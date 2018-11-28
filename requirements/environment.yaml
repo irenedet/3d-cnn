@@ -1,0 +1,18 @@
+name: mlcourse
+channels:
+  - pytorch
+  - conda-forge
+  - default
+dependencies:
+  - python=3.6
+  - jupyter
+  - imageio
+  - h5py
+  - keras
+  - pytorch=0.4.1
+  - torchvision
+  - scikit-learn
+  - scikit-image
+  - tensorboardX
+  - tqdm
+  - pandas

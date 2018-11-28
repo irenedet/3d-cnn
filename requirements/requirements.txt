@@ -1,0 +1,9 @@
+jupyter
+imageio
+pytorch
+torchvision
+scikit-learn
+scikit-image
+tensorboardX
+tqdm
+pandas

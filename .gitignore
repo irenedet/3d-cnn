@@ -1,0 +1,7 @@
+.idea/
+cnn_training.sh
+jobs_outputs/
+slurm.*
+test_script.py
+logs/
+
