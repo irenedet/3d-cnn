@@ -2,6 +2,24 @@
 
 import sys
 
+# import os
+# import re
+
+
+# TODO!
+# This only works when calling the submission script from
+# submission_scripts/:
+
+# nb_dir = os.path.split(os.getcwd())[0]
+# print(nb_dir)
+# pysrc = "/src/python"
+# print(re.findall(r"(.+?3d-cnn)", nb_dir))
+# project_path = re.findall(r"(.+?3d-cnn)", nb_dir)[0]
+# py_src_path = project_path + pysrc
+
+# Change these lines so that they work regardless of where I
+# call the running script!
+
 py_src_path = "/g/scb2/zaugg/trueba/3d-cnn/src/python"
 sys.path.append(py_src_path)
 runners_path = "/g/scb2/zaugg/trueba/3d-cnn/runners"
@@ -17,7 +35,7 @@ from datasets.actions import split_dataset
 from filereaders import h5
 from image.filters import normalize_training_data
 from image.viewers import view_images_h5
-from pytorch_cnn.classes.cnnets import UNet_bis
+from pytorch_cnn.classes.cnnets import UNet_test
 from pytorch_cnn.classes.loss import BCELoss, DiceCoefficient
 from pytorch_cnn.classes.visualizers import TensorBoard
 from pytorch_cnn.classes.routines import train, validate
@@ -34,8 +52,9 @@ else:
     print("GPU is not available")
     device = torch.device("cpu")
 
-training_data_path = \
-    '/scratch/trueba/3d-cnn/training_data/training_data_side128_49examples.h5'
+training_data_path = '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
+# \
+# '/scratch/trueba/3d-cnn/training_data/training_data_side128_49examples.h5'
 print("The training data path is ", training_data_path)
 
 raw_data, labels = h5.read_training_data(training_data_path)
@@ -56,7 +75,7 @@ normalized_data = np.array(normalized_data)[:, None]
 labels = np.array(labels)[:, None]
 
 train_data, train_labels, val_data, val_labels = \
-    split_dataset(normalized_data, labels, 39)
+    split_dataset(normalized_data, labels, 312)
 
 # wrap into datasets
 train_set = du.TensorDataset(torch.from_numpy(train_data),
@@ -70,7 +89,8 @@ val_loader = du.DataLoader(val_set, batch_size=5)
 
 for test_index in range(5):
     # train the neural network
-    net = UNet_bis(1, 1, final_activation=nn.Sigmoid())
+    # net = UNet_bis(1, 1, final_activation=nn.Sigmoid())
+    net = UNet_test(1, 1, final_activation=nn.Sigmoid())
     net = net.to(device)
 
     # built binary cross without weighting and adam optimizer
@@ -84,7 +104,7 @@ for test_index in range(5):
 
     # built tensorboard logger
     log_dir = 'logs/' + str(
-        test_index) + 'TEST_7_layers_side_length_128_39from42__examples'
+        test_index) + 'TEST_4_layers_side_length_64_312from365__examples'
     logger = TensorBoard(log_dir, 20)  # log every 20th image
 
     # train for 25 epochs

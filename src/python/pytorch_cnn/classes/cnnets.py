@@ -119,7 +119,6 @@ class UNet_bis(nn.Module):
     Arguments:
       in_channels: number of input channels
       out_channels: number of output channels
-      p_drop: dropout probability
       final_activation: activation applied to the network output
     """
 
@@ -250,3 +249,72 @@ class UNet_bis(nn.Module):
         if self.activation is not None:
             x = self.activation(x)
         return x
+
+
+class UNet_test(UNet_bis):
+    """ UNet implementation
+    Arguments:
+      in_channels: number of input channels
+      out_channels: number of output channels
+      final_activation: activation applied to the network output
+    """
+
+    def __init__(self, in_channels=1, out_channels=1,
+                 final_activation=None):
+        super().__init__()
+
+        # the depth (= number of encoder / decoder levels) is
+        # hard-coded to:
+        self.depth = 4
+
+        # the final activation must either be None or a Module
+        if final_activation is not None:
+            assert isinstance(final_activation,
+                              nn.Module), "Activation must be torch module"
+
+        # all lists of conv layers (or other nn.Modules with parameters) must be wraped
+        # itnto a nn.ModuleList
+
+        # modules of the encoder path
+        self.encoder = nn.ModuleList([self._conv_block(in_channels, 2),
+                                      self._conv_block(2, 4),
+                                      self._conv_block(4, 16),
+                                      self._conv_block(16, 32)])
+        # self._conv_block(32, 64),
+        # self._conv_block(64, 128),
+        # self._conv_block(128, 256)])
+        # self._conv_block(256, 512)])
+        # self._conv_block(512, 1024)])
+        # the base convolution block
+        # self.base = self._conv_block(1024, 1024)
+        # self.base = self._conv_block(512,512)
+        # self.base = self._conv_block(256, 256)
+        self.base = self._conv_block(32, 32)
+        # modules of the decoder path
+        self.decoder = nn.ModuleList([  # self._conv_block(1024, 512),
+            # self._conv_block(512, 256),
+            # self._conv_block(256, 128),
+            # self._conv_block(128, 64),
+            # self._conv_block(64, 32),
+            self._conv_block(32, 16),
+            self._conv_block(16, 8),
+            self._conv_block(8, 4),
+            self._conv_block(4, 2)])
+        # the pooling layers; we use 2x2 MaxPooling
+        self.poolers = nn.ModuleList(
+            [nn.MaxPool3d(2) for _ in range(self.depth)])
+        # the upsampling layers
+        self.upsamplers = nn.ModuleList([  # self._conv_block(1024, 512),
+            # self._upsampler(512, 256),
+            # self._upsampler(256, 128),
+            # self._upsampler(128, 64),
+            # self._upsampler(64, 32),
+            self._upsampler(32, 16),
+            self._upsampler(16, 8),
+            self._upsampler(8, 4),
+            self._upsampler(4, 2)])
+        # output conv and activation
+        # the output conv is not followed by a non-linearity, because we apply
+        # activation afterwards
+        self.out_conv = nn.Conv3d(2, out_channels, 1)
+        self.activation = final_activation
