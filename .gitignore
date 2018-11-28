@@ -4,4 +4,6 @@ jobs_outputs/
 slurm.*
 test_script.py
 old_logs/
-
+logs/
+src/python/pytorch_cnn/classes/__pycache__/routines.cpython-36.pyc
+.fuse_hidden0000002500000001

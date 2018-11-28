@@ -1,7 +1,9 @@
 import torch
 
+from tensors import actions
 
-# apply training for one epoch
+
+
 def train(model, loader, optimizer, loss_function,
           epoch, device, log_interval=100, tb_logger=None):
     # set the model to train mode
@@ -42,8 +44,8 @@ def train(model, loader, optimizer, loss_function,
             #        tb_logger.log_image(tag='prediction', image=prediction[0, 0].to('cpu').detach(), step=step)
 
 
-# run validation after training epoch
-def validate(model, loader, loss_function, metric, step=None, tb_logger=None):
+def validate(model, loader, loss_function, metric, device, step=None,
+             tb_logger=None):
     # set model to eval mode
     model.eval()
     # running loss and metric values
@@ -59,14 +61,16 @@ def validate(model, loader, loss_function, metric, step=None, tb_logger=None):
             prediction = model(x)
             val_loss += loss_function(prediction, y).item()
             val_metric += metric(prediction,
-                                 crop_tensor(y, prediction.shape)).item()
+                                 actions.crop_tensor(y,
+                                                     prediction.shape)).item()
 
     # normalize loss and metric
     val_loss /= len(loader.dataset)
     val_metric /= len(loader.dataset)
 
     if tb_logger is not None:
-        assert step is not None, "Need to know the current step to log validation results"
+        assert step is not None, \
+            "Need to know the current step to log validation results"
         tb_logger.log_scalar(tag='val_loss', value=val_loss, step=step)
         tb_logger.log_scalar(tag='val_metric', value=val_metric, step=step)
         # we always log the last validation images
