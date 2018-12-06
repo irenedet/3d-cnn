@@ -7,3 +7,12 @@ old_logs/
 logs/
 src/python/pytorch_cnn/classes/__pycache__/routines.cpython-36.pyc
 .fuse_hidden0000002500000001
+.eman2settings
+info/
+results_4_layers_128_length.out
+results_4_layers_64_length.out
+results_6_layers_128_length.out
+results_7_layers_128_length.out
+runners/test_logs/
+selected_logs/
+test_logs/

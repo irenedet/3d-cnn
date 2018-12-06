@@ -4,7 +4,11 @@ import torch
 
 # we adapt the tensorboard logger s.t. it can also log images
 class TensorBoard(object):
-    def __init__(self, log_dir, log_image_interval):
+    """
+    Adapted version from A. Kreshuk and C. Pape
+    """
+
+    def __init__(self, log_dir: str, log_image_interval: int):
         self.log_dir = log_dir
         # we don't wan't to log images every iteration,
         # which is expensive, so we can specify `log_image_interval`
@@ -18,8 +22,8 @@ class TensorBoard(object):
 
         # convert to numpy array
         if torch.is_tensor(image):
-            image = image.numpy()
-        assert image.ndim == 2, "can only log 2d images"
+            # image = image.numpy()
+            image = image.detach().numpy()
 
         # change the image normalization for the tensorboard logger
         image -= image.min()

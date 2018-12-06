@@ -33,10 +33,11 @@ import torch.utils.data as du
 
 from datasets.actions import split_dataset
 from filereaders import h5
-from image.filters import normalize_training_data
+from image.filters import preprocess_data
 from image.viewers import view_images_h5
-from pytorch_cnn.classes.cnnets import UNet_test
-from pytorch_cnn.classes.loss import BCELoss, DiceCoefficient
+from pytorch_cnn.classes.cnnets import UNet_4, UNet_6, UNet_7, UNet
+from pytorch_cnn.classes.loss import BCELoss, DiceCoefficient, \
+    DiceCoefficientLoss
 from pytorch_cnn.classes.visualizers import TensorBoard
 from pytorch_cnn.classes.routines import train, validate
 
@@ -52,9 +53,11 @@ else:
     print("GPU is not available")
     device = torch.device("cpu")
 
-training_data_path = '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
-# \
-# '/scratch/trueba/3d-cnn/training_data/training_data_side128_49examples.h5'
+training_data_path = \
+    '/scratch/trueba/3d-cnn/training_data/training_data_side128_49examples.h5'
+# '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
+
+
 print("The training data path is ", training_data_path)
 
 raw_data, labels = h5.read_training_data(training_data_path)
@@ -68,14 +71,16 @@ if view_data:
 else:
     print(
         "The data viewer is deactivated, to activate it set view_data to True")
-normalized_data = normalize_training_data(raw_data)
+
+# Normalize data
+preprocessed_data = preprocess_data(raw_data)
 
 # add a channel dimension
-normalized_data = np.array(normalized_data)[:, None]
+preprocessed_data = np.array(preprocessed_data)[:, None]
 labels = np.array(labels)[:, None]
 
 train_data, train_labels, val_data, val_labels = \
-    split_dataset(normalized_data, labels, 312)
+    split_dataset(preprocessed_data, labels, 32)
 
 # wrap into datasets
 train_set = du.TensorDataset(torch.from_numpy(train_data),
@@ -87,14 +92,17 @@ val_set = du.TensorDataset(torch.from_numpy(val_data),
 train_loader = du.DataLoader(train_set, shuffle=True, batch_size=5)
 val_loader = du.DataLoader(val_set, batch_size=5)
 
-for test_index in range(5):
+for test_index in range(1):
     # train the neural network
-    # net = UNet_bis(1, 1, final_activation=nn.Sigmoid())
-    net = UNet_test(1, 1, final_activation=nn.Sigmoid())
+    net = UNet_6(1, 1, final_activation=nn.Sigmoid())
+    # net = UNet_7(1, 1, final_activation=nn.Sigmoid())
+    # net = UNet(1, 1, final_activation=nn.Sigmoid())
+    # net = UNet_test(1, 1, final_activation=nn.Sigmoid())
     net = net.to(device)
 
     # built binary cross without weighting and adam optimizer
-    loss = BCELoss()
+    # loss = BCELoss()
+    loss = DiceCoefficientLoss()
     loss = loss.to(device)
     optimizer = optim.Adam(net.parameters())
 
@@ -103,15 +111,12 @@ for test_index in range(5):
     metric = metric.to(device)
 
     # built tensorboard logger
-    log_dir = 'logs/' + str(
-        test_index) + 'TEST_4_layers_side_length_64_312from365__examples'
-    logger = TensorBoard(log_dir, 20)  # log every 20th image
-
-    # train for 25 epochs
-    # after the  you can inspect the
-    # predictions in the tensorboard
+    log_dir = 'test_logs/' + str(
+        test_index) + '_layers_6_length_128_logging_ALL_images_32_DiceLoss'
+    logger = TensorBoard(log_dir=log_dir,
+                         log_image_interval=1)  # log every 20th image
     print("The neural network training is now starting")
-    n_epochs = 30
+    n_epochs = 20
     for epoch in range(n_epochs):
         # apply training for one epoch
         train(net, train_loader, optimizer=optimizer, loss_function=loss,
@@ -121,4 +126,4 @@ for test_index in range(5):
         validate(net, val_loader, loss, metric, device=device, step=step,
                  tb_logger=logger)
 
-print("goodbye!")
+print("We have finished the training!")

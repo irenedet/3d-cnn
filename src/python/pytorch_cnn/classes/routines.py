@@ -3,7 +3,6 @@ import torch
 from tensors import actions
 
 
-
 def train(model, loader, optimizer, loss_function,
           epoch, device, log_interval=100, tb_logger=None):
     # set the model to train mode
@@ -35,13 +34,28 @@ def train(model, loader, optimizer, loss_function,
             step = epoch * len(loader) + batch_id
             tb_logger.log_scalar(tag='train_loss', value=loss.item(),
                                  step=step)
-            #    # check if we log images in this iteration
-            #    log_image_interval = tb_logger.log_image_interval
-            #    if step % log_image_interval == 0:
-            #        pshape = prediction.shape
-            #        tb_logger.log_image(tag='input', image=crop_tensor(x, pshape)[0, 0].to('cpu'), step=step)
-            #        tb_logger.log_image(tag='target', image=crop_tensor(y, pshape)[0, 0].to('cpu'), step=step)
-            #        tb_logger.log_image(tag='prediction', image=prediction[0, 0].to('cpu').detach(), step=step)
+
+            log_image_interval = tb_logger.log_image_interval
+            if step % log_image_interval == 0:
+                # we always log the last validation images
+                img_indx, channel, size_z, size_y, size_z = x.shape
+                pshape = (1, 1, size_z, size_y, size_z)
+                for slice_index in range(4):
+                    slice_index *= size_z//4
+                    tb_logger.log_image(tag='val_input',
+                                        image=actions.crop_tensor(x, pshape)[
+                                            0, 0, slice_index].to('cpu'),
+                                        step=step)
+                    tb_logger.log_image(tag='val_target',
+                                        image=actions.crop_tensor(y, pshape)[
+                                            0, 0, slice_index].to('cpu'),
+                                        step=step)
+                    tb_logger.log_image(tag='val_prediction',
+                                        image=
+                                        actions.crop_tensor(prediction, pshape)[
+                                            0, 0, slice_index].to(
+                                            'cpu'),
+                                        step=step)
 
 
 def validate(model, loader, loss_function, metric, device, step=None,

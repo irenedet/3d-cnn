@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def normalize_training_data(data: np.array):
+def preprocess_data(data: np.array):
     data_mean = data.mean()
     data_std = data.std()
     print("The data mean value is", data_mean)
