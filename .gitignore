@@ -1,3 +1,9 @@
+src/python/filereaders/__pycache__/h5.cpython-36.pyc
+src/python/image/__pycache__/filters.cpython-36.pyc
+src/python/tensors/__pycache__/actions.cpython-36.pyc
+src/python/filereaders/__pycache__/*
+src/python/image/__pycache__/*
+src/python/tensors/__pycache__/*
 .idea/
 cnn_training.sh
 jobs_outputs/
@@ -16,3 +22,8 @@ results_7_layers_128_length.out
 runners/test_logs/
 selected_logs/
 test_logs/
+images/
+models/
+/src/__pycache__/
+/src/python/__pycache__/
+/src/python/pytorch_cnn/classes/__pycache__/

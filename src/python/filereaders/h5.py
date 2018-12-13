@@ -24,4 +24,3 @@ def read_training_data(training_data_path: str, cathegory="ribosomes") -> tuple:
     print("Loaded data and labels of shape", labels.shape)
 
     return data, labels
-

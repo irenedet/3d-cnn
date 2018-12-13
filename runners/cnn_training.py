@@ -1,6 +1,7 @@
 #! /home/trueba/.conda/envs/mlcourse/bin/python3
 
 import sys
+from os.path import join
 
 # import os
 # import re
@@ -40,18 +41,14 @@ from pytorch_cnn.classes.loss import BCELoss, DiceCoefficient, \
     DiceCoefficientLoss
 from pytorch_cnn.classes.visualizers import TensorBoard
 from pytorch_cnn.classes.routines import train, validate
+from pytorch_cnn.io import get_device
 
 print("*************************************")
 print("The cnn_training.py script is running")
 print("*************************************")
 
 # check if we have  a gpu
-if torch.cuda.is_available():
-    print("GPU is available")
-    device = torch.device("cuda")
-else:
-    print("GPU is not available")
-    device = torch.device("cpu")
+device = get_device()
 
 training_data_path = \
     '/scratch/trueba/3d-cnn/training_data/training_data_side128_49examples.h5'
@@ -111,8 +108,10 @@ for test_index in range(1):
     metric = metric.to(device)
 
     # built tensorboard logger
-    log_dir = 'test_logs/' + str(
-        test_index) + '_layers_6_length_128_logging_ALL_images_32_DiceLoss'
+    model_name = str(
+        test_index) + \
+                 '_lay_6_len_128_32_DiceLoss_ELUactiv_2ndtry'
+    log_dir = join('test_logs/', model_name)
     logger = TensorBoard(log_dir=log_dir,
                          log_image_interval=1)  # log every 20th image
     print("The neural network training is now starting")
@@ -125,5 +124,8 @@ for test_index in range(1):
         # run validation after training epoch
         validate(net, val_loader, loss, metric, device=device, step=step,
                  tb_logger=logger)
+    model_name_pkl = model_name + ".pkl"
+    model_path = join("./models/", model_name_pkl)
+    torch.save(net.state_dict(), model_path)
 
 print("We have finished the training!")

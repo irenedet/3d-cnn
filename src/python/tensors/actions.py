@@ -11,7 +11,7 @@ def crop_tensor(input: np.array, shape_to_crop: tuple) -> np.array:
     :return: np.array of size (cz, cy, cx)
     """
     input_shape = input.shape
-    assert all(ish >= csh for ish, csh in zip(input_shape, shape_to_crop)),\
+    assert all(ish >= csh for ish, csh in zip(input_shape, shape_to_crop)), \
         "Input shape must be larger equal crop shape"
     # get the difference between the shapes
     shape_diff = tuple((ish - csh) // 2
@@ -20,6 +20,7 @@ def crop_tensor(input: np.array, shape_to_crop: tuple) -> np.array:
     crop = tuple(slice(sd, sh - sd)
                  for sd, sh in zip(shape_diff, input_shape))
     return input[crop]
+
 
 def crop_window(input, shape_to_crop, window_corner):
     """
@@ -32,10 +33,24 @@ def crop_window(input, shape_to_crop, window_corner):
     :return: np.array of size (cz, cy, cx)
     """
     input_shape = input.shape
-    assert all(ish >= csh for ish, csh in zip(input_shape, shape_to_crop)),\
+    assert all(ish >= csh for ish, csh in zip(input_shape, shape_to_crop)), \
         "Input shape must be larger equal crop shape"
     # get the difference between the shapes
     crop = tuple(slice(wc, wc + csh)
                  for wc, csh in zip(window_corner, shape_to_crop))
-    #print(crop)
+    # print(crop)
+    return input[crop]
+
+
+def crop_window_around_point(input, shape_to_crop_zyx, window_center_zyx):
+    input_shape = input.shape
+    assert all(ish - csh // 2 - center >= 0 for ish, csh, center in
+               zip(input_shape, shape_to_crop_zyx, window_center_zyx)), \
+        "Input shape must be larger or equal than crop shape"
+    assert all(center - csh // 2 >= 0 for csh, center in
+               zip(shape_to_crop_zyx, window_center_zyx)), \
+        "Input shape around window center must be larger equal than crop shape"
+    # get the difference between the shapes
+    crop = tuple(slice(center - csh // 2, center + csh // 2)
+                 for csh, center in zip(shape_to_crop_zyx, window_center_zyx))
     return input[crop]
