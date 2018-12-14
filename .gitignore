@@ -1,3 +1,10 @@
+TEST/
+src/python/coordinates_toolbox/__pycache__/
+src/python/filewriters/__pycache__/
+src/python/naming/__pycache__/
+src/python/osactions/__pycache__/
+src/python/peak_toolbox/__pycache__/
+src/python/pytorch_cnn/__pycache__/io.cpython-36.pyc
 src/python/filereaders/__pycache__/h5.cpython-36.pyc
 src/python/image/__pycache__/filters.cpython-36.pyc
 src/python/tensors/__pycache__/actions.cpython-36.pyc

@@ -2,6 +2,7 @@ import h5py
 import numpy as np
 from os.path import join
 from src.python.tensors.actions import crop_window_around_point
+from src.python.naming import h5_internal_paths
 
 
 def pad_dataset(dataset, shape_to_crop_zyx):
@@ -14,6 +15,7 @@ def pad_dataset(dataset, shape_to_crop_zyx):
 
 def get_particle_coordinates_grid(dataset_shape, shape_to_crop_zyx):
     particle_coordinates = []
+    # Todo -1 in each coordinate?
     nz_coords, ny_coords, nx_coords = [tomo_dim // box_size for
                                        tomo_dim, box_size in
                                        zip(dataset_shape, shape_to_crop_zyx)]
@@ -31,7 +33,8 @@ def write_subtomograms_from_dataset(output_path, padded_dataset,
     with h5py.File(output_path, 'w') as f:
         for particle_index, particle_center in enumerate(particles_coordinates):
             subtomo_name = "subtomo_" + "_" + str(particle_center)
-            subtomo_h5_internal_path = join('volumes/subtomos', subtomo_name)
+            subtomo_h5_internal_path = join(h5_internal_paths.RAW_SUBTOMOGRAMS,
+                                            subtomo_name)
             subtomo_data = crop_window_around_point(input=padded_dataset,
                                                     shape_to_crop_zyx=shape_to_crop_zyx,
                                                     window_center_zyx=particle_center)
@@ -50,11 +53,9 @@ def split_tomo_into_subtomos(dataset, output_path: str,
 
 path_to_raw = '/scratch/trueba/cnn/004/4bin/cnn/rawtomogram/001_bin4_subregion0-0-380-927-927-600.hdf'
 with h5py.File(path_to_raw, 'r') as f:
-    raw_dataset = f['MDF/images/0/image'][:]
+    raw_dataset = f[h5_internal_paths.HDF_INTERNAL_PATH][:]
 
-folder_path = "/scratch/trueba/3d-cnn/evaluating_data/"
-output_path = join(folder_path, "tomo004_in_subtomos_128side.h5")
+folder_path = "/scratch/trueba/3d-cnn/TEST/"
+output_path = join(folder_path, "004_in_subtomos_128side.h5")
 split_tomo_into_subtomos(dataset=raw_dataset, output_path=output_path,
                          shape_to_crop_zyx=(128, 128, 128))
-
-

@@ -57,7 +57,8 @@ training_data_path = \
 
 print("The training data path is ", training_data_path)
 
-raw_data, labels = h5.read_training_data(training_data_path)
+raw_data, labels = h5.read_training_data(training_data_path,
+                                         label_name="ribosomes")
 
 print("Initial unique labels", np.unique(labels))
 
