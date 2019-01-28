@@ -1,3 +1,4 @@
+src/python/datasets/__pycache__/actions.cpython-36.pyc
 TEST/
 src/python/coordinates_toolbox/__pycache__/
 src/python/filewriters/__pycache__/
@@ -34,3 +35,6 @@ models/
 /src/__pycache__/
 /src/python/__pycache__/
 /src/python/pytorch_cnn/classes/__pycache__/
+deepUNet_logs/
+runners/tmp_test.py
+src/python/calculator/__pycache__/

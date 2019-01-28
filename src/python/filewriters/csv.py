@@ -19,8 +19,9 @@ def motl_writer(path_to_output_folder: str, list_of_peak_scores: list,
         motlwriter = csv.writer(csvfile, delimiter=' ',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         indx = 0
-        for val, zyx_coord in reversed(
-                sorted(zip(list_of_peak_scores, list_of_peak_coords))):
+        for val, zyx_coord in sorted(
+                list(zip(list_of_peak_scores, list_of_peak_coords)),
+                key=lambda x: x[0], reverse=1):
             indx += 1
             x, y, z = rearrange_hdf_coordinates(zyx_coord)
             motlwriter.writerow([str(val) + ',0,0,' + str(
@@ -28,6 +29,7 @@ def motl_writer(path_to_output_folder: str, list_of_peak_scores: list,
                 z) + ',0,0,0,0,0,0,0,0,0,1'])
     print("The motive list has been writen in", motl_file_name)
     return
+
 
 def _write_table_header(directory_path: str, param: str,
                         table_writer: csv.writer):

@@ -36,7 +36,7 @@ from datasets.actions import split_dataset
 from filereaders import h5
 from image.filters import preprocess_data
 from image.viewers import view_images_h5
-from pytorch_cnn.classes.cnnets import UNet_4, UNet_6, UNet_7, UNet
+from pytorch_cnn.classes.cnnets import UNet_4, UNet_6, UNet_7, UNet, UNet_deep
 from pytorch_cnn.classes.loss import BCELoss, DiceCoefficient, \
     DiceCoefficientLoss
 from pytorch_cnn.classes.visualizers import TensorBoard
@@ -52,6 +52,7 @@ device = get_device()
 
 training_data_path = \
     '/scratch/trueba/3d-cnn/training_data/training_data_side128_49examples.h5'
+# '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
 # '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
 
 
@@ -78,7 +79,7 @@ preprocessed_data = np.array(preprocessed_data)[:, None]
 labels = np.array(labels)[:, None]
 
 train_data, train_labels, val_data, val_labels = \
-    split_dataset(preprocessed_data, labels, 32)
+    split_dataset(preprocessed_data, labels, 42-8)
 
 # wrap into datasets
 train_set = du.TensorDataset(torch.from_numpy(train_data),
@@ -90,9 +91,9 @@ val_set = du.TensorDataset(torch.from_numpy(val_data),
 train_loader = du.DataLoader(train_set, shuffle=True, batch_size=5)
 val_loader = du.DataLoader(val_set, batch_size=5)
 
-for test_index in range(1):
+for test_index in range(2):
     # train the neural network
-    net = UNet_6(1, 1, final_activation=nn.Sigmoid())
+    net = UNet_deep(1, 1, final_activation=nn.Sigmoid())
     # net = UNet_7(1, 1, final_activation=nn.Sigmoid())
     # net = UNet(1, 1, final_activation=nn.Sigmoid())
     # net = UNet_test(1, 1, final_activation=nn.Sigmoid())
@@ -111,12 +112,12 @@ for test_index in range(1):
     # built tensorboard logger
     model_name = str(
         test_index) + \
-                 '_lay_6_len_128_32_DiceLoss_ELUactiv_2ndtry'
-    log_dir = join('test_logs/', model_name)
+                 'UNet_deep_128_side'
+    log_dir = join('deepUNet_logs/', model_name)
     logger = TensorBoard(log_dir=log_dir,
-                         log_image_interval=1)  # log every 20th image
+                         log_image_interval=1)  # log every image
     print("The neural network training is now starting")
-    n_epochs = 20
+    n_epochs = 30
     for epoch in range(n_epochs):
         # apply training for one epoch
         train(net, train_loader, optimizer=optimizer, loss_function=loss,

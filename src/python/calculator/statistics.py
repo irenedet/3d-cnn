@@ -46,7 +46,9 @@ def quadrature_calculator(x_points: list, y_points: list) -> float:
     x_points: is a list of points in the x axis (not necessarly ordered)
     y_points: is a list of points, such that y_points[n] = f(x_points[n]) for each n.
     """
-    sorted_y = [p for _, p in sorted(zip(x_points, y_points))]
+    # sorted_y = [p for _, p in sorted(zip(x_points, y_points))]
+    sorted_y = [p for _, p in
+                sorted(list(zip(x_points, y_points)), key=lambda x: x[0])]
     n = len(y_points)
     sorted_x = sorted(x_points)
 
