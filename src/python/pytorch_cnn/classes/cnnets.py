@@ -172,41 +172,6 @@ class UNet_deep(UNet):
             nn.ELU()
         )
 
-    # upsampling via transposed 3d convolutions
-    # def _upsampler_deep(self, in_channels, out_channels):
-    #     return nn.Sequential(nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                          nn.ConvTranspose3d(in_channels, out_channels,
-    #                                             kernel_size=2, stride=2),
-    #                           )
 
     def _upsampler(self, in_channels, out_channels):
         return nn.ConvTranspose3d(in_channels, out_channels,
@@ -249,9 +214,7 @@ class UNet_deep(UNet):
                                          self._upsampler(128, 64),
                                          self._upsampler(64, 32),
                                          self._upsampler(32, 16)])
-                                        # self._upsampler(32, 2)])
         self.out_conv = nn.Conv3d(16, out_channels, 1)
-        #self.out_conv = nn.Conv3d(2, out_channels, 1)
 
 
 class UNet_7(UNet):
