@@ -56,6 +56,7 @@ with h5py.File(path_to_raw, 'r') as f:
     raw_dataset = f[h5_internal_paths.HDF_INTERNAL_PATH][:]
 
 folder_path = "/scratch/trueba/3d-cnn/TEST/"
-output_path = join(folder_path, "004_in_subtomos_128side.h5")
+h5_output_file = "004_in_subtomos_128side.h5"
+output_path = join(folder_path, h5_output_file)
 split_tomo_into_subtomos(dataset=raw_dataset, output_path=output_path,
                          shape_to_crop_zyx=(128, 128, 128))
