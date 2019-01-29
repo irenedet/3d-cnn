@@ -36,7 +36,8 @@ from datasets.actions import split_dataset
 from filereaders import h5
 from image.filters import preprocess_data
 from image.viewers import view_images_h5
-from pytorch_cnn.classes.cnnets import UNet_4, UNet_6, UNet_7, UNet, UNet_deep
+# from pytorch_cnn.classes.cnnets import UNet_4, UNet_6, UNet_7, UNet, UNet_deep
+from pytorch_cnn.classes.unet_new import UNet
 from pytorch_cnn.classes.loss import BCELoss, DiceCoefficient, \
     DiceCoefficientLoss
 from pytorch_cnn.classes.visualizers import TensorBoard
@@ -79,7 +80,7 @@ preprocessed_data = np.array(preprocessed_data)[:, None]
 labels = np.array(labels)[:, None]
 
 train_data, train_labels, val_data, val_labels = \
-    split_dataset(preprocessed_data, labels, 42-8)
+    split_dataset(preprocessed_data, labels, 42 - 8)
 
 # wrap into datasets
 train_set = du.TensorDataset(torch.from_numpy(train_data),
@@ -93,41 +94,50 @@ val_loader = du.DataLoader(val_set, batch_size=5)
 
 for test_index in range(2):
     # train the neural network
-    net = UNet_deep(1, 1, final_activation=nn.Sigmoid())
+    # net = UNet_deep(1, 1, final_activation=nn.Sigmoid())
     # net = UNet_7(1, 1, final_activation=nn.Sigmoid())
     # net = UNet(1, 1, final_activation=nn.Sigmoid())
     # net = UNet_test(1, 1, final_activation=nn.Sigmoid())
-    net = net.to(device)
+    net_confs = [{'depth': 5, 'initial_features': 2},
+                 {'depth': 5, 'initial_features': 4},
+                 {'depth': 5, 'initial_features': 8},
+                 {'depth': 5, 'initial_features': 16}]
 
-    # built binary cross without weighting and adam optimizer
-    # loss = BCELoss()
-    loss = DiceCoefficientLoss()
-    loss = loss.to(device)
-    optimizer = optim.Adam(net.parameters())
+    for conf in net_confs:
+        net = UNet(**conf)
+        net = net.to(device)
 
-    # build the dice coefficient metric
-    metric = DiceCoefficient()
-    metric = metric.to(device)
+        # built binary cross without weighting and adam optimizer
+        # loss = BCELoss()
+        loss = DiceCoefficientLoss()
+        loss = loss.to(device)
+        optimizer = optim.Adam(net.parameters())
 
-    # built tensorboard logger
-    model_name = str(
-        test_index) + \
-                 'UNet_deep_128_side'
-    log_dir = join('deepUNet_logs/', model_name)
-    logger = TensorBoard(log_dir=log_dir,
-                         log_image_interval=1)  # log every image
-    print("The neural network training is now starting")
-    n_epochs = 30
-    for epoch in range(n_epochs):
-        # apply training for one epoch
-        train(net, train_loader, optimizer=optimizer, loss_function=loss,
-              epoch=epoch, device=device, log_interval=1, tb_logger=logger)
-        step = epoch * len(train_loader.dataset)
-        # run validation after training epoch
-        validate(net, val_loader, loss, metric, device=device, step=step,
-                 tb_logger=logger)
-    model_name_pkl = model_name + ".pkl"
-    model_path = join("./models/", model_name_pkl)
-    torch.save(net.state_dict(), model_path)
+        # build the dice coefficient metric
+        metric = DiceCoefficient()
+        metric = metric.to(device)
+
+        # built tensorboard logger
+        model_name = str(
+            test_index) + \
+                     '_UNet_new_128_side_' + \
+                     "depth_" + str(conf['depth']) + \
+                     "_ini_feat_" + str(conf['initial_features'])
+        log_dir = join('_deepUNet_logs/', model_name)
+        logger = TensorBoard(log_dir=log_dir,
+                             log_image_interval=1)  # log every image
+        print("The neural network training is now starting")
+        n_epochs = 30
+        for epoch in range(n_epochs):
+            # apply training for one epoch
+            train(net, train_loader, optimizer=optimizer, loss_function=loss,
+                  epoch=epoch, device=device, log_interval=1, tb_logger=logger)
+            step = epoch * len(train_loader.dataset)
+            # run validation after training epoch
+            validate(net, val_loader, loss, metric, device=device, step=step,
+                     tb_logger=logger)
+        model_name_pkl = model_name + ".pkl"
+        model_path = join("./models/", model_name_pkl)
+        torch.save(net.state_dict(), model_path)
 
 print("We have finished the training!")

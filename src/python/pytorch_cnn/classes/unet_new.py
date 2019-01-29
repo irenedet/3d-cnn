@@ -45,7 +45,8 @@ class UNet(nn.Module):
         # modules of the encoder path
         n_features_encode = [in_channels] + n_features
         self.encoder = nn.ModuleList([self._conv_block(n_features_encode[level],
-                                                       n_features_encode[level + 1])
+                                                       n_features_encode[
+                                                           level + 1])
                                       for level in range(self.depth)])
 
         # the base convolution block
@@ -56,16 +57,19 @@ class UNet(nn.Module):
         # modules of the decoder path
         n_features_decode = [n_features_base] + n_features[::-1]
         self.decoder = nn.ModuleList([self._conv_block(n_features_decode[level],
-                                                       n_features_decode[level + 1])
+                                                       n_features_decode[
+                                                           level + 1])
                                       for level in range(self.depth)])
 
         # the pooling layers; we use 2x2 MaxPooling
-        self.poolers = nn.ModuleList([nn.MaxPool3d(2) for _ in range(self.depth)])
+        self.poolers = nn.ModuleList(
+            [nn.MaxPool3d(2) for _ in range(self.depth)])
 
         # the upsampling layers
-        self.upsamplers = nn.ModuleList([self._upsampler(n_features_decode[level],
-                                                         n_features_decode[level + 1])
-                                         for level in range(self.depth)])
+        self.upsamplers = nn.ModuleList(
+            [self._upsampler(n_features_decode[level],
+                             n_features_decode[level + 1])
+             for level in range(self.depth)])
         # output conv and activation
         # the output conv is not followed by a non-linearity, because we apply
         # activation afterwards
@@ -77,8 +81,8 @@ class UNet(nn.Module):
         cropped = actions.crop_tensor(from_encoder, from_decoder.shape)
         return torch.cat((cropped, from_decoder), dim=1)
 
-    def forward(self, input):
-        x = input
+    def forward(self, input_tensor):
+        x = input_tensor
         # apply encoder path
         encoder_out = []
         for level in range(self.depth):
@@ -102,13 +106,3 @@ class UNet(nn.Module):
             x = self.activation(x)
         return x
 
-
-# test that this u-net works for two different configurations
-if __name__ == '__main__':
-    x = torch.rand(1, 1, 64, 64, 64)
-    net_confs = [{}, {'depth': 5, 'initial_features': 4}]
-    for conf in net_confs:
-        net = UNet(**conf)
-        y = net(x)
-        assert x.shape == y.shape
-    print("Passed")
