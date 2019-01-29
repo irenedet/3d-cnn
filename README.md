@@ -17,6 +17,8 @@ UNet adapted for cryo-ET segmentation.
 
  - **path_to_raw ** : path to the tomogram that will be segmented
 
+ - **folder_path = "/scratch/trueba/3d-cnn/TEST/"** TODO
+ 
  - **h5_output_file** : name of the h5 file where the output will be stored.
 
       E.g. h5_output_file = "004_in_subtomos_128side.h5"
