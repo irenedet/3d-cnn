@@ -17,5 +17,5 @@ module load GCC
 module load Anaconda3
 
 source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
-python3 /g/scb2/zaugg/trueba/3d-cnn/runners/subtomos2dataset.py
+python3 /g/scb2/zaugg/trueba/3d-cnn/runners/subtomos2dataset_new.py
 source deactivate

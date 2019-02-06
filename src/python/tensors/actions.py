@@ -42,15 +42,15 @@ def crop_window(input, shape_to_crop, window_corner):
     return input[crop]
 
 
-def crop_window_around_point(input, shape_to_crop_zyx, window_center_zyx):
+def crop_window_around_point(input, crop_shape, window_center):
     input_shape = input.shape
     assert all(ish - csh // 2 - center >= 0 for ish, csh, center in
-               zip(input_shape, shape_to_crop_zyx, window_center_zyx)), \
+               zip(input_shape, crop_shape, window_center)), \
         "Input shape must be larger or equal than crop shape"
     assert all(center - csh // 2 >= 0 for csh, center in
-               zip(shape_to_crop_zyx, window_center_zyx)), \
+               zip(crop_shape, window_center)), \
         "Input shape around window center must be larger equal than crop shape"
     # get the difference between the shapes
     crop = tuple(slice(center - csh // 2, center + csh // 2)
-                 for csh, center in zip(shape_to_crop_zyx, window_center_zyx))
+                 for csh, center in zip(crop_shape, window_center))
     return input[crop]

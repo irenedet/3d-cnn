@@ -36,8 +36,8 @@ def write_subtomograms_from_dataset(output_path, padded_dataset,
             subtomo_h5_internal_path = join(h5_internal_paths.RAW_SUBTOMOGRAMS,
                                             subtomo_name)
             subtomo_data = crop_window_around_point(input=padded_dataset,
-                                                    shape_to_crop_zyx=shape_to_crop_zyx,
-                                                    window_center_zyx=particle_center)
+                                                    crop_shape=shape_to_crop_zyx,
+                                                    window_center=particle_center)
             f[subtomo_h5_internal_path] = subtomo_data
 
 

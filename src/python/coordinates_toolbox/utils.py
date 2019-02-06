@@ -67,8 +67,44 @@ def _store_as_txt(folder_path: str, img: np.array, coord_indx: int,
     return
 
 
-def extract_coordinates_from_motl(motl: np.array) -> np.array:
+def extract_coordinates_from_em_motl(motl: np.array) -> np.array:
     return np.array(motl[0, :, 7:10])
 
 
+def filtering_duplicate_coords(motl_coords: list, min_peak_distance: int):
+    unique_motl_coords = [motl_coords[0]]
+    for point in motl_coords[1:]:
+        flag = "unique"
+        n_point = 0
+        while flag == "unique" and n_point < len(unique_motl_coords):
+            x = unique_motl_coords[n_point]
+            n_point += 1
+            if np.linalg.norm(x - point) <= min_peak_distance:
+                flag = "repeated"
+                # print("repeated point = ", point)
+        if flag == "unique":
+            unique_motl_coords += [point]
+    return unique_motl_coords
 
+
+def filtering_duplicate_coords_with_values(motl_coords: list, motl_values: list,
+                                           min_peak_distance: int):
+    unique_motl_coords = [motl_coords[0]]
+    unique_motl_values = [motl_values[0]]
+    for value, point in zip(motl_values[1:], motl_coords[1:]):
+        flag = "unique"
+        n_point = 0
+        while flag == "unique" and n_point < len(unique_motl_coords):
+            x = unique_motl_coords[n_point]
+            x_val = unique_motl_values[n_point]
+            n_point += 1
+            if np.linalg.norm(x - point) <= min_peak_distance:
+                if x_val < value:
+                    unique_motl_coords[n_point] = point
+                    unique_motl_values[n_point] = value
+                flag = "repeated"
+                # print("repeated point = ", point)
+        if flag == "unique":
+            unique_motl_coords += [point]
+            unique_motl_values += [value]
+    return unique_motl_values, unique_motl_coords
