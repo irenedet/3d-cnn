@@ -18,6 +18,22 @@ def _generate_unit_particle(radius: int):
     return unit_particle
 
 
+def paste_sphere_in_dataset(dataset: np.array, radius: int, value: float,
+                            center: tuple) -> np.array:
+    dataset_dimensions = dataset.shape
+    unit_particle = _generate_unit_particle(radius)
+    particle = [
+        (center[0] + delta_p[0], center[1] + delta_p[1], center[2] + delta_p[2])
+        for delta_p in unit_particle]
+    for coord in particle:
+        if (coord[0] < dataset_dimensions[0]) and (
+                    coord[1] < dataset_dimensions[1]) and (
+                    coord[2] < dataset_dimensions[2]) and (0 <= coord[0]) and (
+                    0 <= coord[1]) and (0 <= coord[2]):
+            dataset[coord[0], coord[1], coord[2]] = value
+    return dataset
+
+
 def _get_next_max(dataset: np.array, coordinates_list: list, radius: int,
                   numb_peaks: int) -> tuple:
     dataset_dimensions = dataset.shape
@@ -30,7 +46,9 @@ def _get_next_max(dataset: np.array, coordinates_list: list, radius: int,
             for coord in particle:
                 if (coord[0] < dataset_dimensions[0]) and (
                             coord[1] < dataset_dimensions[1]) and (
-                            coord[2] < dataset_dimensions[2]):
+                            coord[2] < dataset_dimensions[2]) and (
+                            0 <= coord[0]) and (
+                            0 <= coord[1]) and (0 <= coord[2]):
                     dataset[coord[0]][coord[1]][coord[2]] = -100
         next_max = np.ndarray.max(dataset)
         next_max_coords = np.where(next_max == dataset)
@@ -90,4 +108,12 @@ def write_csv_motl(list_of_maxima: list, list_of_maxima_coords: list,
             motl_writer.writerow([str(val) + ',' + str(p[1]) + ',' + str(
                 p[2]) + ',' + str(p[0]) + ',0,0,0,' + str(p[1]) + ',' + str(
                 p[2]) + ',' + str(p[0]) + ',0,0,0,0,0,0,0,0,0,1'])
+    print("motive list writen in ", motl_file_name)
     return
+
+
+def extract_motl_coordinates_and_score_values(motl: list):
+    coordinates = [np.array([row[7], row[8], row[9]]) for row in
+                   motl]
+    score_values = [row[0] for row in motl]
+    return score_values, coordinates

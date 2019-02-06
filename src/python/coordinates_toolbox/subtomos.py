@@ -10,12 +10,43 @@ def get_subtomo_corners(output_shape: tuple, subtomo_shape: tuple,
                         subtomo_center: tuple) -> tuple:
     subtomo_l1radius = subtomo_shape[0] // 2, subtomo_shape[1] // 2, \
                        subtomo_shape[2] // 2
-    init_points = [center_dim - subtomo_dim for center_dim, subtomo_dim
+    start_corners = [center_dim - subtomo_dim for center_dim, subtomo_dim
+                     in zip(subtomo_center, subtomo_l1radius)]
+    end_corners = [center_dim + subtomo_dim for center_dim, subtomo_dim
                    in zip(subtomo_center, subtomo_l1radius)]
-    end_points = [center_dim + subtomo_dim for center_dim, subtomo_dim
-                  in zip(subtomo_center, subtomo_l1radius)]
-    end_points = [np.min((end_point, tomo_dim)) for end_point, tomo_dim
-                  in zip(end_points,
-                         output_shape)]
-    lengths = [end - init for end, init in zip(end_points, init_points)]
-    return init_points, end_points, lengths
+    end_corners = [np.min((end_point, tomo_dim)) for end_point, tomo_dim
+                   in zip(end_corners,
+                          output_shape)]
+    side_lengths = [end - start for end, start in
+                    zip(end_corners, start_corners)]
+    return start_corners, end_corners, side_lengths
+
+
+def get_particle_coordinates_grid_with_overlap(dataset_shape, shape_to_crop_zyx,
+                                               overlap_thickness):
+    dataset_without_overlap_shape = [tomo_dim - 2 * overlap_thickness for
+                                     tomo_dim in dataset_shape]
+    internal_shape_to_crop_zyx = [dim - 2 * overlap_thickness for
+                                  dim in shape_to_crop_zyx]
+
+    particle_coordinates = get_particle_coordinates_grid(
+        dataset_without_overlap_shape,
+        internal_shape_to_crop_zyx)
+    overlap_shift = overlap_thickness * np.array([1, 1, 1])
+    particle_coordinates_with_overlap = [point + overlap_shift
+                                         for point in particle_coordinates]
+    return particle_coordinates_with_overlap
+
+
+def get_particle_coordinates_grid(dataset_shape, shape_to_crop_zyx):
+    particle_coordinates = []
+    nz_coords, ny_coords, nx_coords = [tomo_dim // box_size for
+                                       tomo_dim, box_size in
+                                       zip(dataset_shape, shape_to_crop_zyx)]
+    for z in range(nz_coords):
+        for y in range(ny_coords):
+            for x in range(nx_coords):
+                particle_coordinates += [
+                    np.array(shape_to_crop_zyx) * np.array([z, y, x])
+                    + np.array(shape_to_crop_zyx) // 2]
+    return particle_coordinates

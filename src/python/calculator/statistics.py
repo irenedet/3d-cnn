@@ -25,6 +25,43 @@ def precision_recall_calculator(motl_coords: np.array,
     return prec, recall, detected_clean
 
 
+def precision_recall_calculator_and_detected(predicted_coordinates: np.array,
+                                             predicted_values: list,
+                                             true_coordinates: np.array,
+                                             radius: float):
+    total_true_points = true_coordinates.shape[0]
+    detected_true = set()
+    detected_predicted = set()
+    value_detected_predicted = []
+    undetected_predicted = set()
+    value_undetected_predicted = []
+    precision = []
+    recall = []
+    total_current_predicted_points = 0
+    for score_value, predicted_point in zip(predicted_values,
+                                            predicted_coordinates):
+        total_current_predicted_points += 1
+        flag = 'undetected'
+        for true_point in true_coordinates:
+            if flag == 'undetected':
+                dist = np.linalg.norm(predicted_point - true_point)
+                if ((dist <= radius) and (
+                            tuple(true_point) not in detected_true)):
+                    detected_true |= {tuple(true_point)}
+                    detected_predicted |= {tuple(predicted_point)}
+                    value_detected_predicted += [score_value]
+                    flag = 'detected'
+        if flag == "undetected":
+            undetected_predicted |= {tuple(predicted_point)}
+            value_undetected_predicted += [score_value]
+        true_positives = len(detected_true)
+        precision += [true_positives / total_current_predicted_points]
+        recall += [true_positives / total_true_points]
+    return precision, recall, detected_true, detected_predicted, \
+           undetected_predicted, value_detected_predicted, \
+           value_undetected_predicted
+
+
 def F1_score_calculator(prec: list, recall: list):
     F1_score = []
 

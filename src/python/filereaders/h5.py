@@ -2,6 +2,7 @@ from os.path import join
 
 import h5py
 import numpy as np
+
 from src.python.naming import h5_internal_paths
 
 
@@ -38,3 +39,4 @@ def read_raw_data_from_h5(data_path: str) -> np.array:
                                             subtomo_name)
             data += [f[subtomo_h5_internal_path][:]]
     return np.array(data)
+
