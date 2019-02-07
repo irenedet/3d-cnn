@@ -1,3 +1,4 @@
+runners/mini_test.py
 runners/testing_motl.py
 runners/test_dummy.py
 runners/__pycache__/

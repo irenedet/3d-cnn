@@ -1,5 +1,9 @@
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import argparse
+from os.path import join
+from os import makedirs
 
 from src.python.calculator.statistics import \
     precision_recall_calculator_and_detected, \
@@ -9,21 +13,47 @@ from src.python.coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl
 from src.python.filereaders.csv import read_motl_from_csv
 from src.python.filereaders.em import load_motl
-from peak_toolbox.utils import extract_motl_coordinates_and_score_values
+from src.python.peak_toolbox.utils import \
+    extract_motl_coordinates_and_score_values
 
-# filtered 50 per tomo - is the best!:
-path_to_csv_motl = "/scratch/trueba/3d-cnn/TEST/motl_unique/motl_4444.csv"
-path_to_motl_clean = '/home/papalotl/Sara_Goetz/180426/004/motl_clean_4b.em'
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-output", "--output_dir",
+                    help="directory where the outputs will be stored",
+                    type=str)
+parser.add_argument("-motl", "--path_to_motl",
+                    help="path to the motive list in csv format",
+                    type=str)
+parser.add_argument("-clean", "--path_to_clean",
+                    help="path to the motive list of true particles in em format",
+                    type=str)
+parser.add_argument("-label", "--label_name",
+                    help="name of segmentation",
+                    type=str)
+
+
+args = parser.parse_args()
+output_dir = args.output_dir
+path_to_csv_motl = args.path_to_motl
+path_to_motl_clean = args.path_to_clean
+label_name = args.label_name
+
+
+figures_dir = join(output_dir, "figures")
+makedirs(name=figures_dir, exist_ok=True)
+
+# path_to_motl_clean = '/scratch/trueba/cnn/004/4bin/cnn/motl_clean_4b.em'
 
 # Extract coordinates from template matching
 Header, motl_clean = load_motl(path_to_emfile=path_to_motl_clean)
 motl_clean_coords = extract_coordinates_from_em_motl(motl_clean)
 
 # Extract coordinates from the UNet segmentation:
-motl_ribos = read_motl_from_csv(path_to_csv_motl)
+motl_predicted = read_motl_from_csv(path_to_csv_motl)
 motl_values, motl_coordinates = extract_motl_coordinates_and_score_values(
-    motl_ribos)
-del motl_ribos
+    motl_predicted)
+del motl_predicted
 # Adjust to original tomogram dimensions:
 motl_coordinates = [point + np.array([0, 0, 380]) for point in motl_coordinates]
 
@@ -35,30 +65,36 @@ value_detected_predicted, value_undetected_predicted = \
         motl_clean_coords,
         radius=8)
 
-print("The detected fraction of positives is ",
-      len(detected_true) / len(motl_clean_coords))
+
+matplotlib.use('Agg')
+plt.ioff()
+plt.figure(1)
 plt.hist(motl_values, bins=50, label="Predicted particles")
 plt.xlabel("score value")
 plt.ylabel("frequency")
-plt.title(str(len(motl_coordinates)) + " peaks, ribosomes in 180426/004")
+plt.title(str(len(motl_coordinates)) + " peaks, " + label_name)
 plt.legend()
 plt.gcf()
-plt.savefig(fname="/home/papalotl/Desktop/histogram180426_004.png",
+figure_name = join(figures_dir, "histogram180426_004.png")
+plt.savefig(fname=figure_name,
             format="png")
-plt.show()
 
+
+matplotlib.use('Agg')
+plt.ioff()
+plt.figure(2)
 plt.hist(value_detected_predicted, bins=70, label="true positives",
          fc=(0, 0, 1, 0.5))
 plt.hist(value_undetected_predicted, bins=70, label="false positives",
          fc=(1, 0, 0, 0.5))
 plt.xlabel("score value")
 plt.ylabel("frequency")
-plt.title(str(len(motl_coordinates)) + " peaks, ribosomes in 180426/004")
+plt.title(str(len(motl_coordinates)) + " peaks, " + label_name)
 plt.legend()
 plt.gcf()
-plt.savefig(fname="/home/papalotl/Desktop/histogram-detected-undetected.png",
+figure_name = join(figures_dir, "histogram-detected-undetected.png")
+plt.savefig(fname=figure_name,
             format="png")
-plt.show()
 
 # plt.hist(value_detected_predicted, bins=30, label="true positives")
 # plt.xlabel("score value")
@@ -84,27 +120,31 @@ max_F1 = np.max(F1_score)
 optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
 auPRC = pr_auc_score(precision=precision, recall=recall)
 
-pr_legend_str = "RIBOSOMES 004, auPRC = " + str(round(auPRC, 4))
-f1_legend_str = "RIBOSOMES 004, (max_F1, best_peaks) = (" + str(
+pr_legend_str = label_name + " , auPRC = " + str(round(auPRC, 4))
+f1_legend_str = label_name + " , (max_F1, best_peaks) = (" + str(
     round(max_F1, 4)) + ", " + str(
     optimal_peak_number) + ")"
 
+plt.figure(3)
 plt.plot(F1_score, label=f1_legend_str)
 plt.xlabel("number of peaks")
 plt.ylabel("F1 score")
 plt.title("3D UNet, 6 layers, 128^3 voxel training set")
 plt.legend()
 plt.gcf()
-plt.savefig(fname="/home/papalotl/Desktop/F1_score_with_overlap.png",
+figure_name = join(figures_dir, "F1_score_with_overlap.png")
+plt.savefig(fname=figure_name,
             format="png")
-plt.show()
 
+plt.figure(4)
 plt.plot(recall, precision, label=pr_legend_str)
 plt.xlabel("recall")
 plt.ylabel("precision")
 plt.title("3D UNet, 6 layers, 128^3 voxel training set")
 plt.legend()
 plt.gcf()
-plt.savefig(fname="/home/papalotl/Desktop/PR_curve_with_overlap.png",
+figure_name = join(figures_dir, "PR_curve_with_overlap.png")
+plt.savefig(fname=figure_name,
             format="png")
-plt.show()
+
+print("Figures saved at ", figures_dir)

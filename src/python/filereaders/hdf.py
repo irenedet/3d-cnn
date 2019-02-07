@@ -1,8 +1,9 @@
 import h5py
 import numpy as np
+from src.python.naming import h5_internal_paths
 
 
-def _load_eman2_dataset(path_to_file: str) -> list:
+def _load_hdf_dataset(hdf_file_path: str) -> list:
     """
     Example:
         path_to_file: 'eman2/ribo3/image.txt'
@@ -21,8 +22,10 @@ def _load_eman2_dataset(path_to_file: str) -> list:
         The internal path has the structure:
         internal_path = 'key0/key1/.../keyn'
     """
-    hdf_file = h5py.File(path_to_file)
-    dataset = hdf_file['MDF']['images']['0']['image']
+    # hdf_file = h5py.File(path_to_file)
+    # dataset = hdf_file['MDF']['images']['0']['image']
+    with h5py.File(hdf_file_path, 'r') as f:
+        dataset = f[h5_internal_paths.HDF_INTERNAL_PATH][:]
     return dataset
 
 
@@ -31,6 +34,5 @@ def _convert_to_array(dataset):
 
 
 def load_eman2_ds_as_array(path_to_file: str):
-    ds = _load_eman2_dataset(path_to_file)
+    ds = _load_hdf_dataset(path_to_file)
     return _convert_to_array(ds)
-

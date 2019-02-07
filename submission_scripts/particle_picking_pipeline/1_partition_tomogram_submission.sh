@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 4G
-#SBATCH --time 0-10:00
+#SBATCH --time 0-02:00
 #SBATCH -o slurm.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -13,5 +13,5 @@
 module load Anaconda3
 
 source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
-python3 /g/scb2/zaugg/trueba/3d-cnn/runners/compute_peaks_motl.py
+python3 /g/scb2/zaugg/trueba/3d-cnn/particle_picking_pipeline/1_partition_tomogram.py
 source deactivate
