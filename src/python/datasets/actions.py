@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 from src.python.coordinates_toolbox.subtomos import \
     get_particle_coordinates_grid_with_overlap
@@ -6,6 +7,13 @@ from src.python.filewriters.h5 import write_subtomograms_from_dataset
 
 
 def split_dataset(data: np.array, labels: np.array, split: int) -> tuple:
+    data = list(data)
+    labels = list(labels)
+    combined = list(zip(data, labels))
+    random.shuffle(combined)
+    data[:], labels[:] = zip(*combined)
+    data = np.array(data)
+    labels = np.array(labels)
     train_data, train_labels = data[:split], labels[:split]
     val_data, val_labels = data[split:], labels[split:]
     print("Shape of training data:", train_data.shape)
