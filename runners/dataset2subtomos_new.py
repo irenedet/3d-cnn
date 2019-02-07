@@ -12,5 +12,5 @@ with h5py.File(path_to_raw, 'r') as f:
 folder_path = "/scratch/trueba/3d-cnn/TEST/"
 h5_output_file = "004_in_subtomos_128side_with_overlap.h5"
 output_file_path = join(folder_path, h5_output_file)
-partition_tomogram(dataset=raw_dataset, output_file_path=output_file_path,
-                   shape_to_crop_zyx=(128, 128, 128))
+partition_tomogram(dataset=raw_dataset, output_h5_file_path=output_file_path,
+                   subtomo_shape=(128, 128, 128))

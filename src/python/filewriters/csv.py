@@ -74,7 +74,7 @@ def write_jobs_table(directory_path: str, table_name: str, param: str,
 
 
 def write_global_motl_from_overlapping_subtomograms(subtomograms_path: str,
-                                                    motl_output_dir: str,
+                                                    motive_list_output_dir: str,
                                                     overlap: int,
                                                     label_name: str,
                                                     output_shape: tuple,
@@ -82,7 +82,7 @@ def write_global_motl_from_overlapping_subtomograms(subtomograms_path: str,
                                                     numb_peaks: int,
                                                     min_peak_distance: int,
                                                     number_peaks_uniquify: int
-                                                    ):
+                                                    ) -> str:
     with h5py.File(subtomograms_path, 'r') as h5file:
         subtomos_internal_path = join(
             h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS, label_name)
@@ -113,20 +113,20 @@ def write_global_motl_from_overlapping_subtomograms(subtomograms_path: str,
             list_of_maxima += subtomo_list_of_maxima
             list_of_maxima_coords += subtomo_maxima_coords
 
-    unique_coordinates_motl_writer(
-        path_to_output_folder=motl_output_dir,
-        list_of_peak_scores=list_of_maxima,
-        list_of_peak_coords=list_of_maxima_coords,
-        number_peaks_to_uniquify=number_peaks_uniquify,
-        minimum_peaks_distance=min_peak_distance)
-    return
+        motl_file_name = unique_coordinates_motl_writer(
+            path_to_output_folder=motive_list_output_dir,
+            list_of_peak_scores=list_of_maxima,
+            list_of_peak_coords=list_of_maxima_coords,
+            number_peaks_to_uniquify=number_peaks_uniquify,
+            minimum_peaks_distance=min_peak_distance)
+    return motl_file_name
 
 
 def unique_coordinates_motl_writer(path_to_output_folder: str,
                                    list_of_peak_scores: list,
                                    list_of_peak_coords: list,
                                    number_peaks_to_uniquify: int,
-                                   minimum_peaks_distance: int):
+                                   minimum_peaks_distance: int) -> str:
     """
     Already modified to match em_motl format
     """
@@ -160,4 +160,4 @@ def unique_coordinates_motl_writer(path_to_output_folder: str,
                 indx) + ',0,0,0,' + str(x) + ',' + str(y) + ',' + str(
                 z) + ',0,0,0,0,0,0,0,0,0,1'])
         print("The motive list has been writen in", motl_file_name)
-    return
+    return motl_file_name

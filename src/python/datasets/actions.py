@@ -34,17 +34,16 @@ def pad_dataset(dataset: np.array,
     return padded_dataset
 
 
-def partition_tomogram(dataset, output_file_path: str,
-                       shape_to_crop_zyx=(128, 128, 128),
-                       border_frame_thickness=12
+def partition_tomogram(dataset, output_h5_file_path: str,
+                       subtomo_shape: tuple,
+                       overlap: int
                        ):
-    padded_dataset = pad_dataset(dataset, shape_to_crop_zyx,
-                                 border_frame_thickness)
-    print("The padded dataset has shape", padded_dataset.shape)
+    padded_dataset = pad_dataset(dataset, subtomo_shape,
+                                 overlap)
     padded_particles_coordinates = get_particle_coordinates_grid_with_overlap(
         padded_dataset.shape,
-        shape_to_crop_zyx,
-        border_frame_thickness)
-    write_subtomograms_from_dataset(output_file_path, padded_dataset,
+        subtomo_shape,
+        overlap)
+    write_subtomograms_from_dataset(output_h5_file_path, padded_dataset,
                                     padded_particles_coordinates,
-                                    shape_to_crop_zyx)
+                                    subtomo_shape)

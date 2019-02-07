@@ -1,3 +1,4 @@
+import os
 from os import listdir, makedirs
 from os.path import isfile, join, exists
 
@@ -58,3 +59,8 @@ def create_negative_output_folder_tree(root_path):
 
     create_dirs(dirs)
     return dirs
+
+
+def extract_file_name(path_to_file: str) -> str:
+    name = os.path.basename(path_to_file)
+    return os.path.splitext(name)[0]

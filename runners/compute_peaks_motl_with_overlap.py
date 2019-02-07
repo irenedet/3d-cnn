@@ -15,7 +15,7 @@ list_of_maxima, list_of_maxima_coords = \
         overlap=12)
 
 csv.motl_writer(path_to_output_folder=data_dir,
-               list_of_peak_scores=list_of_maxima,
-               list_of_peak_coords=list_of_maxima_coords)
+                list_of_peak_scores=list_of_maxima,
+                list_of_peak_coords=list_of_maxima_coords)
 
 print("Finished!")
