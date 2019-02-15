@@ -43,7 +43,6 @@ overlap = args.overlap
 min_peak_distance = args.min_peak_distance
 z_shift = args.z_shift_original
 
-print("hola!!!", z_shift)
 
 subtomo_shape = tuple(box_side * np.array([1, 1, 1]))
 output_shape = (output_zdim, 927, 927)
