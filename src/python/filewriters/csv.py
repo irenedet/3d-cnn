@@ -81,7 +81,8 @@ def write_global_motl_from_overlapping_subtomograms(subtomograms_path: str,
                                                     subtomo_shape: tuple,
                                                     numb_peaks: int,
                                                     min_peak_distance: int,
-                                                    number_peaks_uniquify: int
+                                                    number_peaks_uniquify: int,
+                                                    z_shift: int
                                                     ) -> str:
     with h5py.File(subtomograms_path, 'r') as h5file:
         subtomos_internal_path = join(
@@ -90,6 +91,7 @@ def write_global_motl_from_overlapping_subtomograms(subtomograms_path: str,
         list_of_maxima = []
         list_of_maxima_coords = []
         overlap_shift = overlap * np.array([1, 1, 1])
+        z_shift_vector = [z_shift, 0, 0]
         for subtomo_name in list(h5file[subtomos_internal_path]):
             subtomo_list_of_maxima, subtomo_maxima_coords = \
                 _get_peaks_per_subtomo_with_overlap(
@@ -109,6 +111,8 @@ def write_global_motl_from_overlapping_subtomograms(subtomograms_path: str,
 
             subtomo_maxima_coords = _shift_coordinates_by_vector(
                 coordinates=subtomo_maxima_coords, shift_vector=-overlap_shift)
+            subtomo_maxima_coords = _shift_coordinates_by_vector(
+                coordinates=subtomo_maxima_coords, shift_vector=z_shift_vector)
 
             list_of_maxima += subtomo_list_of_maxima
             list_of_maxima_coords += subtomo_maxima_coords

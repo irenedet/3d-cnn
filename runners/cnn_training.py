@@ -52,15 +52,16 @@ print("*************************************")
 device = get_device()
 
 training_data_path = \
-    '/scratch/trueba/3d-cnn/training_data/training_data_side128_49examples.h5'
+'/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
+    # '/scratch/trueba/3d-cnn/training_data/training_data_side128_49examples.h5'
 # '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
 # '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
-
-
+label_name = "ribosomes"
+split = 34
 print("The training data path is ", training_data_path)
 
 raw_data, labels = h5.read_training_data(training_data_path,
-                                         label_name="ribosomes")
+                                         label_name=label_name)
 
 print("Initial unique labels", np.unique(labels))
 
@@ -79,8 +80,10 @@ preprocessed_data = preprocess_data(raw_data)
 preprocessed_data = np.array(preprocessed_data)[:, None]
 labels = np.array(labels)[:, None]
 
-train_data, train_labels, val_data, val_labels = \
-    split_dataset(preprocessed_data, labels, 42 - 8)
+train_data, train_labels, val_data, val_labels, data_order = \
+    split_dataset(preprocessed_data, labels, split)
+
+# print(data_order)
 
 # wrap into datasets
 train_set = du.TensorDataset(torch.from_numpy(train_data),
@@ -89,10 +92,11 @@ val_set = du.TensorDataset(torch.from_numpy(val_data),
                            torch.from_numpy(val_labels))
 
 # wrap into data-loader
-train_loader = du.DataLoader(train_set, shuffle=True, batch_size=5)
+train_loader = du.DataLoader(train_set, shuffle=False, # we shuffle before
+                             batch_size=5)
 val_loader = du.DataLoader(val_set, batch_size=5)
 
-for test_index in range(2):
+for test_index in range(1):
     # train the neural network
     # net = UNet_deep(1, 1, final_activation=nn.Sigmoid())
     # net = UNet_7(1, 1, final_activation=nn.Sigmoid())
@@ -101,7 +105,8 @@ for test_index in range(2):
     net_confs = [{'depth': 5, 'initial_features': 2},
                  {'depth': 5, 'initial_features': 4},
                  {'depth': 5, 'initial_features': 8},
-                 {'depth': 5, 'initial_features': 16}]
+                 {'depth': 5, 'initial_features': 16}
+                 ]
 
     for conf in net_confs:
         net = UNet(**conf)
@@ -120,12 +125,11 @@ for test_index in range(2):
         # built tensorboard logger
         model_name = str(
             test_index) + \
-                     '_UNet_new_128_side_' + \
+                     '_UNet_ribo_training_' + \
                      "depth_" + str(conf['depth']) + \
-                     "_ini_feat_" + str(conf['initial_features'])
-        log_dir = join('_deepUNet_logs/', model_name)
-        logger = TensorBoard(log_dir=log_dir,
-                             log_image_interval=1)  # log every image
+                     "_ini_feat_" + str(conf['initial_features']) + "_"
+        log_dir = join('deepUNet_logs/', model_name)
+        logger = TensorBoard(log_dir=log_dir, log_image_interval=1)
         print("The neural network training is now starting")
         n_epochs = 30
         for epoch in range(n_epochs):
@@ -139,5 +143,22 @@ for test_index in range(2):
         model_name_pkl = model_name + ".pkl"
         model_path = join("./models/", model_name_pkl)
         torch.save(net.state_dict(), model_path)
+
+        model_name_txt = model_name + ".txt"
+        data_txt_path = join("./models", model_name_txt)
+        with open(data_txt_path, 'w') as txt_file:
+            txt_file.write("training_data_path = " + training_data_path)
+            txt_file.write("\n")
+            txt_file.write("label_name=" + label_name)
+            txt_file.write("\n")
+            txt_file.write("split = " + str(split))
+            txt_file.write("\n")
+            txt_file.write("model_name = " + model_name_pkl)
+            txt_file.write("\n")
+            txt_file.write("conf = " + str(conf))
+            txt_file.write("\n")
+            txt_file.write("data_order = ")
+            txt_file.write(str(data_order))
+            txt_file.write("\n")
 
 print("We have finished the training!")
