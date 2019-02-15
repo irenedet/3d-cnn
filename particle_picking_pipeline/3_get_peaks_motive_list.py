@@ -20,6 +20,12 @@ parser.add_argument("-subtomo", "--subtomo_path",
 parser.add_argument("-box", "--box_side",
                     help="name of category to be segmented",
                     type=int)
+parser.add_argument("-xdim", "--output_xdim",
+                    help="name of category to be segmented",
+                    type=int)
+parser.add_argument("-ydim", "--output_ydim",
+                    help="name of category to be segmented",
+                    type=int)
 parser.add_argument("-zdim", "--output_zdim",
                     help="name of category to be segmented",
                     type=int)
@@ -38,34 +44,16 @@ output_dir = args.output_dir
 label_name = args.label_name
 subtomo_path = args.subtomo_path
 box_side = args.box_side
+output_xdim = args.output_xdim
+output_ydim = args.output_ydim
 output_zdim = args.output_zdim
 overlap = args.overlap
 min_peak_distance = args.min_peak_distance
 z_shift = args.z_shift_original
 
-
 subtomo_shape = tuple(box_side * np.array([1, 1, 1]))
-output_shape = (output_zdim, 927, 927)
-#
-# subtomo_path = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_16_5_bis_/4bin_subtomograms_.h5"
-# label_name = "ribosomes"
-# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_16_5_bis_/"
-# subtomo_shape = (128, 128, 128)
-# output_shape = (251, 927, 927)
-# min_peak_distance = 12
-# overlap = 12
-# z_shift = 370
+output_shape = (output_zdim, output_ydim, output_xdim)
 
-# subtomo_path = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_8_5_bis_/4bin_subtomograms_.h5"
-# label_name = "ribosomes"
-# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_8_5_bis_/"
-# subtomo_shape = (128, 128, 128)
-# output_shape = (321, 927, 927)
-# min_peak_distance = 12
-# overlap = 12
-# z_shift = 0#370
-
-#
 # Future local parameters:
 subtomo_peaks_number = 40
 number_peaks_uniquify = 7000

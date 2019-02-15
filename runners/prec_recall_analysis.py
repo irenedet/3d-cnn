@@ -16,7 +16,6 @@ from src.python.filereaders.em import load_em_motl
 from src.python.peak_toolbox.utils import \
     extract_motl_coordinates_and_score_values
 
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-output", "--output_dir",
@@ -32,30 +31,29 @@ parser.add_argument("-label", "--label_name",
                     help="name of segmentation",
                     type=str)
 
-
 args = parser.parse_args()
 output_dir = args.output_dir
 path_to_csv_motl = args.path_to_motl
 path_to_motl_clean = args.path_to_clean
 label_name = args.label_name
 
-label_name = "ribosomes"
-# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_16_5_bis_/"
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_16_5_bis_/motl_4654.csv"
-
-output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_16_5_bis_/"
-path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_16_5_bis_/motl_5182.csv"
-
+# label_name = "ribosomes"
+# # output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_16_5_bis_/"
+# # path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_16_5_bis_/motl_4654.csv"
+#
+# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_4_5_bis_/"
+# path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_4_5_bis_/motl_4896.csv"
+#
+#
+#
+# # path_to_motl_clean = '/scratch/trueba/cnn/004/4bin/cnn/motl_clean_4b.em'
+# # path_to_motl_clean = '/scratch/trueba/3d-cnn/clean/180426_005/motl_clean_4b.em'
+# path_to_motl_clean = '/scratch/trueba/3d-cnn/clean/180426_006/motl_clean_4b.em'
 figures_dir = join(output_dir, "figures")
 makedirs(name=figures_dir, exist_ok=True)
-
-# path_to_motl_clean = '/scratch/trueba/cnn/004/4bin/cnn/motl_clean_4b.em'
-# path_to_motl_clean = '/scratch/trueba/3d-cnn/clean/180426_005/motl_clean_4b.em'
-path_to_motl_clean = '/scratch/trueba/3d-cnn/clean/180426_006/motl_clean_4b.em'
-
 # Extract coordinates from template matching
-Header, motl_clean = load_em_motl(path_to_emfile=path_to_motl_clean)
-motl_clean_coords = extract_coordinates_from_em_motl(motl_clean)
+Header, motl_true = load_em_motl(path_to_emfile=path_to_motl_clean)
+motl_clean_coords = extract_coordinates_from_em_motl(motl_true)
 # motl_clean_coords[:, 0] += -16*np.ones(motl_clean_coords.shape[0])
 # Extract coordinates from the UNet segmentation:
 motl_predicted = read_motl_from_csv(path_to_csv_motl)
@@ -73,7 +71,6 @@ value_detected_predicted, value_undetected_predicted = \
         motl_clean_coords,
         radius=8)
 
-
 matplotlib.use('Agg')
 plt.ioff()
 plt.figure(1)
@@ -86,7 +83,6 @@ plt.gcf()
 figure_name = join(figures_dir, "histogram180426_004.png")
 plt.savefig(fname=figure_name,
             format="png")
-
 
 matplotlib.use('Agg')
 plt.ioff()
@@ -103,26 +99,6 @@ plt.gcf()
 figure_name = join(figures_dir, "histogram-detected-undetected.png")
 plt.savefig(fname=figure_name,
             format="png")
-
-# plt.hist(value_detected_predicted, bins=30, label="true positives")
-# plt.xlabel("score value")
-# plt.ylabel("frequency")
-# plt.title(str(len(motl_coords)) + " peaks, ribosomes in 180426/004")
-# plt.legend()
-# plt.gcf()
-# # plt.savefig(fname="/scratch/trueba/3d-cnn/TEST/histogram180426_004.png",
-# #             format="png")
-# plt.show()
-#
-# plt.hist(value_undetected_predicted, bins=30, label="false positives")
-# plt.xlabel("score value")
-# plt.ylabel("frequency")
-# plt.title(str(len(motl_coords)) + " peaks, ribosomes in 180426/004")
-# plt.legend()
-# plt.gcf()
-# # plt.savefig(fname="/scratch/trueba/3d-cnn/TEST/histogram180426_004.png",
-# #             format="png")
-# plt.show()
 F1_score = F1_score_calculator(precision, recall)
 max_F1 = np.max(F1_score)
 optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
@@ -137,10 +113,10 @@ plt.figure(3)
 plt.plot(F1_score, label=f1_legend_str)
 plt.xlabel("number of peaks")
 plt.ylabel("F1 score")
-plt.title("3D UNet, 6 layers, 128^3 voxel training set")
+plt.title(str(len(motl_coordinates)) + " peaks, " + label_name)
 plt.legend()
 plt.gcf()
-figure_name = join(figures_dir, "F1_score_with_overlap.png")
+figure_name = join(figures_dir, "F1_score.png")
 plt.savefig(fname=figure_name,
             format="png")
 
@@ -148,10 +124,10 @@ plt.figure(4)
 plt.plot(recall, precision, label=pr_legend_str)
 plt.xlabel("recall")
 plt.ylabel("precision")
-plt.title("3D UNet, 6 layers, 128^3 voxel training set")
+plt.title(str(len(motl_coordinates)) + " peaks, " + label_name)
 plt.legend()
 plt.gcf()
-figure_name = join(figures_dir, "PR_curve_with_overlap.png")
+figure_name = join(figures_dir, "PR_curve.png")
 plt.savefig(fname=figure_name,
             format="png")
 

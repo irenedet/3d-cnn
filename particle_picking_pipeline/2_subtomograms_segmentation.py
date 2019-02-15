@@ -26,8 +26,8 @@ parser.add_argument("-init_feat", "--initial_features",
 parser.add_argument("-depth", "--unet_depth",
                     help="Depth of the UNet",
                     type=int)
+
 args = parser.parse_args()
-# output_h5file = args.output_h5file
 path_to_model = args.path_to_model
 label_name = args.label_name
 output_h5file = args.output_h5_path
@@ -36,10 +36,6 @@ depth = args.unet_depth
 
 conf = {'depth': depth, 'initial_features': init_feat}
 
-# load pre trained model and change the final activation a modo:
-# model = UNet_6(1, 1, final_activation=nn.ELU())
-
-# conf = {'depth': 5, 'initial_features': 16}
 model = UNet(**conf, final_activation=nn.ELU())
 device = get_device()
 model.load_state_dict(torch.load(path_to_model, map_location=device))
