@@ -4,7 +4,7 @@ from tensors import actions
 
 
 def train(model, loader, optimizer, loss_function,
-          epoch, device, log_interval=100, tb_logger=None):
+          epoch, device, log_interval=20, tb_logger=None):
     # set the model to train mode
     model.train()
 
@@ -32,27 +32,30 @@ def train(model, loader, optimizer, loss_function,
         # log to tensorboard
         if tb_logger is not None:
             step = epoch * len(loader) + batch_id
-            tb_logger.log_scalar(tag='train_loss', value=loss.item(),
-                                 step=step)
+            tb_logger.log_scalar(tag='train_loss', value=loss.item(), step=step)
 
             log_image_interval = tb_logger.log_image_interval
             if step % log_image_interval == 0:
-                # we always log the last validation images
+                # we always log the last validation images:
                 img_indx, channel, size_z, size_y, size_z = x.shape
-                pshape = (1, 1, size_z, size_y, size_z)
+                single_tomo_shape = (1, 1, size_z, size_y, size_z)
+                # we log four slices per cube:
                 for slice_index in range(4):
-                    slice_index *= size_z//4
+                    slice_index *= size_z // 4
                     tb_logger.log_image(tag='val_input',
-                                        image=actions.crop_tensor(x, pshape)[
+                                        image=actions.crop_tensor(
+                                            x, single_tomo_shape)[
                                             0, 0, slice_index].to('cpu'),
                                         step=step)
                     tb_logger.log_image(tag='val_target',
-                                        image=actions.crop_tensor(y, pshape)[
+                                        image=actions.crop_tensor(
+                                            y, single_tomo_shape)[
                                             0, 0, slice_index].to('cpu'),
                                         step=step)
                     tb_logger.log_image(tag='val_prediction',
                                         image=
-                                        actions.crop_tensor(prediction, pshape)[
+                                        actions.crop_tensor(
+                                            prediction, single_tomo_shape)[
                                             0, 0, slice_index].to(
                                             'cpu'),
                                         step=step)

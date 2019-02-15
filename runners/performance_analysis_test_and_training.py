@@ -1,9 +1,10 @@
 from src.python.calculator.statistics import precision_recall_calculator, \
     pr_auc_score, \
     F1_score_calculator, precision_recall_calculator_and_detected
-from src.python.coordinates_toolbox.utils import extract_coordinates_from_em_motl
+from src.python.coordinates_toolbox.utils import \
+    extract_coordinates_from_em_motl
 from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import load_motl
+from src.python.filereaders.em import load_em_motl
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -47,8 +48,9 @@ from src.python.coordinates_toolbox.subtomos import get_coord_from_name, \
     get_subtomo_corners
 
 
-def filter_test_coordinates(coordinates, subtomo_file_path, split,
-                            dataset_shape, subtomo_shape, shift):
+def filter_test_coordinates(coordinates: list, subtomo_file_path: str,
+                            split: int, dataset_shape: tuple,
+                            subtomo_shape: tuple, shift: int):
     subtomo_names = read_subtomo_names(subtomo_file_path)
     test_coordinates = []
     train_coordinates = []
@@ -67,9 +69,8 @@ def filter_test_coordinates(coordinates, subtomo_file_path, split,
     return test_coordinates, train_coordinates
 
 
-def _get_subtomo_coorners(subtomo_corners_init, subtomo_corners_end, shift_z):
-    # print("subtomo_corners_init", subtomo_corners_init)
-    # print("subtomo_corners_end", subtomo_corners_end)
+def _get_subtomo_coorners(subtomo_corners_init: list, subtomo_corners_end: list,
+                          shift_z: int):
     subtomo_corners_init_xyz = list(reversed(subtomo_corners_init))
     subtomo_corners_end_xyz = list(reversed(subtomo_corners_end))
     subtomo_corners_init_xyz = np.array(subtomo_corners_init_xyz) + np.array(
@@ -79,8 +80,9 @@ def _get_subtomo_coorners(subtomo_corners_init, subtomo_corners_end, shift_z):
     return subtomo_corners_init_xyz, subtomo_corners_end_xyz
 
 
-def _get_subtomo_corners_from_split(subtomo_names, split, subtomo_shape,
-                                    dataset_shape, shift):
+def _get_subtomo_corners_from_split(subtomo_names: list, split: int,
+                                    subtomo_shape: tuple, dataset_shape: tuple,
+                                    shift: int):
     subtomos_corners = []
     for subtomo_name in subtomo_names[split:]:
         subtomo_center = get_coord_from_name(subtomo_name)
@@ -93,7 +95,7 @@ def _get_subtomo_corners_from_split(subtomo_names, split, subtomo_shape,
     return subtomos_corners
 
 
-def _check_point_in_subtomo(corners, point):
+def _check_point_in_subtomo(corners: tuple, point: list):
     subtomo_corners_init_xyz, subtomo_corners_end_xyz = corners
     is_in_subtomo = all(
         p >= c_init and p <= c_end for p, c_init, c_end in
@@ -102,10 +104,15 @@ def _check_point_in_subtomo(corners, point):
     return is_in_subtomo
 
 
-def select_coordinates_in_subtomos(coordinates, subtomo_file_path, split,
-                                   dataset_shape, subtomo_shape, shift):
+def select_coordinates_in_subtomos(coordinates: list, subtomo_file_path: str,
+                                   split: int,
+                                   data_order: list, dataset_shape: tuple,
+                                   subtomo_shape: tuple,
+                                   shift: int):
     subtomo_names = read_subtomo_names(subtomo_file_path)
-    subtomos_corners = _get_subtomo_corners_from_split(subtomo_names, split,
+    subtomo_names_reordered = [subtomo_names[i] for i in data_order]
+    subtomos_corners = _get_subtomo_corners_from_split(subtomo_names_reordered,
+                                                       split,
                                                        subtomo_shape,
                                                        dataset_shape, shift)
     selected_coordinates = []
@@ -120,15 +127,17 @@ def select_coordinates_in_subtomos(coordinates, subtomo_file_path, split,
     return selected_coordinates, discarded_coordinates
 
 
-def select_coordinates_and_values_in_subtomos(coordinates,
-                                              values,
-                                              subtomo_file_path,
-                                              split,
-                                              dataset_shape,
-                                              subtomo_shape,
-                                              shift):
+def select_coordinates_and_values_in_subtomos(coordinates: list,
+                                              values: list,
+                                              subtomo_file_path: str,
+                                              split: int,
+                                              data_order: list,
+                                              dataset_shape: tuple,
+                                              subtomo_shape: tuple,
+                                              shift: int):
     subtomo_names = read_subtomo_names(subtomo_file_path)
-    subtomos_corners = _get_subtomo_corners_from_split(subtomo_names,
+    subtomo_names_reordered = [subtomo_names[i] for i in data_order]
+    subtomos_corners = _get_subtomo_corners_from_split(subtomo_names_reordered,
                                                        split,
                                                        subtomo_shape,
                                                        dataset_shape,
@@ -150,20 +159,12 @@ def select_coordinates_and_values_in_subtomos(coordinates,
            selected_coordinates_values, discarded_coordinates_values
 
 
-# path_to_csv_motl = '/scratch/trueba/3d-cnn/TEST/motl_245558.csv'
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/TEST/motl_10355.csv"
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/TEST/motl_10373.csv"#wrong
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/TEST/motl_18019.csv"#good! without overlap
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/TEST/motl_7533.csv"#super good! generated by test_dummy.py with overlap
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/TEST/motl_2517790.csv"
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/TEST/motl_8748.csv"  # last-super good results
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/TEST/motl_unique/motl_4643.csv"
-path_to_csv_motl = "/scratch/trueba/3d-cnn/TEST/motl_unique/motl_4444.csv"
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/TEST/motl_unique/motl_9271.csv"# does not really make a difference with 4444
+path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/confs_16_5_bis_/motl_4569.csv"
+# "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/motl_4431.csv"#"/scratch/trueba/3d-cnn/TEST/motl_unique/motl_4444.csv"
 path_to_motl_clean = '/home/papalotl/Sara_Goetz/180426/004/motl_clean_4b.em'
 
 motl_predicted = read_motl_from_csv(path_to_csv_motl)
-Header, motl_true = load_motl(path_to_emfile=path_to_motl_clean)
+Header, motl_true = load_em_motl(path_to_emfile=path_to_motl_clean)
 
 true_coordinates = extract_coordinates_from_em_motl(motl_true)
 print("len(true_coordinates) = ", len(true_coordinates))
@@ -179,15 +180,29 @@ import time
 
 training_data_path = \
     '/scratch/trueba/3d-cnn/training_data/training_data_side128_49examples.h5'
+data_order_while_training = [35, 24, 15, 31, 2, 20, 41, 7, 34, 42, 26, 5, 47,
+                             23, 33, 0, 16, 29, 21, 12, 17, 8, 4, 27, 3, 40, 32,
+                             38, 37, 39, 6, 11, 9, 46, 22, 28, 18, 1, 36, 25,
+                             13, 14, 48, 44, 10, 30, 43, 19,
+                             45]  # list(range(49))
+# data_order = [48, 20, 27, 19, 17, 44, 35, 40, 31, 15, 43, 33, 26, 25, 29, 8, 28,
+# 45, 47, 36, 41, 5, 21, 37, 16, 18, 46, 42, 11, 13, 3, 12, 30, 1,
+# 2, 0, 22, 9, 34, 10, 6, 7, 24, 38, 23, 39, 14, 4, 32]
+training_split = 34
+dataset_shape = (221, 928, 928)
+overlap = 12
+subtomo_shape = (128, 128, 128)
 
 shift = 380
 start = time.time()
 true_coordinates_test, _ = \
     select_coordinates_in_subtomos(
         coordinates=true_coordinates,
-        subtomo_file_path=training_data_path, split=32,
-        dataset_shape=(221, 928, 928),
-        subtomo_shape=(128, 128, 128),
+        subtomo_file_path=training_data_path,
+        split=training_split,
+        data_order=data_order_while_training,
+        dataset_shape=dataset_shape,
+        subtomo_shape=subtomo_shape,
         shift=shift)
 true_coordinates_test = np.array(true_coordinates_test)
 end = time.time()
@@ -197,13 +212,15 @@ print("true_coordinates_test", len(true_coordinates_test))
 
 start = time.time()
 predicted_coordinates_test, _, predicted_coordinates_test_values, _ = \
-    select_coordinates_and_values_in_subtomos(coordinates=predicted_coordinates,
-                                              values=motl_values,
-                                              subtomo_file_path=training_data_path,
-                                              split=32,
-                                              dataset_shape=(221, 928, 928),
-                                              subtomo_shape=(128, 128, 128),
-                                              shift=0)
+    select_coordinates_and_values_in_subtomos(
+        coordinates=predicted_coordinates,
+        values=motl_values,
+        subtomo_file_path=training_data_path,
+        split=training_split,
+        data_order=data_order_while_training,
+        dataset_shape=dataset_shape,
+        subtomo_shape=subtomo_shape,
+        shift=0)
 end = time.time()
 print("elapsed time for splitting test and train coordinates", end - start,
       "sec")

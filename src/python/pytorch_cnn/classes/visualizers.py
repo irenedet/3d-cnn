@@ -10,8 +10,6 @@ class TensorBoard(object):
 
     def __init__(self, log_dir: str, log_image_interval: int):
         self.log_dir = log_dir
-        # we don't wan't to log images every iteration,
-        # which is expensive, so we can specify `log_image_interval`
         self.log_image_interval = log_image_interval
         self.writer = tb.SummaryWriter(self.log_dir)
 
@@ -22,7 +20,6 @@ class TensorBoard(object):
 
         # convert to numpy array
         if torch.is_tensor(image):
-            # image = image.numpy()
             image = image.detach().numpy()
 
         # change the image normalization for the tensorboard logger
