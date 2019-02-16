@@ -1,4 +1,4 @@
-name: mlcourse
+name: 3d-cnn
 channels:
   - pytorch
   - conda-forge
