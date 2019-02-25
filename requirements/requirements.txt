@@ -1,3 +1,4 @@
+scipy
 jupyter
 imageio
 pytorch

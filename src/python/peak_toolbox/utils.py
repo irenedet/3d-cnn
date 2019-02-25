@@ -117,3 +117,62 @@ def extract_motl_coordinates_and_score_values(motl: list):
                    motl]
     score_values = [row[0] for row in motl]
     return score_values, coordinates
+
+
+def _generate_horizontal_disk(radius: int, thickness: int) -> list:
+    disk = []
+    for i in range(radius):
+        for j in range(radius):
+            for k in range(thickness // 2):
+                if np.sqrt(i ** 2 + j ** 2) <= radius:
+                    disk += [(k, i, j), (k, -i, j), (k, i, -j), (k, -i, -j)]
+                    if k > 0:
+                        disk += [(-k, i, j), (-k, -i, j), (-k, i, -j),
+                                 (-k, -i, -j)]
+                        # disk += [(i, j, k), (-i, j, k), (i, -j, k), (-i, -j, k)]
+                        # if k > 0:
+                        #     disk += [(i, j, -k), (-i, j, -k), (i, -j, -k),
+                        #              (-i, -j, -k)]
+
+    return disk
+
+
+def paste_rotated_disk(dataset: np.array, center: tuple, radius: int,
+                       thickness: int,
+                       ZXZ_angles: tuple):
+    cx, cy, cz = center
+    psi, theta, sigma = ZXZ_angles
+    to_radians = lambda theta: theta * np.pi / 180
+    #
+    psi = to_radians(psi)
+    theta = to_radians(theta)
+    sigma = to_radians(sigma)
+
+    rot_z = lambda psi: np.array(
+        [[np.cos(psi), -np.sin(psi), 0], [np.sin(psi), np.cos(psi), 0],
+         [0, 0, 1]])
+
+    rot_x = lambda psi: np.array([[1, 0, 0], [0, np.cos(psi), -np.sin(psi)],
+                                  [0, np.sin(psi), np.cos(psi)]])
+
+    # To fit hdf coordinate system:
+    hdf_coords = np.array([[0, 0, 1], [0, 1, 0], [1, 0, 0]])
+    swap_coords = np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]])
+    ZXZ_matrix = rot_z(psi).dot(rot_x(theta))
+    ZXZ_matrix = ZXZ_matrix.dot(rot_z(sigma))
+    print(ZXZ_matrix)
+    ZXZ_matrix = hdf_coords.dot(ZXZ_matrix)
+    ZXZ_matrix = ZXZ_matrix.dot(swap_coords)
+
+    disk = _generate_horizontal_disk(radius, thickness)
+    new_disk = []
+    for point in disk:
+        new_disk += [ZXZ_matrix.dot(np.array(point))]
+    for point in new_disk:
+        i, j, k = point
+        i = int(i)
+        j = int(j)
+        k = int(k)
+        dataset[i + cx, j + cy, k + cz] = 1
+
+    return dataset

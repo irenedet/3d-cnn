@@ -55,6 +55,7 @@ makedirs(name=figures_dir, exist_ok=True)
 Header, motl_true = load_em_motl(path_to_emfile=path_to_motl_clean)
 motl_clean_coords = extract_coordinates_from_em_motl(motl_true)
 # motl_clean_coords[:, 0] += -16*np.ones(motl_clean_coords.shape[0])
+# motl_clean_coords[:, 2] += -40*np.ones(motl_clean_coords.shape[0])
 # Extract coordinates from the UNet segmentation:
 motl_predicted = read_motl_from_csv(path_to_csv_motl)
 motl_values, motl_coordinates = extract_motl_coordinates_and_score_values(

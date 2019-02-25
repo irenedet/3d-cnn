@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 4G
-#SBATCH --time 0-01:00
+#SBATCH --time 0-00:30
 #SBATCH -o slurm.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -12,9 +12,9 @@
 
 
 
-export path_to_motl='/scratch/trueba/3d-cnn/pipeline_TEST/TEST2/motl_4443.csv'
-export path_to_clean='/scratch/trueba/cnn/004/4bin/cnn/motl_clean_4b.em'
-export output_dir='/scratch/trueba/3d-cnn/pipeline_TEST/TEST3/'
+export path_to_motl='/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_16_5_bis_/motl_4621.csv'
+export output_dir='/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_16_5_bis_/'
+export path_to_clean='/scratch/trueba/3d-cnn/clean/180426_006/motl_clean_4b.em'
 export label_name='ribosomes'
 
 module load Anaconda3

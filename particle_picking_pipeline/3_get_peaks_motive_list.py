@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, '/g/scb2/zaugg/trueba/3d-cnn/src')
+print(sys.path)
 import numpy as np
 import argparse
 
