@@ -7,12 +7,13 @@ from src.python.naming import h5_internal_paths
 
 
 def read_training_data(training_data_path: str,
-                       label_name="ribosomes") -> tuple:
+                       label_name="ribosomes",
+                       split=-1) -> tuple:
     data = []
     labels = []
     with h5py.File(training_data_path, 'r') as f:
         raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
-        for subtomo_name in raw_subtomo_names:
+        for subtomo_name in raw_subtomo_names[:split]:
             raw_subtomo_h5_internal_path = join(
                 h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
             data += [f[raw_subtomo_h5_internal_path][:]]
@@ -39,4 +40,3 @@ def read_raw_data_from_h5(data_path: str) -> np.array:
                                             subtomo_name)
             data += [f[subtomo_h5_internal_path][:]]
     return np.array(data)
-
