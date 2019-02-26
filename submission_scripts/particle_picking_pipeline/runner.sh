@@ -23,10 +23,10 @@ export input_zdim=251
 export z_shift=370
 
 # Trained UNet for the segmentation, category to be segmented, and UNet architecture features:
-export path_to_model="/g/scb2/zaugg/trueba/3d-cnn/models/0_UNet_new_128_side_depth_5_ini_feat_2_.pkl"
+export path_to_model="/struct/mahamid/Processing/3d-cnn/models/0_UNet_new_128_side_depth_5_ini_feat_4_.pkl"
 export label_name="ribosomes"
 export depth=5
-export init_feat=2
+export init_feat=4
 export box_side=128
 
 # Output directory, where results will be stored:

@@ -102,6 +102,12 @@ for test_index in range(1):
     # net = UNet_7(1, 1, final_activation=nn.Sigmoid())
     # net = UNet(1, 1, final_activation=nn.Sigmoid())
     # net = UNet_test(1, 1, final_activation=nn.Sigmoid())
+
+    # Multi class:
+    # net = UNetGN(in_channel=1, out_channel=13,
+    #              final_activation=nn.LogSoftmax(dim=1))
+
+
     net_confs = [{'depth': 5, 'initial_features': 2},
                  {'depth': 5, 'initial_features': 4},
                  {'depth': 5, 'initial_features': 8},
