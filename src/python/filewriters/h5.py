@@ -7,8 +7,9 @@ import numpy as np
 
 from src.python.filereaders.csv import read_motl_from_csv
 from src.python.filereaders.em import load_em_motl
+from src.python.filereaders.txt import read_shrec_motl
 from src.python.coordinates_toolbox.utils import \
-    extract_coordinates_from_em_motl
+    extract_coordinates_from_em_motl, extract_coordinates_from_txt_shrec
 from src.python.peak_toolbox.utils import paste_sphere_in_dataset
 
 from src.python.naming import h5_internal_paths
@@ -192,10 +193,11 @@ def write_hdf_particles_from_motl(path_to_motl: str,
                                   sphere_radius: int,
                                   values_in_motl=True,
                                   number_of_particles=None,
-                                  z_shift=0):
+                                  z_shift=0,
+                                  particle_class=1):
     _, file_extension = os.path.splitext(path_to_motl)
     print("The motive list has extension ", file_extension)
-    assert file_extension == ".csv" or file_extension == ".em"
+    assert file_extension == ".csv" or file_extension == ".em" or file_extension == ".txt"
 
     if file_extension == ".csv" or file_extension == ".em":
         if file_extension == ".csv":
@@ -235,6 +237,36 @@ def write_hdf_particles_from_motl(path_to_motl: str,
 
         write_dataset_hdf(output_path=hdf_output_path,
                           tomo_data=predicted_dataset)
+    elif file_extension == ".txt":
+        motive_list = read_shrec_motl(path_to_motl)
+        coordinates = extract_coordinates_from_txt_shrec(
+            motive_list=motive_list, particle_class=particle_class)
+        if isinstance(number_of_particles, int):
+            coordinates = coordinates[:number_of_particles]
+            print("Only", str(number_of_particles),
+                  " particles in the motive list will be pasted.")
+        else:
+            print("All particles in the motive list will be pasted.")
+        # point_0 = motive_list[0, 1:4]
+        # print(point_0)
+        # point_0 = [int(val) for val in point_0[::-1]]
+        # print(point_0)
+        #
+        # point_1 = motive_list[1, 1:4]
+        # print(point_1)
+        # point_1 = [int(val) for val in point_1[::-1]]
+        # print(point_1)
+
+        score_values = np.ones(len(coordinates))
+        predicted_dataset = np.zeros(output_shape)
+        for center, value in zip(coordinates, score_values):
+            paste_sphere_in_dataset(dataset=predicted_dataset,
+                                    radius=sphere_radius,
+                                    value=value, center=center)
+
+        write_dataset_hdf(output_path=hdf_output_path,
+                          tomo_data=predicted_dataset)
+
     else:
         print("The motive list is not written in a valid file format.")
 
