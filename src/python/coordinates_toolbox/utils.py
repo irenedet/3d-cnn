@@ -71,6 +71,17 @@ def extract_coordinates_from_em_motl(motl: np.array) -> np.array:
     return np.array(motl[0, :, 7:10])
 
 
+def extract_coordinates_from_txt_shrec(motive_list: np.array,
+                                       particle_class=1) -> np.array:
+    n = motive_list.shape[0]
+    pre_coordinates = [np.array(motive_list[index, 1:4]) for index in range(n) if
+                       motive_list[index, 0] == particle_class]
+    coordinates = [[int(val) for val in point] for point in
+                   pre_coordinates]
+    del pre_coordinates
+    return coordinates
+
+
 def filtering_duplicate_coords(motl_coords: list, min_peak_distance: int):
     unique_motl_coords = [motl_coords[0]]
     for point in motl_coords[1:]:

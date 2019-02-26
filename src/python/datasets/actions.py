@@ -79,3 +79,58 @@ def partition_raw_and_labels_tomograms(raw_dataset: np.array,
         label_name=label_name,
         window_centers=padded_particles_coordinates,
         crop_shape=subtomo_shape)
+
+
+# def partition_tomograms(dataset: np.array,
+#                         label_name: str,
+#                         output_h5_file_path: str,
+#                         subtomo_shape: tuple,
+#                         overlap: int
+#                         ):
+#     padded_raw_dataset = pad_dataset(dataset, subtomo_shape, overlap)
+#     padded_particles_coordinates = get_particle_coordinates_grid_with_overlap(
+#         padded_raw_dataset.shape,
+#         subtomo_shape,
+#         overlap)
+#     write_subtomograms(
+#         output_path=output_h5_file_path,
+#         padded_raw_dataset=padded_raw_dataset,
+#         padded_labels_dataset=padded_labels_dataset,
+#         label_name=label_name,
+#         window_centers=padded_particles_coordinates,
+#         crop_shape=subtomo_shape)
+#
+#
+# def write_subtomograms(output_path: str,
+#                                             padded_raw_dataset: np.array,
+#                                             padded_labels_dataset: np.array,
+#                                             label_name: str,
+#                                             window_centers: list,
+#                                             crop_shape: tuple):
+#     with h5py.File(output_path, 'w') as f:
+#         for window_center in window_centers:
+#             subtomo_name = "subtomo_{0}".format(str(window_center))
+#             subtomo_raw_h5_internal_path = join(
+#                 h5_internal_paths.RAW_SUBTOMOGRAMS,
+#                 subtomo_name)
+#             subtomo_raw_data = crop_window_around_point(
+#                 input=padded_raw_dataset,
+#                 crop_shape=crop_shape,
+#                 window_center=window_center)
+#
+#             subtomo_label_h5_internal_path = join(
+#                 h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
+#             subtomo_label_h5_internal_path = join(
+#                 subtomo_label_h5_internal_path,
+#                 subtomo_name)
+#             subtomo_label_data = crop_window_around_point(
+#                 input=padded_labels_dataset,
+#                 crop_shape=crop_shape,
+#                 window_center=window_center)
+#             print("subtomo_max = ", np.max(subtomo_label_data))
+#             if np.max(subtomo_label_data) > 0.2:
+#                 f[subtomo_raw_h5_internal_path] = subtomo_raw_data
+#                 f[subtomo_label_h5_internal_path] = subtomo_label_data
+#             else:
+#                 print("subtomo ", subtomo_name, "discarded")
+#     return
