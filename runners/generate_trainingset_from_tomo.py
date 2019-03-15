@@ -45,8 +45,8 @@ output_shape = (321, 927, 927)
 
 # 2. create subtomograms of raw and labeled
 path_to_raw = "/scratch/trueba/3d-cnn/clean/180426_006/subtomo330-650.hdf"
-"/scratch/trueba/3d-cnn/clean/180426_005/subtomo370-620.hdf"
-"/scratch/trueba/3d-cnn/clean/181126_002/002_sq_df_sorted.hdf"
+# "/scratch/trueba/3d-cnn/clean/180426_005/subtomo370-620.hdf"
+# "/scratch/trueba/3d-cnn/clean/181126_002/002_sq_df_sorted.hdf"
 path_to_labeled = hdf_output_path
 output_dir = "/scratch/trueba/3d-cnn/training_data/TEST/"
 tomo_name = "180426_006"  # extract_file_name(path_to_file=path_to_raw)

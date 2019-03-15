@@ -36,12 +36,10 @@ from datasets.actions import split_dataset
 from filereaders import h5
 from image.filters import preprocess_data
 from image.viewers import view_images_h5
-# from pytorch_cnn.classes.cnnets import UNet_4, UNet_6, UNet_7, UNet, UNet_deep
 from pytorch_cnn.classes.unet_new import UNet
-from pytorch_cnn.classes.loss import BCELoss, DiceCoefficient, \
-    DiceCoefficientLoss
-from pytorch_cnn.classes.visualizers import TensorBoard
-from pytorch_cnn.classes.routines import train_float, validate_float
+
+from pytorch_cnn.classes.visualizers import TensorBoard, TensorBoard_multiclass
+from pytorch_cnn.classes.routines import train, validate
 from pytorch_cnn.io import get_device
 
 print("*************************************")
@@ -52,40 +50,34 @@ print("*************************************")
 device = get_device()
 
 training_data_path = \
-"/scratch/trueba/3d-cnn/training_data/TEST/data_aug.h5"
-    # '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
-# '/scratch/trueba/3d-cnn/training_data/training_data_side128_49examples.h5'
-# '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
-# '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
-label_name = "ribosomes"
-split = 170
+    "/scratch/trueba/shrec/0_real_masks/training_sets/all_particles_differentiated_training.h5"
+label_name = "all_particles"
+split = 850
+output_classes = 13
+
+
 print("The training data path is ", training_data_path)
 
 raw_data, labels = h5.read_training_data(training_data_path,
                                          label_name=label_name)
-print("labels shape", labels.shape)
 
 print("Initial unique labels", np.unique(labels))
-
-view_data = False
-
-if view_data:
-    view_images_h5(data_path=training_data_path, img_range=(5, 10))
-else:
-    print(
-        "The data viewer is deactivated, to activate it set view_data to True")
 
 # Normalize data
 preprocessed_data = preprocess_data(raw_data)
 
-# add a channel dimension
-preprocessed_data = np.array(preprocessed_data)[:, None]
-labels = np.array(labels)[:, None]
+# add channel dimension only to input data
+# preprocessed_data = np.array(preprocessed_data)[:, None]
+labels = np.array(labels, dtype=np.long)
 
 train_data, train_labels, val_data, val_labels, data_order = \
     split_dataset(preprocessed_data, labels, split)
 
-# print(data_order)
+train_data = train_data[:, None]
+val_data = val_data[:, None]
+
+print("train_data.shape", train_data.shape)
+print("train_labels.shape", train_labels.shape)
 
 # wrap into datasets
 train_set = du.TensorDataset(torch.from_numpy(train_data),
@@ -99,65 +91,58 @@ train_loader = du.DataLoader(train_set, shuffle=False,  # we shuffle before
 val_loader = du.DataLoader(val_set, batch_size=5)
 
 for test_index in range(1):
-    # train the neural network
-    # net = UNet_deep(1, 1, final_activation=nn.Sigmoid())
-    # net = UNet_7(1, 1, final_activation=nn.Sigmoid())
-    # net = UNet(1, 1, final_activation=nn.Sigmoid())
-    # net = UNet_test(1, 1, final_activation=nn.Sigmoid())
+    net_confs = [
+        {'final_activation': nn.LogSoftmax(dim=1),
+         'depth': 2,
+         'initial_features': 8,
+         "out_channels": output_classes},
+        {'final_activation': nn.LogSoftmax(dim=1),
+         'depth': 3,
+         'initial_features': 8,
+         "out_channels": output_classes},
+        {'final_activation': nn.LogSoftmax(dim=1),
+         'depth': 2,
+         'initial_features': 16,
+         "out_channels": output_classes},
+        {'final_activation': nn.LogSoftmax(dim=1),
+         'depth': 3,
+         'initial_features': 16,
+         "out_channels": output_classes},
+    ]
 
-    # Multi class:
-    # net = UNetGN(in_channel=1, out_channel=13,
-    #              final_activation=nn.LogSoftmax(dim=1))
-
-
-    net_confs = [{'depth': 5, 'initial_features': 4, 'final_activation': nn.Sigmoid()},
-                 # {'depth': 5, 'initial_features': 4},
-                 # {'depth': 5, 'initial_features': 8},
-                 # {'depth': 5, 'initial_features': 16}
-                 ]
-    is_best = True
-    validation_loss = 10
     for conf in net_confs:
         net = UNet(**conf)
         net = net.to(device)
-
-        # built binary cross without weighting and adam optimizer
-        # loss = BCELoss()
-        loss = DiceCoefficientLoss()
+        weight = [1 for n in range(output_classes)]
+        weight[0] = 0.01  # background
+        weight_tensor = torch.tensor(weight).to(device)
+        loss = nn.NLLLoss(weight=weight_tensor)
         loss = loss.to(device)
         optimizer = optim.Adam(net.parameters())
 
         # build the dice coefficient metric
-        metric = DiceCoefficient()
-        metric = metric.to(device)
+        metric = loss
+        # metric = metric.to(device)
 
         # built tensorboard logger
-        model_name = str(
-            test_index) + \
-                     '_UNet_data_aug_sigmoid' + \
-                     "d_" + str(conf['depth']) + \
-                     "_ifeat_" + str(conf['initial_features']) + "_"
-        model_name_pkl = model_name + ".pkl"
-        log_dir = join('deepUNet_logs/', model_name)
-        model_path = join("./models/", model_name_pkl)
-        logger = TensorBoard(log_dir=log_dir, log_image_interval=1)
+        model_name = "Unet_all_parts_differentiated_0_" + label_name + "_D_" + \
+                     str(conf['depth']) + "_IF_" + \
+                     str(conf['initial_features'])
+        log_dir = join('shrec_non_sph_logs/', model_name)
+        logger = TensorBoard_multiclass(log_dir=log_dir, log_image_interval=1)
         print("The neural network training is now starting")
-        n_epochs = 30
+        n_epochs = 200
         for epoch in range(n_epochs):
             # apply training for one epoch
-            train_float(net, train_loader, optimizer=optimizer, loss_function=loss,
+            train(net, train_loader, optimizer=optimizer, loss_function=loss,
                   epoch=epoch, device=device, log_interval=1, tb_logger=logger)
             step = epoch * len(train_loader.dataset)
             # run validation after training epoch
-            current_validation_loss = validate_float(net, val_loader, loss, metric,
-                                               device=device, step=step,
-                                               tb_logger=logger)
-
-            if current_validation_loss < validation_loss:
-                torch.save(net.state_dict(), model_path)
-                validation_loss = current_validation_loss
-            else:
-                print("this model was not the best")
+            validate(net, val_loader, loss, metric, device=device, step=step,
+                     tb_logger=logger)
+        model_name_pkl = model_name + ".pkl"
+        model_path = join("./models/multi-class/", model_name_pkl)
+        torch.save(net.state_dict(), model_path)
 
         model_name_txt = model_name + ".txt"
         data_txt_path = join("./models", model_name_txt)

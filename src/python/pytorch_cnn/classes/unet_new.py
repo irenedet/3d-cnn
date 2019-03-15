@@ -106,3 +106,16 @@ class UNet(nn.Module):
             x = self.activation(x)
         return x
 
+
+class UNetGN(UNet):
+    def _conv_block(self, in_channels, out_channels):
+        n_groups1 = min(32, in_channels)
+        n_groups2 = min(32, out_channels)
+        return nn.Sequential(nn.GroupNorm(n_groups1, in_channels),
+                             nn.Conv3d(in_channels, out_channels,
+                                       kernel_size=3, padding=1),
+                             nn.ReLU(),
+                             nn.GroupNorm(n_groups2, out_channels),
+                             nn.Conv3d(out_channels, out_channels,
+                                       kernel_size=3, padding=1),
+                             nn.ReLU())

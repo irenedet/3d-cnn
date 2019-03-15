@@ -7,17 +7,33 @@ from src.python.filewriters.h5 import write_subtomograms_from_dataset, \
     write_joint_raw_and_labels_subtomograms
 
 
-def split_dataset(data: np.array, labels: np.array, split: int) -> tuple:
+def split_dataset(data: np.array, labels: np.array, split: int,
+                  shuffle=True) -> tuple:
     data = list(data)
     labels = list(labels)
     data_order = list(range(len(data)))
     combined = list(zip(data, labels, data_order))
-    random.shuffle(combined)
+    if shuffle:
+        random.shuffle(combined)
+    else:
+        print("Splitting sets without shuffling")
     data[:], labels[:], data_order = zip(*combined)
     data = np.array(data)
     labels = np.array(labels)
-    train_data, train_labels = data[:split], labels[:split]
-    val_data, val_labels = data[split:], labels[split:]
+    if isinstance(split, int):
+        train_data, train_labels = data[:split], labels[:split]
+        val_data, val_labels = data[split:], labels[split:]
+    elif isinstance(split, tuple):
+        assert len(split) == 2
+        train_data0, train_labels0 = data[:split[0]], labels[:split[0]]
+        train_data1, train_labels1 = data[split[1]:], labels[split[1]:]
+        train_data = np.concatenate((train_data0, train_data1), axis=0)
+        train_labels = np.concatenate((train_labels0, train_labels1), axis=0)
+
+        val_data, val_labels = data[split[0]:split[1]], labels[
+                                                        split[0]:split[1]]
+    else:
+        print("split should be an integer or a tuple of integers")
     print("Shape of training data:", train_data.shape)
     print("Shape of validation data", val_data.shape)
     return train_data, train_labels, val_data, val_labels, data_order
@@ -79,7 +95,6 @@ def partition_raw_and_labels_tomograms(raw_dataset: np.array,
         label_name=label_name,
         window_centers=padded_particles_coordinates,
         crop_shape=subtomo_shape)
-
 
 # def partition_tomograms(dataset: np.array,
 #                         label_name: str,

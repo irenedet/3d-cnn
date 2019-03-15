@@ -1,5 +1,7 @@
 import re
 import numpy as np
+import h5py
+from src.python.naming import h5_internal_paths
 
 
 def get_coord_from_name(subtomo_name):
@@ -50,3 +52,8 @@ def get_particle_coordinates_grid(dataset_shape, shape_to_crop_zyx):
                     np.array(shape_to_crop_zyx) * np.array([z, y, x])
                     + np.array(shape_to_crop_zyx) // 2]
     return particle_coordinates
+
+
+def read_subtomo_names(subtomo_file_path):
+    with h5py.File(subtomo_file_path, 'r') as f:
+        return list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])

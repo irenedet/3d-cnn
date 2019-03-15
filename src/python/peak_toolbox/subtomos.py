@@ -5,6 +5,9 @@ from functools import reduce
 from src.python.coordinates_toolbox import subtomos
 from src.python.naming import h5_internal_paths
 from src.python.peak_toolbox.utils import extract_peaks
+from src.python.coordinates_toolbox.subtomos import read_subtomo_names
+from src.python.coordinates_toolbox.subtomos import get_coord_from_name, \
+    get_subtomo_corners
 
 
 def _get_numb_peaks(subtomo_shape: tuple, min_peak_distance: int) -> int:
@@ -30,7 +33,8 @@ def _extract_data_subtomo(h5file: h5py.File,  # before h5py._hl.files.File
            overlap:subtomo_side_lengths[2] + overlap]
 
 
-def _get_subtomo_corner_and_side_lengths(subtomo_name: str, subtomo_shape: tuple,
+def _get_subtomo_corner_and_side_lengths(subtomo_name: str,
+                                         subtomo_shape: tuple,
                                          output_shape: tuple) -> tuple:
     subtomo_center = subtomos.get_coord_from_name(subtomo_name)
     init_points, _, subtomo_side_lengths = \
@@ -107,12 +111,11 @@ def _get_peaks_per_subtomo_with_overlap(h5file: h5py.File, subtomo_name: str,
                                         numb_peaks: int,
                                         min_peak_distance: int,
                                         overlap: int) -> tuple:
-
     subtomo_corner, subtomo_side_lengths, zero_padding = \
         _get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name,
                                                           subtomo_shape,
                                                           output_shape,
-                                                          overlap // 2)#ToDo check if this works well
+                                                          overlap // 2)
 
     subtomo_h5_internal_path = join(subtomos_internal_path,
                                     subtomo_name)
@@ -222,3 +225,153 @@ def get_peaks_from_subtomograms_with_overlap(subtomo_file_path: str,
             list_of_maxima += subtomo_list_of_maxima
             list_of_maxima_coords += shifted_subtomo_maxima_coords
     return list_of_maxima, list_of_maxima_coords
+
+
+def _filter_coordinates_per_subtomo(coordinates, subtomo_corners_init,
+                                    subtomo_corners_end, shift_z):
+    # print("subtomo_corners_init", subtomo_corners_init)
+    # print("subtomo_corners_end", subtomo_corners_end)
+    subtomo_corners_init_xyz = list(reversed(subtomo_corners_init))
+    subtomo_corners_end_xyz = list(reversed(subtomo_corners_end))
+    subtomo_corners_init_xyz = np.array(subtomo_corners_init_xyz) + np.array(
+        [0, 0, shift_z])
+    subtomo_corners_end_xyz = np.array(subtomo_corners_end_xyz) + np.array(
+        [0, 0, shift_z])  # hasta aca bien!
+
+    # print("subtomo", subtomo_corners_init_xyz, subtomo_corners_end_xyz)
+    selected_coordinates = []
+    discarded_coordinates = []
+    for point in coordinates:
+        is_in_subtomo = all(p >= c_init and p <= c_end for p, c_init, c_end in
+                            zip(point, subtomo_corners_init_xyz,
+                                subtomo_corners_end_xyz))
+        if is_in_subtomo:
+            selected_coordinates += [point]
+        else:
+            discarded_coordinates += [point]
+            print("discarded!")
+    return selected_coordinates, discarded_coordinates
+
+
+def filter_test_coordinates(coordinates: list, subtomo_file_path: str,
+                            split: int, dataset_shape: tuple,
+                            subtomo_shape: tuple, shift: int):
+    subtomo_names = read_subtomo_names(subtomo_file_path)
+    test_coordinates = []
+    train_coordinates = []
+    for subtomo_name in subtomo_names[split:]:
+        subtomo_center = get_coord_from_name(subtomo_name)
+        subtomo_corners_init, subtomo_corners_end, _ = get_subtomo_corners(
+            output_shape=dataset_shape, subtomo_shape=subtomo_shape,
+            subtomo_center=subtomo_center)
+        filtered_coordinates, discarded_coordinates = \
+            _filter_coordinates_per_subtomo(coordinates,
+                                            subtomo_corners_init,
+                                            subtomo_corners_end,
+                                            shift)
+        test_coordinates += filtered_coordinates
+        train_coordinates += discarded_coordinates
+    return test_coordinates, train_coordinates
+
+
+def _get_subtomo_coorners(subtomo_corners_init: list, subtomo_corners_end: list,
+                          shift_z: int):
+    subtomo_corners_init_xyz = list(reversed(subtomo_corners_init))
+    subtomo_corners_end_xyz = list(reversed(subtomo_corners_end))
+    subtomo_corners_init_xyz = np.array(subtomo_corners_init_xyz) + np.array(
+        [0, 0, shift_z])
+    subtomo_corners_end_xyz = np.array(subtomo_corners_end_xyz) + np.array(
+        [0, 0, shift_z])
+    return subtomo_corners_init_xyz, subtomo_corners_end_xyz
+
+
+def _get_subtomo_corners_from_split(subtomo_names: list, split: int,
+                                    subtomo_shape: tuple, dataset_shape: tuple,
+                                    shift: int):
+    subtomos_corners = []
+    for subtomo_name in subtomo_names[split:]:
+        subtomo_center = get_coord_from_name(subtomo_name)
+        subtomo_corners_init, subtomo_corners_end, _ = get_subtomo_corners(
+            output_shape=dataset_shape, subtomo_shape=subtomo_shape,
+            subtomo_center=subtomo_center)
+        corners = _get_subtomo_coorners(subtomo_corners_init,
+                                        subtomo_corners_end, shift)
+        subtomos_corners += [corners]
+    return subtomos_corners
+
+
+def _check_point_in_subtomo(corners: tuple, point: list):
+    subtomo_corners_init_xyz, subtomo_corners_end_xyz = corners
+    is_in_subtomo = all(
+        p >= c_init and p <= c_end for p, c_init, c_end in
+        zip(point, subtomo_corners_init_xyz,
+            subtomo_corners_end_xyz))
+    return is_in_subtomo
+
+
+def select_coordinates_in_subtomos(coordinates: list, subtomo_file_path: str,
+                                   split: int,
+                                   data_order, dataset_shape: tuple,
+                                   subtomo_shape: tuple,
+                                   shift: int):
+    subtomo_names = read_subtomo_names(subtomo_file_path)
+    if isinstance(data_order, str):
+        print("Keeping data order from the h5 file.")
+        subtomo_names_reordered = subtomo_names
+    else:
+        subtomo_names_reordered = [subtomo_names[i] for i in data_order]
+
+    subtomos_corners = _get_subtomo_corners_from_split(subtomo_names_reordered,
+                                                       split,
+                                                       subtomo_shape,
+                                                       dataset_shape, shift)
+    selected_coordinates = []
+    discarded_coordinates = []
+    for point in coordinates:
+        flag = "undetected"
+        for corners in subtomos_corners:
+            is_in_subtomo = _check_point_in_subtomo(corners, point)
+            if is_in_subtomo and flag == "undetected":
+                selected_coordinates += [point]
+                flag = "detected"
+        if flag == "undetected":
+            discarded_coordinates += [point]
+    return selected_coordinates, discarded_coordinates
+
+
+def select_coordinates_and_values_in_subtomos(coordinates: list,
+                                              values: list,
+                                              subtomo_file_path: str,
+                                              split: int,
+                                              data_order,
+                                              dataset_shape: tuple,
+                                              subtomo_shape: tuple,
+                                              shift: int):
+    subtomo_names = read_subtomo_names(subtomo_file_path)
+    if isinstance(data_order, str):
+        print("Keeping data order from the h5 file.")
+        subtomo_names_reordered = subtomo_names
+    else:
+        subtomo_names_reordered = [subtomo_names[i] for i in data_order]
+    subtomos_corners = _get_subtomo_corners_from_split(subtomo_names_reordered,
+                                                       split,
+                                                       subtomo_shape,
+                                                       dataset_shape,
+                                                       shift)
+    selected_coordinates = []
+    selected_coordinates_values = []
+    discarded_coordinates = []
+    discarded_coordinates_values = []
+    for value, point in zip(values, coordinates):
+        flag = "undetected"
+        for corners in subtomos_corners:
+            is_in_subtomo = _check_point_in_subtomo(corners, point)
+            if is_in_subtomo and flag == "undetected":
+                selected_coordinates += [point]
+                selected_coordinates_values += [value]
+                flag = "detected"
+        if flag == "undetected":
+            discarded_coordinates += [point]
+            discarded_coordinates_values += [value]
+    return selected_coordinates, discarded_coordinates, \
+           selected_coordinates_values, discarded_coordinates_values

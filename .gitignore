@@ -1,3 +1,10 @@
+Notes/
+data_aug_good_logs/
+data_aug_logs/
+dummy.py
+shrec_logs/
+shrec_non_sph_logs/
+shrec_sph_logs_old/
 add_path.sh
 test.sh
 runners/mini_test.py
