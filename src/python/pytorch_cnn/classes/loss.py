@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from tensors.actions import crop_tensor
+from src.python.tensors.actions import crop_tensor
 
 
 class BCELoss(nn.Module):
@@ -123,6 +123,25 @@ class DiceCoefficientLoss(nn.Module):
     # the dice coefficient of two sets represented as vectors a, b ca be
     # computed as (2 *|a b| / (a^2 + b^2))
     def forward(self, prediction, target):
+        prediction.float()
+        target.float()
         intersection = (prediction * target).sum()
         denominator = (prediction * prediction).sum() + (target * target).sum()
         return 1 - (2 * intersection / denominator.clamp(min=self.eps))
+
+
+# class NLLLoss(nn.Module):
+#     def __init__(self, class_weights=None):
+#         super().__init__()
+#         self.loss = nn.NLLLoss(weight=class_weights)
+#
+#     def forward(self, prediction, target):
+# #        prediction.float()
+        # target.long()
+        # assert prediction.shape[0] == target.shape[0]
+        # print("len(target.shape)", len(target.shape))
+        # print("len(prediction.shape)", len(prediction.shape))
+        # assert len(target.shape) == len(prediction.shape) - 1
+#        # target = crop_tensor(target, prediction.shape)
+#        # target = target[:, None]
+        # return self.loss(prediction, target.long())

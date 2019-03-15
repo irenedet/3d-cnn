@@ -1,18 +1,19 @@
 import csv
 import numpy as np
 
-particle_dict = {'4b4t': 1,
-                 '2cg9': 2,
-                 '3d2f': 3,
-                 '3h84': 4,
-                 '3cf3': 5,
-                 '1u6g': 6,
-                 '3gl1': 7,
-                 '4d8q': 8,
-                 '1s3x': 9,
+particle_dict = {'3qm1': 1,
+                 '1s3x': 2,
+                 '3h84': 3,
+                 '3gl1': 4,
+                 '2cg9': 5,
+                 '3d2f': 6,
+                 '1u6g': 7,
+                 '3cf3': 8,
+                 '1bxn': 9,
                  '1qvr': 10,
-                 '1bxn': 11,
-                 '3qm1': 12}
+                 '4b4t': 11,
+                 '4d8q': 12,
+                 }
 
 
 def read_shrec_motl(path_to_motl: str):

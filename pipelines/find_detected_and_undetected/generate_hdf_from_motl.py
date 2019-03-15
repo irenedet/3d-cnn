@@ -9,15 +9,29 @@ parser.add_argument("-motl", "--path_to_motl",
 parser.add_argument("-output", "--output_dir",
                     help="directory where the outputs will be stored",
                     type=str)
+parser.add_argument("-radius", "--sphere_radius",
+                    type=int)
+parser.add_argument("-z_shift", "--output_z_shift",
+                    type=int)
+parser.add_argument("-shape_x", "--output_shape_x",
+                    type=int)
+parser.add_argument("-shape_y", "--output_shape_y",
+                    type=int)
+parser.add_argument("-shape_z", "--output_shape_z",
+                    type=int)
 
 args = parser.parse_args()
 path_to_motl = args.path_to_motl
 output_dir = args.output_dir
+shape_x = args.output_shape_x
+shape_y = args.output_shape_y
+shape_z = args.output_shape_z
+z_shift = args.output_z_shift
+radius = args.sphere_radius
 
 # path_to_motl = "/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/006/TM/motl_clean_4b.em"
 # path_to_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/from_004_training/confs_4_5_/motl_1315.csv"
-path_to_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_4_5_bis_/detected/motl_1027.csv"
-output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_4_5_bis_/detected/"
+# path_to_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_4_5_bis_/detected/motl_1027.csv"
 
 # path_to_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/confs_4_5_bis_/motl_4623.csv"
 # output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/confs_4_5_bis_/"
@@ -26,16 +40,16 @@ output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_4_5_bis_/de
 # output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_16_5_bis_/"
 
 makedirs(name=output_dir, exist_ok=True)
-hdf_output_path = join(output_dir, "true_positives_ribos_mask.hdf")
-z_shift = -330  # shift between original tomogram and subtomogram of analysis
-output_shape = (321, 927, 927)
+hdf_output_path = join(output_dir, "particles_mask.hdf")
+# z_shift = -330  # shift between original tomogram and subtomogram of analysis
+output_shape = (shape_z, shape_y, shape_x)
 
 from src.python.filewriters.h5 import write_hdf_particles_from_motl
 
 write_hdf_particles_from_motl(path_to_motl=path_to_motl,
                               hdf_output_path=hdf_output_path,
                               output_shape=output_shape,
-                              sphere_radius=12,
+                              sphere_radius=radius,
                               values_in_motl=True,
                               number_of_particles=None,
                               z_shift=z_shift)
