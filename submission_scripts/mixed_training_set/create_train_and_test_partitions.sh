@@ -10,34 +10,34 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=irene.de.teresa@embl.de
 
-#export path_to_raw="/scratch/trueba/cnn/004/4bin/cnn/rawtomogram/180426_004_4bin.hdf"
-#export path_to_labeled="/scratch/trueba/cnn/004/4bin/cnn/centralregion_004.hdf"
-#export output_dir="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/004"
+#export path_to_raw="/scratch/trueba/3d-cnn/clean/180426_004/subtomo380-600.hdf"
+#export path_to_labeled="/scratch/trueba/3d-cnn/clean/180426_004/clean_mask.hdf"
+#export output_dir="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/004/G_sigma1"
 #export shape_x=928
 #export shape_y=928
 #export shape_z=221
 
 #export path_to_raw="/scratch/trueba/3d-cnn/clean/180426_005/subtomo370-620.hdf"
 #export path_to_labeled="/scratch/trueba/3d-cnn/clean/180426_005/4b_ribos_mask.hdf"
-#export output_dir="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/005"
+#export output_dir="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/005/G_sigma1"
 #export shape_x=928
 #export shape_y=928
 #export shape_z=251
 
 export path_to_raw="/scratch/trueba/3d-cnn/clean/180426_006/subtomo330-650.hdf"
 export path_to_labeled="/scratch/trueba/3d-cnn/clean/180426_006/4b_ribos_mask.hdf"
-export output_dir="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/006"
+export output_dir="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/006/G_sigma1/"
 export shape_x=928
 export shape_y=928
 export shape_z=321
 
 export label_name="ribosomes"
-export split=130  # Between partitions of testing and training data
+export split=90  # Between partitions of testing and training data
 export box_side=128
 
 # For data augmentation:
 export number_iter=6
-export train_split=110  # within training data for nnet training & data aug
+export train_split=77  # within training data for nnet training & data aug
 export overlap=12
 
 
