@@ -375,7 +375,7 @@ def transform_data(raw_data: np.array, labeled_data: np.array,
         # transformed_raw = transformed_raw[None, :]
         # transformed_labeled = transformed_labeled[None, :]
 
-        sigma = 1.5*np.random.random()
+        sigma = np.random.random()
         transform = AdditiveGaussianNoise(sigma=sigma)
         # transformed_raw = transform(transformed_raw)
         transformed_raw = transform(raw_data)

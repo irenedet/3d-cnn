@@ -145,7 +145,7 @@ for test_index in range(1):
         torch.save(net.state_dict(), model_path)
 
         model_name_txt = model_name + ".txt"
-        data_txt_path = join("./models", model_name_txt)
+        data_txt_path = join("./models/multi-class/", model_name_txt)
         with open(data_txt_path, 'w') as txt_file:
             txt_file.write("training_data_path = " + training_data_path)
             txt_file.write("\n")
