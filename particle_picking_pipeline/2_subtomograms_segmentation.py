@@ -8,9 +8,6 @@ from src.python.filewriters.h5 import segment_and_write
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("-output", "--output_h5file",
-                    help="directory where the outputs will be stored",
-                    type=str)
 parser.add_argument("-model", "--path_to_model",
                     help="path to already trained net in .pkl format",
                     type=str)

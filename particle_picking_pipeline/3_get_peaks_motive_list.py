@@ -3,6 +3,7 @@ sys.path.insert(0, '/g/scb2/zaugg/trueba/3d-cnn/src')
 print(sys.path)
 import numpy as np
 import argparse
+from os import makedirs
 
 from src.python.filewriters.csv import \
     write_global_motl_from_overlapping_subtomograms
@@ -56,7 +57,7 @@ z_shift = args.z_shift_original
 
 subtomo_shape = tuple(box_side * np.array([1, 1, 1]))
 output_shape = (output_zdim, output_ydim, output_xdim)
-
+makedirs(name=output_dir, exist_ok=True)
 # Future local parameters:
 subtomo_peaks_number = 40
 number_peaks_uniquify = 7000

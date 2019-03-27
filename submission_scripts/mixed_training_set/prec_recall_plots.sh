@@ -16,33 +16,33 @@
 #echo 'starting virtual environment'
 #source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
 
-export output_dir="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/006/train_and_test_partitions/shuffle/NA_confs_4_5_"
-export path_to_motl_clean='/scratch/trueba/3d-cnn/clean/180426_006/motl_clean_4b.em'
-export path_to_csv_motl=$(ls $output_dir/motl*)
-export testing_set_data_path="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/006/train_and_test_partitions/test_partition.h5"
-export radius=8
-export z_shift=330  # shift between original tomogram and subtomogram of analysis
-export x_shift=0
-export shape_x=927
-export shape_y=927
-export shape_z=321
-export box=128
-
-#export output_dir="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/004/train_and_test_partitions/NA_confs_4_5_"
-#export path_to_motl_clean='/scratch/trueba/cnn/004/4bin/cnn/motl_clean_4b.em'
-#export path_to_csv_motl=$(ls $output_dir/motl*)
-#export testing_set_data_path="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/004/train_and_test_partitions/test_partition.h5"
+#export output_dir="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/006/train_and_test_partitions/shuffle/G1-5_confs_4_5_"
+#export path_to_motl_clean='/scratch/trueba/3d-cnn/clean/180426_006/motl_clean_4b.em'
+#export path_to_csv_motl=$(ls $output_dir/motl*.csv)
+#export testing_set_data_path="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/006/train_and_test_partitions/test_partition.h5"
 #export radius=8
-#export z_shift=380  # shift between original tomogram and subtomogram of analysis
+#export z_shift=330  # shift between original tomogram and subtomogram of analysis
 #export x_shift=0
 #export shape_x=927
 #export shape_y=927
-#export shape_z=221
+#export shape_z=321
 #export box=128
 
-#export output_dir="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/005/train_and_test_partitions/G1_confs_4_5_"
+export output_dir="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/004/train_and_test_partitions/shuffle/G1-5_confs_4_5_"
+export path_to_motl_clean='/scratch/trueba/cnn/004/4bin/cnn/motl_clean_4b.em'
+export path_to_csv_motl=$(ls $output_dir/motl*.csv)
+export testing_set_data_path="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/004/train_and_test_partitions/test_partition.h5"
+export radius=8
+export z_shift=380  # shift between original tomogram and subtomogram of analysis
+export x_shift=0
+export shape_x=927
+export shape_y=927
+export shape_z=221
+export box=128
+
+#export output_dir="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/005/train_and_test_partitions/shuffle/G1-5_confs_4_5_"
 #export path_to_motl_clean='/scratch/trueba/3d-cnn/clean/180426_005/motl_clean_4b.em'
-#export path_to_csv_motl=$(ls $output_dir/motl*)
+#export path_to_csv_motl=$(ls $output_dir/motl*.csv)
 #export testing_set_data_path="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/005/train_and_test_partitions/test_partition.h5"
 #export radius=8
 #export z_shift=370  # shift between original tomogram and subtomogram of analysis

@@ -58,14 +58,10 @@ box = args.subtomo_box_length
 
 print("path_to_csv_motl = ", path_to_csv_motl)
 print("output_dir = ", output_dir)
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/gaussian_aug/confs_4_5_/motl_4470.csv"
-# path_to_motl_clean = '/home/papalotl/Sara_Goetz/180426/004/motl_clean_4b.em'
-# testing_set_data_path = \
-#     "/scratch/trueba/3d-cnn/training_data/TEST/ribo_training.h5"
-# z_shift = 380
-# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/gaussian_aug/confs_4_5_/"
+print("testing_set_data_path = ", testing_set_data_path)
 
-top_peaks = 5000
+#ToDo add these as input parameters for user:
+# top_peaks = 6000
 training_split = 0
 dataset_shape = (shape_z, shape_y, shape_x)
 overlap = 12
@@ -81,8 +77,8 @@ true_coordinates = extract_coordinates_from_em_motl(motl_true)
 print("len(true_coordinates) = ", len(true_coordinates))
 
 predicted_coordinates = [np.array([row[7], row[8], row[9]]) for row in
-                         motl_predicted[:top_peaks]]
-motl_values = [row[0] for row in motl_predicted[:top_peaks]]
+                         motl_predicted]
+motl_values = [row[0] for row in motl_predicted]
 del motl_predicted
 unique_peaks_number = len(motl_values)
 
@@ -250,7 +246,7 @@ pr_legend_str = "auPRC = " + str(round(auPRC, 4))
 f1_legend_str = "(max_F1, best_peaks) = (" + str(
     round(max_F1, 4)) + ", " + str(
     optimal_peak_number) + ")"
-title_str = str(top_peaks) + " peaks"
+title_str = str(len(predicted_coordinates_test)) + " peaks"
 plt.figure(5)
 plt.plot(F1_score, label=f1_legend_str)
 plt.xlabel("number of peaks")

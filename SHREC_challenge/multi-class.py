@@ -50,10 +50,10 @@ print("*************************************")
 device = get_device()
 
 training_data_path = \
-    "/scratch/trueba/shrec/0_real_masks/training_sets/all_particles_differentiated_training.h5"
+    "/scratch/trueba/shrec/0_sph_masks/training_sets/top5_differentiated_training.h5"
 label_name = "all_particles"
 split = 850
-output_classes = 13
+output_classes = 6
 
 
 print("The training data path is ", training_data_path)
@@ -125,10 +125,10 @@ for test_index in range(1):
         # metric = metric.to(device)
 
         # built tensorboard logger
-        model_name = "Unet_all_parts_differentiated_0_" + label_name + "_D_" + \
+        model_name = "Unet_top5_diff_sph_adjusted_radius_" + label_name + "_D_" + \
                      str(conf['depth']) + "_IF_" + \
                      str(conf['initial_features'])
-        log_dir = join('shrec_non_sph_logs/', model_name)
+        log_dir = join('shrec_sph_logs/', model_name)
         logger = TensorBoard_multiclass(log_dir=log_dir, log_image_interval=1)
         print("The neural network training is now starting")
         n_epochs = 200
@@ -141,11 +141,11 @@ for test_index in range(1):
             validate(net, val_loader, loss, metric, device=device, step=step,
                      tb_logger=logger)
         model_name_pkl = model_name + ".pkl"
-        model_path = join("./models/multi-class/", model_name_pkl)
+        model_path = join("./shrec_models/multi-class", model_name_pkl)
         torch.save(net.state_dict(), model_path)
 
         model_name_txt = model_name + ".txt"
-        data_txt_path = join("./models/multi-class/", model_name_txt)
+        data_txt_path = join("./shrec_models/multi-class/", model_name_txt)
         with open(data_txt_path, 'w') as txt_file:
             txt_file.write("training_data_path = " + training_data_path)
             txt_file.write("\n")

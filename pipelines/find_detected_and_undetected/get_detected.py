@@ -1,5 +1,6 @@
 from os.path import join
 from os import makedirs
+import numpy as np
 
 from src.python.calculator.statistics import \
     precision_recall_calculator_and_detected
@@ -9,6 +10,7 @@ from src.python.filereaders.csv import read_motl_from_csv
 from src.python.filereaders.em import load_em_motl
 from src.python.peak_toolbox.utils import \
     extract_motl_coordinates_and_score_values
+from src.python.filewriters.csv import unique_coordinates_motl_writer
 
 import argparse
 
@@ -22,22 +24,20 @@ parser.add_argument("-clean", "--path_to_motl_clean",
 parser.add_argument("-output", "--output_dir",
                     help="directory where the outputs will be stored",
                     type=str)
-parser.add_argument("-radius", "--sphere_radius",
+parser.add_argument("-min_peak_distance", "--min_peak_distance",
                     type=int)
 parser.add_argument("-label", "--label_name",
                     type=str)
+parser.add_argument("-x_shift", "--x_shift",
+                    type=int)
 
 args = parser.parse_args()
 path_to_csv_motl = args.path_to_csv_motl
 path_to_motl_clean = args.path_to_motl_clean
 output_dir = args.output_dir
-radius = args.sphere_radius
+min_peak_distance = args.min_peak_distance
 label_name = args.label_name
-
-# label_name = "ribosomes"
-# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_4_5_bis_/"
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_4_5_bis_/motl_4896.csv"
-# path_to_motl_clean = '/scratch/trueba/3d-cnn/clean/180426_006/motl_clean_4b.em'
+x_shift = args.x_shift
 
 figures_dir = join(output_dir, "figures")
 makedirs(name=figures_dir, exist_ok=True)
@@ -49,6 +49,9 @@ motl_predicted = read_motl_from_csv(path_to_csv_motl)
 motl_values, motl_coordinates = extract_motl_coordinates_and_score_values(
     motl_predicted)
 del motl_predicted
+#Todo change for 005
+motl_coordinates = [point + np.array([x_shift, 0, 0]) for point in
+                    motl_coordinates]
 
 precision, recall, detected_true, detected_predicted, undetected_predicted, \
 value_detected_predicted, value_undetected_predicted = \
@@ -56,25 +59,33 @@ value_detected_predicted, value_undetected_predicted = \
         motl_coordinates,
         motl_values,
         motl_clean_coords,
-        radius=radius)
+        radius=min_peak_distance)
+
+print("len(detected_predicted)", len(detected_predicted))
+print("len(undetected_predicted)", len(undetected_predicted))
+#Todo change for 005
+detected_predicted = [np.array(point) + np.array([-x_shift, 0, 0]) for point in
+                      detected_predicted]
+undetected_predicted = [np.array(point) + np.array([-x_shift, 0, 0]) for point
+                        in undetected_predicted]
 
 # detected_predicted = [np.array(point) for point in detected_predicted]
 # undetected_predicted = [np.array(point) for point in undetected_predicted]
 
-from src.python.filewriters.csv import unique_coordinates_motl_writer
+
 
 detected_output_folder = join(output_dir, "detected")
 makedirs(name=detected_output_folder, exist_ok=True)
 unique_coordinates_motl_writer(path_to_output_folder=detected_output_folder,
                                list_of_peak_scores=value_detected_predicted,
                                list_of_peak_coords=detected_predicted,
-                               number_peaks_to_uniquify=5000,
-                               minimum_peaks_distance=radius)
+                               number_peaks_to_uniquify=-1,
+                               minimum_peaks_distance=min_peak_distance)
 
 undetected_output_folder = join(output_dir, "undetected")
 makedirs(name=undetected_output_folder, exist_ok=True)
 unique_coordinates_motl_writer(path_to_output_folder=undetected_output_folder,
                                list_of_peak_scores=value_undetected_predicted,
                                list_of_peak_coords=undetected_predicted,
-                               number_peaks_to_uniquify=5000,
-                               minimum_peaks_distance=radius)
+                               number_peaks_to_uniquify=-1,
+                               minimum_peaks_distance=min_peak_distance)

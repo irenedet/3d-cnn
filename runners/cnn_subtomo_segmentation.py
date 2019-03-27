@@ -19,8 +19,7 @@ label_name = "all_particles"
 
 # data_path = "/scratch/trueba/3d-cnn/TEST/004_in_subtomos_128side_with_overlap.h5"
 # model_path = "/g/scb2/zaugg/trueba/3d-cnn/models/0_lay_6_len_128_32_DiceLoss_ELUactiv_2ndtry.pkl"
-# model = UNet_6(1, 1, final_activation=nn.ELU()) #ToDo automate this step
-# model = UNet(**kwargs??)
+# model = UNet_6(1, 1, final_activation=nn.ELU())
 
 # load pre trained model
 # model_dir = "/g/scb2/zaugg/trueba/3d-cnn/models"
