@@ -6,11 +6,11 @@ from src.python.datasets.transformations import transform_data_from_h5
 
 path_to_raw = "/scratch/trueba/shrec/0/reconstruction_model_0.hdf"
 # path_to_labeled = "/struct/mahamid/Irene/shrec/0/all_classes_differentiated_mask_0.hdf"
-path_to_labeled = "/struct/mahamid/Irene/shrec/0/all_classes_foreground_mask_0.hdf"
+path_to_labeled = "/scratch/trueba/shrec/0_sph_masks/all_particles_foreground.hdf"
 
-output_dir = "/scratch/trueba/shrec/0_real_masks/training_sets/"
+output_dir = "/scratch/trueba/shrec/0_sph_masks/training_sets/"
 makedirs(name=output_dir, exist_ok=True)
-output_h5_file_name = "all_particles_foreground_training.h5"
+output_h5_file_name = "all_foreground_training.h5"
 output_h5_file_path = join(output_dir, output_h5_file_name)
 
 output_shape = (512, 512, 512)

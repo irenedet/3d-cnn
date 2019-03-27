@@ -8,7 +8,7 @@ import numpy as np
 
 from src.python.filereaders.csv import read_motl_from_csv
 from src.python.filereaders.em import load_em_motl
-from src.python.filereaders.txt import read_shrec_motl
+from src.python.filereaders.shrec import read_shrec_motl
 from src.python.coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl, extract_coordinates_from_txt_shrec
 from src.python.peak_toolbox.utils import paste_sphere_in_dataset
@@ -17,6 +17,7 @@ from src.python.naming import h5_internal_paths
 from src.python.coordinates_toolbox import subtomos
 from src.python.tensors.actions import crop_window_around_point
 from src.python.pytorch_cnn.classes.unet_new import UNet
+from src.python.filereaders.shrec import particle_dict
 
 
 def write_dataset_hdf(output_path: str, tomo_data: np.array):
@@ -95,6 +96,7 @@ def write_dataset_from_subtomos_with_overlap_multiclass(output_path,
                                                         output_shape,
                                                         subtomo_shape,
                                                         subtomos_internal_path,
+                                                        class_number,
                                                         overlap):
     output_shape_with_overlap = output_shape  # [dim + overlap_thickness for
     # dim in
@@ -119,8 +121,9 @@ def write_dataset_from_subtomos_with_overlap_multiclass(output_path,
             channels = f[subtomo_h5_internal_path][:].shape[0]
             internal_subtomo_data = np.zeros(lengths)
             if channels > 1:
+                # ToDo: define if we want this to plot only one class at a time (delete for loop... not needed)
                 for n in range(1):  # leave out the background class
-                    channel_data = f[subtomo_h5_internal_path][n + 6,
+                    channel_data = f[subtomo_h5_internal_path][n + class_number,
                                    overlap:lengths[0] + overlap,
                                    overlap:lengths[1] + overlap,
                                    overlap:lengths[2] + overlap]
@@ -301,11 +304,12 @@ def _write_segmented_subtomo_data(data_file: h5py.File,
 def write_hdf_particles_from_motl(path_to_motl: str,
                                   hdf_output_path: str,
                                   output_shape: tuple,
-                                  sphere_radius: int,
+                                  sphere_radius=8,
                                   values_in_motl=True,
                                   number_of_particles=None,
                                   z_shift=0,
-                                  particle_classes=[1]):
+                                  particle_classes=[1],
+                                  switch_to_zyx=False):
     _, file_extension = os.path.splitext(path_to_motl)
     print("The motive list has extension ", file_extension)
     assert file_extension == ".csv" or file_extension == ".em" or file_extension == ".txt"
@@ -320,9 +324,16 @@ def write_hdf_particles_from_motl(path_to_motl: str,
             else:
                 print("All particles in the motive list will be pasted.")
                 # Already in x,y,z format:
-            coordinates = [
-                np.array([int(row[7]) + z_shift, int(row[8]), int(row[9])]) for
-                row in motive_list]
+            if switch_to_zyx:
+                coordinates = [
+                    np.array([int(row[9]) + z_shift, int(row[8]), int(row[7])])
+                    for
+                    row in motive_list]
+            else:
+                coordinates = [
+                    np.array([int(row[7]) + z_shift, int(row[8]), int(row[9])])
+                    for
+                    row in motive_list]
             if values_in_motl:
                 score_values = [row[0] for row in motive_list]
             else:
@@ -352,21 +363,47 @@ def write_hdf_particles_from_motl(path_to_motl: str,
     elif file_extension == ".txt":
         motive_list = read_shrec_motl(path_to_motl)
         predicted_dataset = np.zeros(output_shape)
-        for particle_class in particle_classes:
-            coordinates = extract_coordinates_from_txt_shrec(
-                motive_list=motive_list, particle_class=particle_class)
-            # if isinstance(number_of_particles, int):
-            #     coordinates = coordinates[:number_of_particles]
-            #     print("Only", str(number_of_particles),
-            #           " particles in the motive list will be pasted.")
-            # else:
-            #     print("All particles in the motive list will be pasted.")
+        for counter, particle_class in enumerate(particle_classes):
+            if isinstance(particle_class, int):
+                if values_in_motl:
+                    value = counter + 1
+                else:
+                    value = 1
+                coordinates = extract_coordinates_from_txt_shrec(
+                    motive_list=motive_list, particle_class=particle_class)
+                coordinates = [p + np.array([z_shift, 0, 0]) for p in
+                               coordinates]
+                for center in coordinates:
+                    paste_sphere_in_dataset(dataset=predicted_dataset,
+                                            radius=sphere_radius,
+                                            value=value,
+                                            center=center)
+            elif isinstance(particle_class, str):
+                particle_class_number = particle_dict[particle_class]['class']
+                if values_in_motl:
+                    value = counter + 1
+                    print("The value assigned to", particle_class, "is", value)
+                else:
+                    value = 1
+                    print("The value assigned to", particle_class, "is", value)
 
-            for center in coordinates:
-                paste_sphere_in_dataset(dataset=predicted_dataset,
-                                        radius=sphere_radius,
-                                        value=particle_class, center=center)
-
+                sphere_radius = particle_dict[particle_class]['radius']
+                print("The radius in pixels of", particle_class, "is",
+                      sphere_radius)
+                coordinates = extract_coordinates_from_txt_shrec(
+                    motive_list=motive_list,
+                    particle_class=particle_class_number)
+                print("len(coordinates) =", len(coordinates))
+                coordinates = [p + np.array([z_shift, 0, 0]) for p in
+                               coordinates]
+                print("coordinates[0] = ", coordinates[0])
+                for center in coordinates:
+                    paste_sphere_in_dataset(dataset=predicted_dataset,
+                                            radius=sphere_radius,
+                                            value=value,
+                                            center=center)
+            else:
+                print("particle classes should be either integers or strings.")
         write_dataset_hdf(output_path=hdf_output_path,
                           tomo_data=predicted_dataset)
 
@@ -382,7 +419,6 @@ def split_and_write_h5_partition(h5_partition_data_path: str,
                                  split: int,
                                  label_name="ribosomes",
                                  shuffle=True) -> tuple:
-
     with h5py.File(h5_partition_data_path, 'r') as f:
         raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
         if shuffle:
@@ -394,7 +430,6 @@ def split_and_write_h5_partition(h5_partition_data_path: str,
                 raw_subtomo_h5_internal_path \
                     = join(h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
                 data_raw_train = f[raw_subtomo_h5_internal_path][:]
-
 
                 labels_subtomo_h5_internal_path = join(
                     h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
