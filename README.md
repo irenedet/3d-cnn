@@ -1,6 +1,6 @@
 # 3d-cnn
-## Descripton.
-UNet adapted for cryo-ET segmentation.
+## Description.
+3D UNet adapted for cryo-ET segmentation and particle localisaton.
 
 ## Submission scripts {**script_name**: description}
 
@@ -9,6 +9,8 @@ UNet adapted for cryo-ET segmentation.
 
 ### Using a trained UNet to segment a tomogram
 #### STEP 1
+
+
 **submission_scripts/1_dataset2subtomos_submission.sh** : Given a tomogram, the output is a h5 file where the subtomograms of a given size are stored. This is the preparation step to apply the neural network.
 
 **Input variables**:
@@ -18,7 +20,7 @@ UNet adapted for cryo-ET segmentation.
  - **path_to_raw ** : path to the tomogram that will be segmented
 
  - **folder_path = "/scratch/trueba/3d-cnn/TEST/"** TODO
- 
+
  - **h5_output_file** : name of the h5 file where the output will be stored.
 
       E.g. h5_output_file = "004_in_subtomos_128side.h5"
@@ -34,6 +36,8 @@ UNet adapted for cryo-ET segmentation.
 ```
 
 #### STEP 2
+
+
 **submission_scripts/2_cnn_subtomo_segmentation_submission.sh** : Given a h5 file that contains a series of subtomograms of a compatible size to a given trained neural network, the neural network is applied for segmentation of each subtomogram.
 
 **Input variables**:
@@ -68,6 +72,8 @@ is stored as
 ```
 
 #### STEP 2 bis (optional)  
+
+
 **submission_scripts/2bis_subtomos2dataset_submission.sh** : This is an optional (and relatively expensive step). This script runs a program that assembles prediction sub tomograms in an h5 file, to get the global prediction of the full tomogram.
 
 
@@ -85,7 +91,7 @@ is stored as
  - The file with path:
    path_to_output_folder/'motl_' + str(numb_peaks) + '.csv'
 
-   where the a motive list associated to the local maxima of the prediction score (in decreasing order) is produced. Where numb_peaks is the total number of local maxima (or peaks) corresponding in the motive list. 
+   where the a motive list associated to the local maxima of the prediction score (in decreasing order) is produced. Where numb_peaks is the total number of local maxima (or peaks) corresponding in the motive list.
 
 ## To run in the cluster
 
