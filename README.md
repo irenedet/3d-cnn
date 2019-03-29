@@ -1,11 +1,14 @@
 # 3d-cnn
+
 ## Description.
+
 3D UNet adapted for cryo-ET segmentation and particle localisaton.
 
 ## Submission scripts {**script_name**: description}
 
 ### Training the UNet
-  **submission_scripts/training_submission.sh** : given a training dataset (add description), this script outputs a trained model which is saved under the given path. By default in: models/given_name.pkl
+
+**submission_scripts/training_submission.sh** : given a training dataset (add description), this script outputs a trained model which is saved under the given path. By default in: models/given_name.pkl
 
 ### Using a trained UNet to segment a tomogram
 #### STEP 1
@@ -31,7 +34,9 @@
 
   volumes/raw/subtomo_name
 
- where  ```
+ where  
+
+```
   subtomo_name = "subtomo_" + "_" + str(subtomogram_center)
 ```
 
