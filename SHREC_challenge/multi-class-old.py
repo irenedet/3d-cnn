@@ -50,10 +50,10 @@ print("*************************************")
 device = get_device()
 
 training_data_path = \
-    "/scratch/trueba/shrec/0_sph_masks/training_sets/top5_differentiated_training.h5"
+    "/scratch/trueba/shrec/0_sph_masks/training_sets/all_foreground_training.h5"
 label_name = "all_particles"
 split = 850
-output_classes = 6
+output_classes = 2
 
 
 print("The training data path is ", training_data_path)
@@ -90,24 +90,24 @@ train_loader = du.DataLoader(train_set, shuffle=False,  # we shuffle before
                              batch_size=5)
 val_loader = du.DataLoader(val_set, batch_size=5)
 
-for test_index in range(1):
+for test_index in range(3):
     net_confs = [
         {'final_activation': nn.LogSoftmax(dim=1),
          'depth': 2,
          'initial_features': 8,
          "out_channels": output_classes},
-        {'final_activation': nn.LogSoftmax(dim=1),
-         'depth': 3,
-         'initial_features': 8,
-         "out_channels": output_classes},
-        {'final_activation': nn.LogSoftmax(dim=1),
-         'depth': 2,
-         'initial_features': 16,
-         "out_channels": output_classes},
-        {'final_activation': nn.LogSoftmax(dim=1),
-         'depth': 3,
-         'initial_features': 16,
-         "out_channels": output_classes},
+        # {'final_activation': nn.LogSoftmax(dim=1),
+        #  'depth': 3,
+        #  'initial_features': 8,
+        #  "out_channels": output_classes},
+        # {'final_activation': nn.LogSoftmax(dim=1),
+        #  'depth': 2,
+        #  'initial_features': 16,
+        #  "out_channels": output_classes},
+        # {'final_activation': nn.LogSoftmax(dim=1),
+        #  'depth': 3,
+        #  'initial_features': 16,
+        #  "out_channels": output_classes},
     ]
 
     for conf in net_confs:
@@ -125,7 +125,8 @@ for test_index in range(1):
         # metric = metric.to(device)
 
         # built tensorboard logger
-        model_name = "Unet_top5_diff_sph_adjusted_radius_" + label_name + "_D_" + \
+        model_name = str(test_index) + "try_multiclassold_all_fore_" + \
+                     label_name + "_D_" + \
                      str(conf['depth']) + "_IF_" + \
                      str(conf['initial_features'])
         log_dir = join('shrec_sph_logs/', model_name)

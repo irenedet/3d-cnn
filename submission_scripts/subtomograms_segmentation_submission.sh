@@ -13,7 +13,9 @@
 
 
 module load Anaconda3
-
+echo "activating virtual environment"
 source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
+echo "... done"
+
+echo "running python 3 script"
 python3 /g/scb2/zaugg/trueba/3d-cnn/runners/cnn_subtomo_segmentation.py
-source deactivate

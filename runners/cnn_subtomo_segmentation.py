@@ -7,9 +7,9 @@ from src.python.pytorch_cnn.io import get_device
 from src.python.filewriters.h5 import segment_and_write
 
 # data to provide by user:
-data_path = "/scratch/trueba/shrec/0_real_masks/training_sets/all_particles_differentiated_training.h5"
-model_path = "/g/scb2/zaugg/trueba/3d-cnn/models/multi-class/Unet_all_parts_differentiated_0_all_particles_D_2_IF_16.pkl"
-model = UNet(1, 13, final_activation=None, depth=2, initial_features=16)
+data_path = "/scratch/trueba/shrec/0_sph_masks/training_sets/top5_foreground_training.h5"
+model_path = "/g/scb2/zaugg/trueba/3d-cnn/shrec_models/multi-class/Unet_top5_fore_sph_adjusted_radius_all_particles_D_3_IF_8.pkl"
+model = UNet(1, 2, final_activation=None, depth=3, initial_features=8)
 label_name = "all_particles"
 
 # data_path = "/scratch/trueba/shrec/0_real_masks/training_sets/all_particles_foreground_training.h5"
