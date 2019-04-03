@@ -54,16 +54,18 @@ export path_to_model="/g/scb2/zaugg/trueba/3d-cnn/shrec_models/multi-class/Unet_
 export label_name="all_particles"
 export depth=3
 export init_feat=8
+export out_classes=13
 export box_side=64
 
 # Output directory, where results will be stored:
 export output_dir='/scratch/trueba/shrec/0_sph_masks/cnn_evaluations/all_diff_D3_IF8/'
 
 # Parameters relevant for the peak computations:
+export class_number=12 # from 0 to n = out_classes - 1
 export minimum_peak_distance=12
 
 module load Anaconda3
 echo 'starting virtual environment'
 source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
 
-bash ./particle_picking_pipeline/runner.sh -raw $path_to_raw -output $output_dir -model $path_to_model -label $label_name -init_feat $init_feat -depth $depth -box $box_side -xdim $input_xdim -ydim $input_ydim -zdim $input_zdim -min_peak_distance $minimum_peak_distance -z_shift $z_shift
+bash /g/scb2/zaugg/trueba/3d-cnn/pipelines/multi-class/particle_picking_pipeline/runner.sh -raw $path_to_raw -output $output_dir -model $path_to_model -label $label_name -init_feat $init_feat -depth $depth -out_classes $out_classes -box $box_side -xdim $input_xdim -ydim $input_ydim -zdim $input_zdim -class_number $class_number -min_peak_distance $minimum_peak_distance -z_shift $z_shift

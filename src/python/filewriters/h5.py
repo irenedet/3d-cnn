@@ -16,7 +16,7 @@ from src.python.peak_toolbox.utils import paste_sphere_in_dataset
 from src.python.naming import h5_internal_paths
 from src.python.coordinates_toolbox import subtomos
 from src.python.tensors.actions import crop_window_around_point
-from src.python.pytorch_cnn.classes.unet_new import UNet
+from src.python.pytorch_cnn.classes.unet import UNet
 from src.python.filereaders.shrec import particle_dict
 
 

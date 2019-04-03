@@ -52,7 +52,7 @@ class BCELoss(nn.Module):
         return loss
 
 
-class Multi_class_BCELoss(nn.Module):
+class Multi_class_CELoss(nn.Module):
     def __init__(self, in_channels, weight_function=None):
         # in torch, loss functions must inherit from `torch.nn.Module`
         # and call the super constructor to be compatible with the
@@ -85,7 +85,7 @@ class Multi_class_BCELoss(nn.Module):
             # apply the weight function
             weight = self.weight_function(target)
             # compute the loss WITHOUT reduction, which means that
-            # the los will have the same shape as input and target
+            # the loss will have the same shape as input and target
             loss = F.binary_cross_entropy(input, target, reduction='none')
 
             # multiply the loss by the weight and
@@ -128,6 +128,22 @@ class DiceCoefficientLoss(nn.Module):
         intersection = (prediction * target).sum()
         denominator = (prediction * prediction).sum() + (target * target).sum()
         return 1 - (2 * intersection / denominator.clamp(min=self.eps))
+
+
+# From the internet
+# def dice_coef(y_true, y_pred):
+#     smooth = 5e-6
+#     y_true_f = K.flatten(y_true)
+#     y_pred_f = K.flatten(y_pred)
+#     intersection = K.sum(y_true_f * y_pred_f)
+#     return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+#
+# def dice_coef_multilabel(y_true, y_pred, numLabels=5):
+#     dice = 0
+#     for index in range(numLabels):
+#         dice -= dice_coef(y_true[:, index, :, :, :], y_pred[:, index, :, :, :])
+#     return dice
+
 
 
 # class NLLLoss(nn.Module):

@@ -20,7 +20,7 @@ import torch.utils.data as du
 from src.python.datasets.actions import split_dataset
 from src.python.filereaders import h5
 from src.python.image.filters import preprocess_data
-from src.python.pytorch_cnn.classes.unet_new import UNet
+from src.python.pytorch_cnn.classes.unet import UNet
 from src.python.pytorch_cnn.classes.loss import BCELoss, DiceCoefficient, \
     DiceCoefficientLoss
 from src.python.pytorch_cnn.classes.visualizers import TensorBoard
