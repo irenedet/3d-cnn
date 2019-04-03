@@ -37,7 +37,7 @@ from filereaders import h5
 from image.filters import preprocess_data
 from image.viewers import view_images_h5
 # from pytorch_cnn.classes.cnnets import UNet_4, UNet_6, UNet_7, UNet, UNet_deep
-from pytorch_cnn.classes.unet_new import UNet
+from pytorch_cnn.classes.unet import UNet
 from pytorch_cnn.classes.loss import BCELoss, DiceCoefficient, \
     DiceCoefficientLoss
 from pytorch_cnn.classes.visualizers import TensorBoard

@@ -23,6 +23,9 @@ parser.add_argument("-init_feat", "--initial_features",
 parser.add_argument("-depth", "--unet_depth",
                     help="Depth of the UNet",
                     type=int)
+parser.add_argument("-out_classes", "--output_classes",
+                    help="Integer indicating number of classes to segment",
+                    type=int)
 
 args = parser.parse_args()
 path_to_model = args.path_to_model
@@ -30,10 +33,13 @@ label_name = args.label_name
 output_h5file = args.output_h5_path
 init_feat = args.initial_features
 depth = args.unet_depth
+output_classes = args.output_classes
 
-conf = {'depth': depth, 'initial_features': init_feat}
+conf = {'final_activation': nn.ELU(), 'depth': depth,
+        'initial_features': init_feat, 'out_channels': output_classes}
 
-model = UNet(**conf, final_activation=nn.ELU())
+model = UNet(**conf)
+
 device = get_device()
 model.load_state_dict(torch.load(path_to_model, map_location=device))
 model = model.eval()

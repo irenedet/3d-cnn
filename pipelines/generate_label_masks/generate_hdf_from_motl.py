@@ -13,6 +13,8 @@ parser.add_argument("-radius", "--sphere_radius",
                     type=int)
 parser.add_argument("-z_shift", "--output_z_shift",
                     type=int)
+parser.add_argument("-coords_in_tom_format", "--coords_in_tom_format",
+                    type=bool)
 parser.add_argument("-shape_x", "--output_shape_x",
                     type=int)
 parser.add_argument("-shape_y", "--output_shape_y",
@@ -27,6 +29,7 @@ shape_x = args.output_shape_x
 shape_y = args.output_shape_y
 shape_z = args.output_shape_z
 z_shift = args.output_z_shift
+coords_in_tom_format = args.coords_in_tom_format
 radius = args.sphere_radius
 
 makedirs(name=output_dir, exist_ok=True)
@@ -43,4 +46,4 @@ write_hdf_particles_from_motl(path_to_motl=path_to_motl,
                               values_in_motl=True,
                               number_of_particles=None,
                               z_shift=z_shift,
-                              switch_to_zyx=False)
+                              switch_to_zyx=coords_in_tom_format)
