@@ -81,13 +81,13 @@ h5_test_partition_path = join(output_dir, "test_partition.h5")
 
 makedirs(name=output_dir, exist_ok=True)
 
-partition_raw_and_labels_tomograms_dice_multiclass(
-    path_to_raw=path_to_raw,
-    labels_dataset_list=labels_dataset_list,
-    segmentation_names=segmentation_names,
-    output_h5_file_path=output_h5_file_path,
-    subtomo_shape=subtomogram_shape,
-    overlap=overlap)
+# partition_raw_and_labels_tomograms_dice_multiclass(
+#     path_to_raw=path_to_raw,
+#     labels_dataset_list=labels_dataset_list,
+#     segmentation_names=segmentation_names,
+#     output_h5_file_path=output_h5_file_path,
+#     subtomo_shape=subtomogram_shape,
+#     overlap=overlap)
 
 print("The training data path is ", output_h5_file_path)
 
@@ -102,12 +102,12 @@ split_and_write_h5_partition_dice_multi_class(
 print("The training set has been written in ", h5_train_partition_path)
 print("The testing set has been written in ", h5_test_partition_path)
 
-print("The data augmentation is starting...")
-transform_data_from_h5_dice_multi_class(
-    training_data_path=h5_train_partition_path,
-    segmentation_names=segmentation_names,
-    number_iter=number_iter,
-    output_data_path=output_data_path, split=train_split)
+# print("The data augmentation is starting...")
+# transform_data_from_h5_dice_multi_class(
+#     training_data_path=h5_train_partition_path,
+#     segmentation_names=segmentation_names,
+#     number_iter=number_iter,
+#     output_data_path=output_data_path, split=train_split)
 print("The training data with data augmentation has been writen in ",
       output_data_path)
 

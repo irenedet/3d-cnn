@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 16G
-#SBATCH --time 0-2:00
+#SBATCH --time 0-04:00
 #SBATCH -o slurm.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -41,28 +41,34 @@
 #export z_shift=330
 
 # Tomogram to segment, z dimension, and shift of the current tomo w.r.t original:
-export path_to_raw='/scratch/trueba/shrec/0/reconstruction_model_0.hdf'
-export input_xdim=512
-export input_ydim=512
-export input_zdim=512
+export path_to_raw='/scratch/trueba/3d-cnn/clean/180426_004/subtomo380-600.hdf'
+export input_xdim=928
+export input_ydim=928
+export input_zdim=221
 
 # to be set as zero (unless the tomogram is shifted w.r. to original):
-export z_shift=0
+export z_shift=380
 
 # Trained UNet for the segmentation, category to be segmented, and UNet architecture features:
-export path_to_model="/g/scb2/zaugg/trueba/3d-cnn/shrec_models/multi-class/Unet_all_diff_sph_adjusted_radius_all_particles_D_3_IF_8.pkl"
-export label_name="all_particles"
-export depth=3
+export path_to_model="/g/scb2/zaugg/trueba/3d-cnn//models/multi-class/ribo_corr_fas_memb_ribos_corrected_fas_memb_D_3_IF_8.pkl"
+export label_name="ribo_corrected_fas_memb"
+export depth=5
 export init_feat=8
-export out_classes=13
-export box_side=64
+export out_classes=4
+export box_side=128
 
 # Output directory, where results will be stored:
-export output_dir='/scratch/trueba/shrec/0_sph_masks/cnn_evaluations/all_diff_D3_IF8/'
+#export output_dir='/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/multi-class/G_s1_D4_IF8_w_1_64_854_250'
+#export label_name="D_4_IF_8_w_1_64_854_250"
+
+export output_dir='/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/multi-class/G_s1_D4_IF8_w_1_64_1200_250'
+export label_name="D_4_IF_8_w_1_64_1200_250"
 
 # Parameters relevant for the peak computations:
-export class_number=12 # from 0 to n = out_classes - 1
-export minimum_peak_distance=12
+export class_number=2 # from 0 to n = out_classes - 1
+export minimum_peak_distance=15
+
+export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
 
 module load Anaconda3
 echo 'starting virtual environment'

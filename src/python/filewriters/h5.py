@@ -251,6 +251,56 @@ def write_joint_raw_and_labels_subtomograms(output_path: str,
     return
 
 
+def write_joint_raw_and_labels_subtomograms_dice_multiclass(
+        output_path: str,
+        padded_raw_dataset: np.array,
+        padded_labels_dataset_list: list, #list of padded labeled datasets
+        segmentation_names: list,
+        window_centers: list,
+        crop_shape: tuple):
+    with h5py.File(output_path, 'w') as f:
+        for window_center in window_centers:
+            print("window_center", window_center)
+            subtomo_name = "subtomo_{0}".format(str(window_center))
+            subtomo_raw_h5_internal_path = join(
+                h5_internal_paths.RAW_SUBTOMOGRAMS,
+                subtomo_name)
+            subtomo_raw_data = crop_window_around_point(
+                input=padded_raw_dataset,
+                crop_shape=crop_shape,
+                window_center=window_center)
+
+            subtomo_label_data_list = []
+            subtomo_label_h5_internal_path_list = []
+            segmentation_max = 0
+            for label_name, padded_labels_dataset in zip(segmentation_names,
+                                                         padded_labels_dataset_list):
+                subtomo_label_data = crop_window_around_point(
+                    input=padded_labels_dataset,
+                    crop_shape=crop_shape,
+                    window_center=window_center)
+                subtomo_label_data_list += [subtomo_label_data]
+                print("subtomo_max = ", np.max(subtomo_label_data))
+                subtomo_label_h5_internal_path = join(
+                    h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
+                subtomo_label_h5_internal_path = join(
+                        subtomo_label_h5_internal_path,
+                        subtomo_name)
+                subtomo_label_h5_internal_path_list += [
+                    subtomo_label_h5_internal_path]
+                segmentation_max = np.max(
+                    [segmentation_max, np.max(subtomo_label_data)])
+            if segmentation_max > 0.5:
+                f[subtomo_raw_h5_internal_path] = subtomo_raw_data
+                for subtomo_label_h5_internal_path, subtomo_label_data in zip(
+                        subtomo_label_h5_internal_path_list,
+                        subtomo_label_data_list):
+                    f[subtomo_label_h5_internal_path] = subtomo_label_data
+            else:
+                print("subtomo ", subtomo_name, "discarded")
+    return
+
+
 def write_segmented_data(data_path: str, output_segmentation: np.array,
                          label_name: str) -> np.array:
     with h5py.File(data_path, 'a') as f:
@@ -309,7 +359,7 @@ def write_hdf_particles_from_motl(path_to_motl: str,
                                   number_of_particles=None,
                                   z_shift=0,
                                   particle_classes=[1],
-                                  switch_to_zyx=False):
+                                  particles_in_tom_format=True):
     _, file_extension = os.path.splitext(path_to_motl)
     print("The motive list has extension ", file_extension)
     assert file_extension == ".csv" or file_extension == ".em" or file_extension == ".txt"
@@ -324,7 +374,7 @@ def write_hdf_particles_from_motl(path_to_motl: str,
             else:
                 print("All particles in the motive list will be pasted.")
                 # Already in x,y,z format:
-            if switch_to_zyx:
+            if particles_in_tom_format:
                 coordinates = [
                     np.array([int(row[9]) + z_shift, int(row[8]), int(row[7])])
                     for
@@ -347,9 +397,18 @@ def write_hdf_particles_from_motl(path_to_motl: str,
                       " particles in the motive list will be pasted.")
             else:
                 print("All particles in the motive list will be pasted.")
+
             coordinates = extract_coordinates_from_em_motl(motive_list)
-            coordinates = [[int(p[2]) + z_shift, int(p[1]), int(p[0])] for p in
-                           coordinates]
+
+            if particles_in_tom_format:
+                print("coordinates already in tom format")
+                coordinates = [[int(p[2]) + z_shift, int(p[1]), int(p[0])] for p
+                               in coordinates]
+            else:
+                print("transforming coordinates to tom format")
+                coordinates = [[int(p[2]) + z_shift, int(p[1]), int(p[0])] for p
+                               in coordinates]
+
             score_values = np.ones(len(coordinates))
 
         predicted_dataset = np.zeros(output_shape)
@@ -417,7 +476,7 @@ def split_and_write_h5_partition(h5_partition_data_path: str,
                                  h5_train_patition_path: str,
                                  h5_test_patition_path: str,
                                  split: int,
-                                 label_name="ribosomes",
+                                 label_name="particles",
                                  shuffle=True) -> tuple:
     with h5py.File(h5_partition_data_path, 'r') as f:
         raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
@@ -455,5 +514,49 @@ def split_and_write_h5_partition(h5_partition_data_path: str,
 
                 f_test[raw_subtomo_h5_internal_path] = data_raw_test
                 f_test[labels_subtomo_h5_internal_path] = data_label_test
+
+    return
+
+
+def split_and_write_h5_partition_dice_multi_class(h5_partition_data_path: str,
+                                                  h5_train_patition_path: str,
+                                                  h5_test_patition_path: str,
+                                                  split: int,
+                                                  segmentation_names: list,
+                                                  shuffle=True) -> tuple:
+    with h5py.File(h5_partition_data_path, 'r') as f:
+        raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
+        if shuffle:
+            random.shuffle(raw_subtomo_names)
+        else:
+            print("Splitting sets without shuffling")
+        with h5py.File(h5_train_patition_path, "w") as f_train:
+            for subtomo_name in raw_subtomo_names[:split]:
+                raw_subtomo_h5_internal_path \
+                    = join(h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
+                data_raw_train = f[raw_subtomo_h5_internal_path][:]
+                f_train[raw_subtomo_h5_internal_path] = data_raw_train
+                for label_name in segmentation_names:
+                    labels_subtomo_h5_internal_path = join(
+                        h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
+                    labels_subtomo_h5_internal_path = join(
+                        labels_subtomo_h5_internal_path,
+                        subtomo_name)
+                    data_label_train = f[labels_subtomo_h5_internal_path][:]
+                    f_train[labels_subtomo_h5_internal_path] = data_label_train
+        # with h5py.File(h5_test_patition_path, "w") as f_test:
+        #     for subtomo_name in raw_subtomo_names[split:]:
+        #         raw_subtomo_h5_internal_path \
+        #             = join(h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
+        #         data_raw_test = f[raw_subtomo_h5_internal_path][:]
+        #         f_test[raw_subtomo_h5_internal_path] = data_raw_test
+        #         for label_name in segmentation_names:
+        #             labels_subtomo_h5_internal_path = join(
+        #                 h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
+        #             labels_subtomo_h5_internal_path = join(
+        #                 labels_subtomo_h5_internal_path,
+        #                 subtomo_name)
+        #             data_label_test = f[labels_subtomo_h5_internal_path][:]
+        #             f_test[labels_subtomo_h5_internal_path] = data_label_test
 
     return

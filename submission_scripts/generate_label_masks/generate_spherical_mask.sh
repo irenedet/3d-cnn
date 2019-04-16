@@ -13,21 +13,29 @@
 
 module load Anaconda3
 echo 'starting virtual environment'
-#source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
+source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/004/TM/motl_clean_4b.em
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/005/TM/motl_clean_4b.em
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/021/TM/motl_clean_4b.em
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/024/TM/motl_clean_4b.em
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/003/TM/motl_clean_4b.em
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/004/TM/motl_clean_4b.em
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/005/TM/motl_clean_4b.em
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/018/TM/motl_clean_4b.em
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180713/027/TM/motl_clean_4b.em
+export output_dir="/struct/mahamid/Irene/yeast/ribosomes/180426_021/"
+export path_to_motl="/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/021/TM/motl_clean_4b.em"
 
-
-export output_dir="/struct/mahamid/Irene/predictions/180426/004"
-export path_to_motl="/struct/mahamid/Shared/For_Irene/predictions/180426/004/motl_482_checked.csv"
-
-export z_shift=-380  # shift between original tomogram and subtomogram of analysis
+export z_shift=0  # shift between original tomogram and subtomogram of analysis
 export shape_x=928
 export shape_y=928
-export shape_z=221
-export radius=8
+export shape_z=1000
+export radius=10
 
-export coords_in_tom_format=True
+export coords_in_tom_format='True'
 
-echo "starting to generate hdf of undetected particles"
+export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
+echo "starting to generate hdf of particles in the motl"
 python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/generate_label_masks/generate_hdf_from_motl.py -motl $path_to_motl -output $output_dir -shape_x $shape_x -shape_y $shape_y -shape_z $shape_z -radius $radius -z_shift $z_shift -coords_in_tom_format $coords_in_tom_format
 echo "...done."
 

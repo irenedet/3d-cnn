@@ -1,6 +1,7 @@
 #! /home/trueba/.conda/envs/mlcourse/bin/python3
 
 from os.path import join
+from os import makedirs
 
 import numpy as np
 import torch
@@ -45,6 +46,10 @@ parser.add_argument("-classes", "--output_classes",
 parser.add_argument("-n_epochs", "--number_of_epochs",
                     help="number of epoches for training",
                     type=int)
+parser.add_argument("-weights", "--weights_per_class",
+  type=str,
+  )
+
 
 args = parser.parse_args()
 training_data_path = args.training_data_path
@@ -55,24 +60,21 @@ model_initial_name = args.model_initial_name
 model_path = args.model_path
 output_classes = args.output_classes
 n_epochs = args.number_of_epochs
+weight = args.weights_per_class
+weight = list(map(float, weight.split(',')))
+
+makedirs(name=log_dir, exist_ok=True)
+makedirs(name=model_path, exist_ok=True)
 
 net_confs = [
     {'final_activation': nn.LogSoftmax(dim=1),
-     'depth': 2,
-     'initial_features': 8,
-     "out_channels": output_classes},
-    {'final_activation': nn.LogSoftmax(dim=1),
      'depth': 3,
      'initial_features': 8,
      "out_channels": output_classes},
     {'final_activation': nn.LogSoftmax(dim=1),
-     'depth': 2,
-     'initial_features': 16,
-     "out_channels": output_classes},
-    {'final_activation': nn.LogSoftmax(dim=1),
-     'depth': 3,
-     'initial_features': 16,
-     "out_channels": output_classes},
+     'depth': 4,
+     'initial_features': 8,
+     "out_channels": output_classes}
 ]
 
 print("*************************************")
@@ -109,30 +111,34 @@ val_set = du.TensorDataset(torch.from_numpy(val_data),
                            torch.from_numpy(val_labels))
 
 # wrap into data-loader (we shuffle before during training test construction)
-train_loader = du.DataLoader(train_set, shuffle=False, batch_size=5)
+train_loader = du.DataLoader(train_set, shuffle=True, batch_size=5)
 val_loader = du.DataLoader(val_set, batch_size=5)
 
 for test_index in range(1):
     for conf in net_confs:
         net = UNet(**conf)
         net = net.to(device)
-        weight = [1 for n in range(output_classes)]
-        weight[0] = 0.01  # background
         weight_tensor = torch.tensor(weight).to(device)
         loss = nn.NLLLoss(weight=weight_tensor)
         loss = loss.to(device)
         optimizer = optim.Adam(net.parameters())
 
-        # build the dice coefficient metric
+        # ToDo build the dice coefficient metric
         metric = loss
 
         # built tensorboard logger
         model_name = model_initial_name + label_name + "_D_" + \
                      str(conf['depth']) + "_IF_" + \
                      str(conf['initial_features'])
+        model_name_pkl = model_name + ".pkl"
+        model_path_pkl = join(model_path, model_name_pkl)
+        model_name_txt = model_name + ".txt"
+        data_txt_path = join(model_path, model_name_txt)
+        write_model_description(data_txt_path, training_data_path, label_name,
+                                split, model_name_pkl, conf, data_order)
 
-        log_dir = join(log_dir, model_name)
-        logger = TensorBoard_multiclass(log_dir=log_dir, log_image_interval=1)
+        log_model = join(log_dir, model_name)
+        logger = TensorBoard_multiclass(log_dir=log_model, log_image_interval=1)
         print("The neural network training is now starting")
         for epoch in range(n_epochs):
             # apply training for one epoch
@@ -140,15 +146,19 @@ for test_index in range(1):
                   epoch=epoch, device=device, log_interval=1, tb_logger=logger)
             step = epoch * len(train_loader.dataset)
             # run validation after training epoch
-            validate(net, val_loader, loss, metric, device=device, step=step,
+            current_validation_loss = validate(net, val_loader, loss, metric, device=device, step=step,
                      tb_logger=logger)
-        model_name_pkl = model_name + ".pkl"
-        model_path_pkl = join(model_path, model_name_pkl)
-        torch.save(net.state_dict(), model_path_pkl)
 
-        model_name_txt = model_name + ".txt"
-        data_txt_path = join(model_path, model_name_txt)
-        write_model_description(data_txt_path, training_data_path, label_name,
-                                split, model_name_pkl, conf, data_order)
+
+
+
+            if epoch == 0:
+                validation_loss = current_validation_loss
+            else:
+                if current_validation_loss <= validation_loss:
+                    torch.save(net.state_dict(), model_path_pkl)
+                    validation_loss = current_validation_loss
+                else:
+                    print("this model was not the best")
 
 print("We have finished the training!")

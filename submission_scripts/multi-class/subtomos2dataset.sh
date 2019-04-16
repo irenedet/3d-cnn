@@ -14,6 +14,8 @@ module load Anaconda3
 echo "activating virtual env"
 source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
 echo "...done."
+
+export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
+
 echo "starting python script"
-python3 /g/scb2/zaugg/trueba/3d-cnn/SHREC_challenge/subtomos2dataset_new.py
-source deactivate
+python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/multi-class/evaluation/subtomos2dataset.py

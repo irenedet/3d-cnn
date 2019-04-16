@@ -1,6 +1,6 @@
 # from os.path import join
 from os import makedirs
-
+from os.path import join
 from src.python.filereaders.hdf import _load_hdf_dataset
 from src.python.datasets.transformations import transform_data_from_h5
 from src.python.datasets.actions import partition_raw_and_labels_tomograms
@@ -51,43 +51,26 @@ split = args.split
 train_split = args.train_split
 overlap = args.overlap
 
-from os.path import join
-
-# path_to_raw = "/scratch/trueba/cnn/004/4bin/cnn/rawtomogram/180426_004_4bin.hdf"
-# path_to_labeled = "/scratch/trueba/cnn/004/4bin/cnn/centralregion_004.hdf"
-# output_dir = "/scratch/trueba/3d-cnn/training_data/TEST/004_last"
-# label_name = "ribosomes"
-# split = 130  # Between partitions of testing and training data
-# shape_x = 928
-# shape_y = 928
-# shape_z = 221
-# box_side = 128
-#
-# # For data augmentation:
-# number_iter = 6
-# train_split = 110  # within training data for nnet training
-# overlap = 12
-
 assert split > train_split
 
 output_shape = (shape_y, shape_y, shape_x)
 subtomogram_shape = (box_side, box_side, box_side)
 output_dir = join(output_dir, "train_and_test_partitions")
+makedirs(name=output_dir, exist_ok=True)
+
 output_h5_file_name = "partition_training.h5"
 output_h5_file_path = join(output_dir, output_h5_file_name)
-output_data_path = join(output_dir, "data_aug_on_training_split.h5")
 
+output_data_path = join(output_dir, "data_aug_on_training_split.h5")
 ####################
 # For splitting test and train sets:
 h5_train_partition_path = join(output_dir, "train_partition.h5")
 h5_test_partition_path = join(output_dir, "test_partition.h5")
-
 #####################
-
-makedirs(name=output_dir, exist_ok=True)
 
 raw_dataset = _load_hdf_dataset(hdf_file_path=path_to_raw)
 labels_dataset = _load_hdf_dataset(hdf_file_path=path_to_labeled)
+
 partition_raw_and_labels_tomograms(raw_dataset=raw_dataset,
                                    labels_dataset=labels_dataset,
                                    label_name=label_name,
@@ -100,7 +83,9 @@ print("Splitting training and testing data into two different files...")
 split_and_write_h5_partition(h5_partition_data_path=output_h5_file_path,
                              h5_train_patition_path=h5_train_partition_path,
                              h5_test_patition_path=h5_test_partition_path,
-                             split=split)
+                             label_name=label_name,
+                             split=split,
+                             shuffle=True)
 print("The training set has been written in ", h5_train_partition_path)
 print("The testing set has been written in ", h5_test_partition_path)
 

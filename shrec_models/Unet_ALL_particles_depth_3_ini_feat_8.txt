@@ -1,0 +1,6 @@
+training_data_path = /scratch/trueba/shrec/0_test/ALL_particles_big_spheres_training.h5
+label_name=ALL_particles
+split = 40
+model_name = Unet_ALL_particles_depth_3_ini_feat_8.pkl
+conf = {'final_activation': LogSoftmax(), 'depth': 3, 'initial_features': 8, 'out_channels': 13}
+data_order = (39, 15, 48, 35, 23, 46, 21, 38, 29, 24, 3, 13, 32, 12, 36, 34, 16, 19, 37, 26, 1, 6, 10, 25, 20, 4, 27, 11, 7, 47, 22, 2, 31, 45, 40, 9, 30, 44, 14, 33, 42, 5, 0, 8, 17, 18, 41, 28, 43)

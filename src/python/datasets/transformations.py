@@ -350,6 +350,48 @@ def transform_data_from_h5(training_data_path: str, label_name: str,
     return
 
 
+def transform_data_from_h5_dice_multi_class(training_data_path: str,
+                                            segmentation_names: list,
+                                            number_iter: int,
+                                            output_data_path: str, split: int):
+    raw_data, labeled_data = h5.read_training_data_dice_multi_class(
+        training_data_path,
+        segmentation_names=segmentation_names,
+        split=split)
+    numb_train = raw_data.shape[0]
+    print(numb_train)
+    raw_data = raw_data[None, :]
+    # labeled_data = labeled_data[None, :]
+    for iteration in range(number_iter):
+        if iteration == 0:
+            transform = False
+        else:
+            transform = True
+
+        transformed_raw, transformed_labeled = transform_data_dice_multi_class(
+            raw_data,
+            labeled_data,
+            transform)
+
+        print("transformed_labeled.shape = ", transformed_labeled.shape)
+        with h5py.File(output_data_path, 'a') as f:
+            for img_index in range(numb_train):
+                subtomo_name = str(iteration) + "_" + str(img_index)
+                subtomo_raw_h5_path = h5_internal_paths.RAW_SUBTOMOGRAMS
+                subtomo_raw_h5_path = join(subtomo_raw_h5_path, subtomo_name)
+                f[subtomo_raw_h5_path] = transformed_raw[0, img_index, :, :, :]
+                subtomo_label_h5_path = h5_internal_paths.LABELED_SUBTOMOGRAMS
+                for channel, label_name in enumerate(segmentation_names):
+                    subtomo_label_h5_name = join(subtomo_label_h5_path,
+                                                 label_name)
+                    subtomo_label_h5_name = join(subtomo_label_h5_name,
+                                                 subtomo_name)
+                    f[subtomo_label_h5_name] = transformed_labeled[img_index,
+                                               channel,
+                                               :, :, :]
+    return
+
+
 def transform_data(raw_data: np.array, labeled_data: np.array,
                    transform=True) -> tuple:
     if transform:
@@ -375,6 +417,20 @@ def transform_data(raw_data: np.array, labeled_data: np.array,
         # transformed_raw = transformed_raw[None, :]
         # transformed_labeled = transformed_labeled[None, :]
 
+        sigma = np.random.random()
+        transform = AdditiveGaussianNoise(sigma=sigma)
+        # transformed_raw = transform(transformed_raw)
+        transformed_raw = transform(raw_data)
+        transformed_labeled = labeled_data
+        return transformed_raw, transformed_labeled
+    else:
+        print("The data in the first iteration is intact.")
+        return raw_data, labeled_data
+
+
+def transform_data_dice_multi_class(raw_data: np.array, labeled_data: np.array,
+                                    transform=True) -> tuple:
+    if transform:
         sigma = np.random.random()
         transform = AdditiveGaussianNoise(sigma=sigma)
         # transformed_raw = transform(transformed_raw)

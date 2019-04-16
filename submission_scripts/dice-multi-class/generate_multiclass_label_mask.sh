@@ -19,5 +19,5 @@ source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/e
 
 export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
 
-python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/multi-class/generate_masks/generate_multiclass_label_mask.py
+python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/dice_multi-class/generate_training_masks/generate_multiclass_label_mask.py
 

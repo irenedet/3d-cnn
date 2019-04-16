@@ -19,7 +19,7 @@ from src.python.coordinates_toolbox.utils import rearrange_hdf_coordinates
 
 
 def motl_writer(path_to_output_folder: str, list_of_peak_scores: list,
-                list_of_peak_coords: list):
+                list_of_peak_coords: list, in_tom_format=False):
     """
     Already modified to match em_motl format
     """
@@ -31,11 +31,14 @@ def motl_writer(path_to_output_folder: str, list_of_peak_scores: list,
         motlwriter = csv.writer(csvfile, delimiter=' ',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         indx = 0
-        for val, zyx_coord in sorted(
+        for val, point in sorted(
                 list(zip(list_of_peak_scores, list_of_peak_coords)),
                 key=lambda x: x[0], reverse=1):
             indx += 1
-            x, y, z = rearrange_hdf_coordinates(zyx_coord)
+            if in_tom_format:
+                x, y, z = point
+            else:
+                x, y, z = rearrange_hdf_coordinates(point)
             motlwriter.writerow([str(val) + ',0,0,' + str(
                 indx) + ',0,0,0,' + str(x) + ',' + str(y) + ',' + str(
                 z) + ',0,0,0,0,0,0,0,0,0,1'])

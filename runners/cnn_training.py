@@ -111,9 +111,9 @@ for test_index in range(1):
 
 
     net_confs = [{'depth': 5, 'initial_features': 4, 'final_activation': nn.Sigmoid()},
-                 # {'depth': 5, 'initial_features': 4},
-                 # {'depth': 5, 'initial_features': 8},
-                 # {'depth': 5, 'initial_features': 16}
+                 # {'depth': 5, 'initial_features': 4, 'final_activation':nn.Sigmoid()},
+                 # {'depth': 5, 'initial_features': 8, 'final_activation':nn.Sigmoid()},
+                 # {'depth': 5, 'initial_features': 16, 'final_activation':nn.Sigmoid()}
                  ]
     is_best = True
     validation_loss = 10

@@ -19,7 +19,8 @@ for value in values:
     count = np.count_nonzero(1*np.where(data == value))
     count_list += [count]
 
-weights = [count_list[2]/count for count in count_list]
+total_counts = np.sum(count_list)
+weights = [count/total_counts for count in count_list]
 
 print(count_list)
 print(weights)

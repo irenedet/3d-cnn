@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 2G
-#SBATCH --time 0-00:50
+#SBATCH --mem 4G
+#SBATCH --time 0-00:10
 #SBATCH -o slurm.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -14,4 +14,7 @@ module load Anaconda3
 echo 'starting virtual environment'
 source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
 
-python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/generate_label_masks/sum_particles_masks.py
+export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
+
+echo 'running python script'
+python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/multi-class/training/compute_relative_weights.py
