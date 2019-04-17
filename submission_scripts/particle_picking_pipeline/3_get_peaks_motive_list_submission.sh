@@ -11,12 +11,21 @@
 #SBATCH --mail-user=irene.de.teresa@embl.de
 
 # Tomogram to segment, z dimension, and shift of the current tomo w.r.t original:
+<<<<<<< HEAD
 export input_xdim=928
 export input_ydim=928
 export input_zdim=221
 
 # to be set as zero (unless the tomogram is shifted w.r. to original):
 export z_shift=380
+=======
+export input_xdim=927
+export input_ydim=927
+export input_zdim=321
+
+# to be set as zero (unless the tomogram is shifted w.r. to original):
+export z_shift=330
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 
 # Trained UNet for the segmentation, category to be segmented, and UNet architecture features:
 #export path_to_model="/g/scb2/zaugg/trueba/3d-cnn/models/0_UNet_new_128_side_depth_5_ini_feat_16_.pkl"
@@ -24,10 +33,17 @@ export label_name="ribosomes"
 export box_side=128
 
 # Output directory, where results will be stored:
+<<<<<<< HEAD
 export output_dir='scratch/trueba/3d-cnn/cnn_evaluation/multi-class/004/G_sigma1_D3_IF8'
 
 # Parameters relevant for the peak computations:
 export minimum_peak_distance=17
+=======
+export output_dir='/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_16_5_bis_/'
+
+# Parameters relevant for the peak computations:
+export minimum_peak_distance=12
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 export box_overlap=12
 export output_h5_file_path=$output_dir'4bin_subtomograms_.h5'
 

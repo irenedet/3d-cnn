@@ -130,6 +130,7 @@ class DiceCoefficientLoss(nn.Module):
         return 1 - (2 * intersection / denominator.clamp(min=self.eps))
 
 
+<<<<<<< HEAD
 class DiceCoefficientLoss_multilabel(nn.Module):
     def __init__(self, weights, eps=1e-6):
         super().__init__()
@@ -176,11 +177,41 @@ class DiceCoefficientLoss_multilabel(nn.Module):
         #
         #     def forward(self, prediction, target):
         # #        prediction.float()
+=======
+# From the internet
+# def dice_coef(y_true, y_pred):
+#     smooth = 5e-6
+#     y_true_f = K.flatten(y_true)
+#     y_pred_f = K.flatten(y_pred)
+#     intersection = K.sum(y_true_f * y_pred_f)
+#     return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+#
+# def dice_coef_multilabel(y_true, y_pred, numLabels=5):
+#     dice = 0
+#     for index in range(numLabels):
+#         dice -= dice_coef(y_true[:, index, :, :, :], y_pred[:, index, :, :, :])
+#     return dice
+
+
+
+# class NLLLoss(nn.Module):
+#     def __init__(self, class_weights=None):
+#         super().__init__()
+#         self.loss = nn.NLLLoss(weight=class_weights)
+#
+#     def forward(self, prediction, target):
+# #        prediction.float()
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
         # target.long()
         # assert prediction.shape[0] == target.shape[0]
         # print("len(target.shape)", len(target.shape))
         # print("len(prediction.shape)", len(prediction.shape))
         # assert len(target.shape) == len(prediction.shape) - 1
+<<<<<<< HEAD
         #        # target = crop_tensor(target, prediction.shape)
         #        # target = target[:, None]
+=======
+#        # target = crop_tensor(target, prediction.shape)
+#        # target = target[:, None]
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
         # return self.loss(prediction, target.long())

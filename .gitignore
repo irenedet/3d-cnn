@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 src/python/datasets/__pycache__/*
 src/python/filereaders/__pycache__/*
 src/python/image/__pycache__/*
@@ -7,6 +8,9 @@ shrec_models
 .eman2log.txt
 log_dice_multi_label/
 log_multi_class/shrec_models/
+=======
+shrec_models/
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 shrec_sph_logs/
 mixed_logs/
 mixed_models/

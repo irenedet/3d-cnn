@@ -10,12 +10,17 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=irene.de.teresa@embl.de
 
+<<<<<<< HEAD
 export PYTHONPATH=/g/scb2/zaugg/trueba/3d-cnn
+=======
+
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 # ToDo check why this does not run in cluster
 #module load Anaconda3
 #echo 'starting virtual environment'
 #source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
 
+<<<<<<< HEAD
 #export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/mixed_trainset/no_shuffle/G1_confs_4_5_/peaks_in_training_partition"
 #export path_to_motl_clean='/scratch/trueba/3d-cnn/clean/180426_006/motl_clean_4b.em'
 #export path_to_csv_motl=$(ls $output_dir/motl*)
@@ -44,6 +49,32 @@ export shape_y=928
 export shape_z=221
 export box=128
 
+=======
+export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/mixed_trainset/no_shuffle/G1_confs_4_5_/peaks_in_training_partition"
+export path_to_motl_clean='/scratch/trueba/3d-cnn/clean/180426_006/motl_clean_4b.em'
+export path_to_csv_motl=$(ls $output_dir/motl*)
+export testing_set_data_path="/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/006/train_and_test_partitions/partition_training.h5" #$(ls $output_dir/partition_subtomograms_.h5)
+export radius=8
+export z_shift=330  # shift between original tomogram and subtomogram of analysis
+export x_shift=0
+export shape_x=927
+export shape_y=927
+export shape_z=321
+export box=128
+
+#export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/gaussian_aug/confs_4_5_/peaks_in_training_partition"
+#export path_to_motl_clean='/scratch/trueba/cnn/004/4bin/cnn/motl_clean_4b.em'
+#export path_to_csv_motl=$(ls $output_dir/motl*)
+#export testing_set_data_path="/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/gaussian_aug/confs_4_5_/partition_subtomograms_.h5" #$(ls $output_dir/partition_subtomograms_.h5)
+#export radius=8
+#export z_shift=380  # shift between original tomogram and subtomogram of analysis
+#export x_shift=0
+#export shape_x=927
+#export shape_y=927
+#export shape_z=221
+#export box=128
+
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 #export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_4_5_bis_/peaks_in_training_partition"
 #export path_to_motl_clean='/scratch/trueba/3d-cnn/clean/180426_005/motl_clean_4b.em'
 #export path_to_csv_motl=$(ls $output_dir/motl*)

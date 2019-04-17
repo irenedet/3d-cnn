@@ -251,6 +251,7 @@ def write_joint_raw_and_labels_subtomograms(output_path: str,
     return
 
 
+<<<<<<< HEAD
 def write_joint_raw_and_labels_subtomograms_dice_multiclass(
         output_path: str,
         padded_raw_dataset: np.array,
@@ -301,6 +302,8 @@ def write_joint_raw_and_labels_subtomograms_dice_multiclass(
     return
 
 
+=======
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 def write_segmented_data(data_path: str, output_segmentation: np.array,
                          label_name: str) -> np.array:
     with h5py.File(data_path, 'a') as f:
@@ -359,7 +362,11 @@ def write_hdf_particles_from_motl(path_to_motl: str,
                                   number_of_particles=None,
                                   z_shift=0,
                                   particle_classes=[1],
+<<<<<<< HEAD
                                   particles_in_tom_format=True):
+=======
+                                  switch_to_zyx=False):
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
     _, file_extension = os.path.splitext(path_to_motl)
     print("The motive list has extension ", file_extension)
     assert file_extension == ".csv" or file_extension == ".em" or file_extension == ".txt"
@@ -374,7 +381,11 @@ def write_hdf_particles_from_motl(path_to_motl: str,
             else:
                 print("All particles in the motive list will be pasted.")
                 # Already in x,y,z format:
+<<<<<<< HEAD
             if particles_in_tom_format:
+=======
+            if switch_to_zyx:
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
                 coordinates = [
                     np.array([int(row[9]) + z_shift, int(row[8]), int(row[7])])
                     for
@@ -397,6 +408,7 @@ def write_hdf_particles_from_motl(path_to_motl: str,
                       " particles in the motive list will be pasted.")
             else:
                 print("All particles in the motive list will be pasted.")
+<<<<<<< HEAD
 
             coordinates = extract_coordinates_from_em_motl(motive_list)
 
@@ -409,6 +421,11 @@ def write_hdf_particles_from_motl(path_to_motl: str,
                 coordinates = [[int(p[2]) + z_shift, int(p[1]), int(p[0])] for p
                                in coordinates]
 
+=======
+            coordinates = extract_coordinates_from_em_motl(motive_list)
+            coordinates = [[int(p[2]) + z_shift, int(p[1]), int(p[0])] for p in
+                           coordinates]
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
             score_values = np.ones(len(coordinates))
 
         predicted_dataset = np.zeros(output_shape)
@@ -476,7 +493,11 @@ def split_and_write_h5_partition(h5_partition_data_path: str,
                                  h5_train_patition_path: str,
                                  h5_test_patition_path: str,
                                  split: int,
+<<<<<<< HEAD
                                  label_name="particles",
+=======
+                                 label_name="ribosomes",
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
                                  shuffle=True) -> tuple:
     with h5py.File(h5_partition_data_path, 'r') as f:
         raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
@@ -516,6 +537,7 @@ def split_and_write_h5_partition(h5_partition_data_path: str,
                 f_test[labels_subtomo_h5_internal_path] = data_label_test
 
     return
+<<<<<<< HEAD
 
 
 def split_and_write_h5_partition_dice_multi_class(h5_partition_data_path: str,
@@ -560,3 +582,5 @@ def split_and_write_h5_partition_dice_multi_class(h5_partition_data_path: str,
         #             f_test[labels_subtomo_h5_internal_path] = data_label_test
 
     return
+=======
+>>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
