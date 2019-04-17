@@ -1,6 +1,0 @@
-training_data_path = /scratch/trueba/shrec/0_test/particle1_2_training.h5
-label_name=particles1_2
-split = 40
-model_name = 0particles1_2_depth_1_ini_feat_2.pkl
-conf = {'final_activation': LogSoftmax(), 'depth': 1, 'initial_features': 2, 'out_channels': 3}
-data_order = (4, 38, 0, 35, 6, 8, 21, 24, 5, 31, 16, 40, 27, 15, 23, 41, 46, 19, 22, 14, 26, 17, 44, 12, 32, 47, 28, 13, 34, 36, 9, 7, 1, 30, 25, 3, 20, 42, 18, 45, 37, 10, 11, 33, 48, 39, 43, 2, 29)
