@@ -1,11 +1,8 @@
 from os.path import join
 from os import makedirs
-<<<<<<< HEAD
 from src.python.filewriters.h5 import write_hdf_particles_from_motl
-
-=======
->>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 import argparse
+
 #
 parser = argparse.ArgumentParser()
 parser.add_argument("-motl", "--path_to_motl",
@@ -36,22 +33,13 @@ shape_z = args.output_shape_z
 z_shift = args.output_z_shift
 coords_in_tom_format = args.coords_in_tom_format
 radius = args.sphere_radius
-
-<<<<<<< HEAD
 print("coords_in_tom_format = ", coords_in_tom_format)
 
-=======
->>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 makedirs(name=output_dir, exist_ok=True)
 hdf_output_path = join(output_dir, "particles_mask.hdf")
 # z_shift = -330  # shift between original tomogram and subtomogram of analysis
 output_shape = (shape_z, shape_y, shape_x)
 
-<<<<<<< HEAD
-=======
-from src.python.filewriters.h5 import write_hdf_particles_from_motl
-
->>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 write_hdf_particles_from_motl(path_to_motl=path_to_motl,
                               hdf_output_path=hdf_output_path,
                               output_shape=output_shape,
@@ -59,8 +47,4 @@ write_hdf_particles_from_motl(path_to_motl=path_to_motl,
                               values_in_motl=True,
                               number_of_particles=None,
                               z_shift=z_shift,
-<<<<<<< HEAD
                               particles_in_tom_format=True)
-=======
-                              switch_to_zyx=coords_in_tom_format)
->>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
