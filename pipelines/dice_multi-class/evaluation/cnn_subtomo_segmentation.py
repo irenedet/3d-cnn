@@ -15,21 +15,8 @@ model = UNet(**confs)
 label_name = "D_2_IF_8_w_1_1_1"
 
 device = get_device()
-# torch.save({
-#         'epoch': epoch,
-#         'model_state_dict': net.state_dict(),
-#         'optimizer_state_dict': optimizer.state_dict(),
-#         'loss': loss
-#     }, path_to_model)
 model.load_state_dict(torch.load(model_path, map_location=device)['model_state_dict'])
-# print(model)
-# model.load_state_dict(torch.load(model_path, map_location=device))
 model = model.eval()
-
-# data to segment
-# data_dir = "/scratch/trueba/3d-cnn/TEST/"
-# data_file = "004_in_subtomos_128side_with_overlap.h5"
-# data_path = join(data_dir, data_file)
 
 # save the segmented data in the same data file
 segment_and_write(data_path, model, label_name=label_name)

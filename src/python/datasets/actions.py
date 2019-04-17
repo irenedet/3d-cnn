@@ -1,19 +1,16 @@
 import numpy as np
 import random
 
-<<<<<<< HEAD
 from src.python.filereaders.hdf import _load_hdf_dataset
 from src.python.coordinates_toolbox.subtomos import \
     get_particle_coordinates_grid_with_overlap
 from src.python.filewriters.h5 import write_subtomograms_from_dataset, \
     write_joint_raw_and_labels_subtomograms, \
     write_joint_raw_and_labels_subtomograms_dice_multiclass
-=======
 from src.python.coordinates_toolbox.subtomos import \
     get_particle_coordinates_grid_with_overlap
 from src.python.filewriters.h5 import write_subtomograms_from_dataset, \
     write_joint_raw_and_labels_subtomograms
->>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 
 
 def split_dataset(data: np.array, labels: np.array, split: int,
@@ -105,7 +102,6 @@ def partition_raw_and_labels_tomograms(raw_dataset: np.array,
         window_centers=padded_particles_coordinates,
         crop_shape=subtomo_shape)
 
-<<<<<<< HEAD
 
 def partition_raw_and_labels_tomograms_dice_multiclass(
         path_to_raw: str,
@@ -124,7 +120,8 @@ def partition_raw_and_labels_tomograms_dice_multiclass(
     padded_labels_dataset_list = []
     for path_to_labeled in labels_dataset_list:
         labels_dataset = _load_hdf_dataset(hdf_file_path=path_to_labeled)
-        padded_labels_dataset = pad_dataset(labels_dataset, subtomo_shape, overlap)
+        padded_labels_dataset = pad_dataset(labels_dataset, subtomo_shape,
+                                            overlap)
         padded_labels_dataset_list += [padded_labels_dataset]
 
     write_joint_raw_and_labels_subtomograms_dice_multiclass(
@@ -135,8 +132,6 @@ def partition_raw_and_labels_tomograms_dice_multiclass(
         window_centers=padded_particles_coordinates,
         crop_shape=subtomo_shape)
 
-=======
->>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 # def partition_tomograms(dataset: np.array,
 #                         label_name: str,
 #                         output_h5_file_path: str,
