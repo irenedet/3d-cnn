@@ -1,3 +1,7 @@
+src/python/datasets/__pycache__/*
+src/python/filereaders/__pycache__/*
+src/python/image/__pycache__/*
+src/python/tensors/__pycache__/*
 log_multi_class
 shrec_models
 .eman2log.txt
