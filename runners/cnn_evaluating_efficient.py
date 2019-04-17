@@ -22,7 +22,7 @@ def write_segmented_data(data_path: str, output: np.array,
         for subtomo_indx, subtomo_name in enumerate(
                 list(f['volumes/subtomos'])):
             subtomo_label_path = join('volumes/labels/',
-                                            label_name)
+                                      label_name)
             subtomo_h5_internal_path = join(subtomo_label_path,
                                             subtomo_name)
             f[subtomo_h5_internal_path] = output[subtomo_indx, :, :, :, :]
@@ -35,7 +35,7 @@ model_name_pkl = '0_lay_6_len_128_32_DiceLoss_ELUactiv_2ndtry.pkl'
 model_path = join(model_dir, model_name_pkl)
 model = UNet_6(1, 1, final_activation=nn.ELU())
 model.load_state_dict(torch.load(model_path))
-#model.load_state_dict(torch.load(model_path, map_location='cpu'))
+# model.load_state_dict(torch.load(model_path, map_location='cpu'))
 model = model.eval()
 
 # load data
