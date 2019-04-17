@@ -1,5 +1,17 @@
+<<<<<<< HEAD
 .eman2log.txt
 log_dice_multi_label/
+=======
+src/python/datasets/__pycache__/*
+src/python/filereaders/__pycache__/*
+src/python/image/__pycache__/*
+src/python/tensors/__pycache__/*
+log_multi_class
+shrec_models
+.eman2log.txt
+log_dice_multi_label/
+log_multi_class/shrec_models/
+>>>>>>> 2baeb6606df4a2d61084c911d71b47d56b26c42f
 shrec_models/
 shrec_sph_logs/
 mixed_logs/

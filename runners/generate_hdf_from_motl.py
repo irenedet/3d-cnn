@@ -1,6 +1,7 @@
 from os.path import join
 from os import makedirs
 import argparse
+
 #
 parser = argparse.ArgumentParser()
 parser.add_argument("-motl", "--path_to_motl",
@@ -42,4 +43,4 @@ write_hdf_particles_from_motl(path_to_motl=path_to_motl,
                               values_in_motl=True,
                               number_of_particles=None,
                               z_shift=z_shift,
-                              switch_to_zyx=True)
+                              particles_in_tom_format=True)

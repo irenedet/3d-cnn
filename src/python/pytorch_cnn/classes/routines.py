@@ -97,6 +97,7 @@ def train(model, loader, optimizer, loss_function,
             if step % log_image_interval == 0:
                 # we always log the last validation images:
                 batch, channel, size_x, size_y, size_z = x.shape
+                classes = y.shape[1]
                 single_tomo_shape = (1, 1, size_x, size_y, size_z)
                 # we log four slices per cube:
                 for slice_index in range(1):
@@ -112,6 +113,7 @@ def train(model, loader, optimizer, loss_function,
                                             'cpu'),
                                         step=step)
                     if len(y.shape) == 5:
+                        channel = classes-1
                         tb_logger.log_image(tag='val_target',
                                             image=actions.crop_tensor(
                                                 y, single_tomo_shape)[
@@ -127,6 +129,7 @@ def train(model, loader, optimizer, loss_function,
                             step=step)
                     else:
                         print("the size of the target tensor is loggable")
+                    channel = classes - 1
                     tb_logger.log_image(tag='val_prediction',
                                         image=
                                         actions.crop_tensor(
