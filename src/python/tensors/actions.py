@@ -38,7 +38,7 @@ def crop_window(input, shape_to_crop, window_corner):
     # get the difference between the shapes
     crop = tuple(slice(wc, wc + csh)
                  for wc, csh in zip(window_corner, shape_to_crop))
-    # print(crop)
+    print(crop)
     return input[crop]
 
 
