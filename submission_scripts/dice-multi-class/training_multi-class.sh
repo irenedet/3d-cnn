@@ -22,11 +22,11 @@ echo '... done.'
 export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
 
 export training_data_path="/scratch/trueba/3d-cnn/training_data/dice-multi-class/004/G_sigma1/train_and_test_partitions/train_partition.h5"
-export label_name="ribos_corrected_fas_memb"
+export label_name="ribo_fas_memb"
 export split=70
 export output_classes=3 #background is not a class
 export log_dir="/g/scb2/zaugg/trueba/3d-cnn/log_dice_multi_label"
-export model_initial_name="w_1_1_1_"
+export model_initial_name="0_w_1_1_1_"
 export model_path="models/dice_multi_label"
 export n_epochs=10
 export weight='1,1,1' #background, ribos, fas, membranes

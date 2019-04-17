@@ -113,7 +113,7 @@ def train(model, loader, optimizer, loss_function,
                                             'cpu'),
                                         step=step)
                     if len(y.shape) == 5:
-                        channel = classes-1
+                        channel = classes - 1
                         tb_logger.log_image(tag='val_target',
                                             image=actions.crop_tensor(
                                                 y, single_tomo_shape)[
@@ -123,14 +123,14 @@ def train(model, loader, optimizer, loss_function,
                     elif len(y.shape) == 4:
                         y_single_tomoshape = (1, size_x, size_y, size_z)
                         tb_logger.log_image(
-                            tag='val_target',
+                            tag='val_target_class' + str(channel),
                             image=actions.crop_tensor(y, y_single_tomoshape)[
                                 batch, slice_index].to('cpu'),
                             step=step)
                     else:
                         print("the size of the target tensor is loggable")
                     channel = classes - 1
-                    tb_logger.log_image(tag='val_prediction',
+                    tb_logger.log_image(tag='val_pred_class' + str(channel),
                                         image=
                                         actions.crop_tensor(
                                             prediction, single_tomo_shape)[
