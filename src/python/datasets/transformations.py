@@ -350,7 +350,6 @@ def transform_data_from_h5(training_data_path: str, label_name: str,
     return
 
 
-<<<<<<< HEAD
 def transform_data_from_h5_dice_multi_class(training_data_path: str,
                                             segmentation_names: list,
                                             number_iter: int,
@@ -393,8 +392,6 @@ def transform_data_from_h5_dice_multi_class(training_data_path: str,
     return
 
 
-=======
->>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 def transform_data(raw_data: np.array, labeled_data: np.array,
                    transform=True) -> tuple:
     if transform:
@@ -429,7 +426,6 @@ def transform_data(raw_data: np.array, labeled_data: np.array,
     else:
         print("The data in the first iteration is intact.")
         return raw_data, labeled_data
-<<<<<<< HEAD
 
 
 def transform_data_dice_multi_class(raw_data: np.array, labeled_data: np.array,
@@ -444,5 +440,3 @@ def transform_data_dice_multi_class(raw_data: np.array, labeled_data: np.array,
     else:
         print("The data in the first iteration is intact.")
         return raw_data, labeled_data
-=======
->>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
