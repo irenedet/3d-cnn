@@ -26,7 +26,7 @@
 
 export path_to_raw="/scratch/trueba/3d-cnn/clean/180426_004/subtomo380-600.hdf"
 #export labels_dataset_list="/struct/mahamid/Irene/yeast/180426/004/training/dice_multi_class/ribos_corrected.hdf:"
-export output_dir="/scratch/trueba/3d-cnn/training_data/dice-multi-class/004/G_sigma1_right_splitting/"
+export output_dir="/scratch/trueba/3d-cnn/training_data/dice-multi-class/004/G_sigma1/"
 export shape_x=928
 export shape_y=928
 export shape_z=221

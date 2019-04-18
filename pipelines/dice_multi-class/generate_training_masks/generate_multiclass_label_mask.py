@@ -7,25 +7,25 @@ from src.python.filewriters.h5 import write_dataset_hdf
 
 output_path = "/struct/mahamid/Irene/yeast/180426/004/training/dice_multi_class"
 makedirs(name=output_path, exist_ok=True)
-output_shape = (251, 928, 928)
+output_shape = (221, 928, 928)
 
 masks_list = [
     {'label': 'ribos',
      'file': "/scratch/trueba/3d-cnn/clean/180426_004/clean_mask.hdf",
      'threshold': 1,
-     'value': 2},
+     'value': 1},
     {'label': 'corrected',
      'file': "/struct/mahamid/Irene/predictions/180426/004/particles_mask.hdf",
      'threshold': 1,
-     'value': 2},
-    {'label': 'fas',
-     'file': "/scratch/trueba/3d-cnn/clean/180426_004/fas_clean_mask.hdf",
-     'threshold': 0.25,
-     'value': 3},
-    {'label': 'memb',
-     'file': "/scratch/trueba/3d-cnn/clean/180426_004/membrane_segmentation.hdf",
-     'threshold': 2.6,
      'value': 1},
+    {'label': 'fas',
+     'file': "/scratch/trueba/3d-cnn/clean/180426_004/fas_clean_mask_subregion.hdf",
+     'threshold': 0.25,
+     'value': 2},
+    {'label': 'memb',
+     'file': "/scratch/trueba/cnn/004/4bin/cnn/membrane_segmentation.hdf",
+     'threshold': 4,
+     'value': 3},
 ]
 
 """

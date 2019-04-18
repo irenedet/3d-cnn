@@ -149,63 +149,6 @@ class DiceCoefficientLoss_multilabel(nn.Module):
             intersection = (channel_prediction * channel_target).sum()
             denominator = (channel_prediction * channel_prediction).sum() \
                           + (channel_target * channel_target).sum()
-            dice_loss -= (
-            2 * weight * intersection / denominator.clamp(min=self.eps))
+            dice_loss += weight * (1 - 2 * intersection / denominator.clamp(
+                min=self.eps))
         return dice_loss
-
-        # From the internet
-        # def dice_coef(y_true, y_pred):
-        #     smooth = 5e-6
-        #     y_true_f = K.flatten(y_true)
-        #     y_pred_f = K.flatten(y_pred)
-        #     intersection = K.sum(y_true_f * y_pred_f)
-        #     return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
-        #
-        # def dice_coef_multilabel(y_true, y_pred, numLabels=5):
-        #     dice = 0
-        #     for index in range(numLabels):
-        #         dice -= dice_coef(y_true[:, index, :, :, :], y_pred[:, index, :, :, :])
-        #     return dice
-
-
-
-        # class NLLLoss(nn.Module):
-        #     def __init__(self, class_weights=None):
-        #         super().__init__()
-        #         self.loss = nn.NLLLoss(weight=class_weights)
-        #
-        #     def forward(self, prediction, target):
-        # #        prediction.float()
-# From the internet
-# def dice_coef(y_true, y_pred):
-#     smooth = 5e-6
-#     y_true_f = K.flatten(y_true)
-#     y_pred_f = K.flatten(y_pred)
-#     intersection = K.sum(y_true_f * y_pred_f)
-#     return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
-#
-# def dice_coef_multilabel(y_true, y_pred, numLabels=5):
-#     dice = 0
-#     for index in range(numLabels):
-#         dice -= dice_coef(y_true[:, index, :, :, :], y_pred[:, index, :, :, :])
-#     return dice
-
-
-
-# class NLLLoss(nn.Module):
-#     def __init__(self, class_weights=None):
-#         super().__init__()
-#         self.loss = nn.NLLLoss(weight=class_weights)
-#
-#     def forward(self, prediction, target):
-# #        prediction.float()
-        # target.long()
-        # assert prediction.shape[0] == target.shape[0]
-        # print("len(target.shape)", len(target.shape))
-        # print("len(prediction.shape)", len(prediction.shape))
-        # assert len(target.shape) == len(prediction.shape) - 1
-        #        # target = crop_tensor(target, prediction.shape)
-        #        # target = target[:, None]
-#        # target = crop_tensor(target, prediction.shape)
-#        # target = target[:, None]
-        # return self.loss(prediction, target.long())

@@ -153,6 +153,68 @@ def write_dataset_from_subtomos_with_overlap_multiclass(output_path,
     print("right before deleting the maximum is", np.max(tomo_data))
     del tomo_data
 
+def write_dataset_from_subtomos_with_overlap_dice_multiclass(output_path,
+                                                        subtomo_path,
+                                                        output_shape,
+                                                        subtomo_shape,
+                                                        subtomos_internal_path,
+                                                        class_number,
+                                                        overlap):
+    output_shape_with_overlap = output_shape  # [dim + overlap_thickness for
+    # dim in
+    # output_shape]
+    print("The output shape is", output_shape_with_overlap)
+    tomo_data = np.zeros(output_shape_with_overlap)
+
+    internal_subtomo_shape = tuple([subtomo_dim - 2 * overlap for
+                                    subtomo_dim in subtomo_shape])
+    with h5py.File(subtomo_path, 'r') as f:
+        for subtomo_name in list(f[subtomos_internal_path]):
+            subtomo_center = subtomos.get_coord_from_name(subtomo_name)
+            start_corner, end_corner, lengths = subtomos.get_subtomo_corners(
+                output_shape,
+                internal_subtomo_shape,
+                subtomo_center)
+            overlap_shift = overlap * np.array([1, 1, 1])
+            start_corner -= overlap_shift
+            end_corner -= overlap_shift
+            subtomo_h5_internal_path = join(subtomos_internal_path,
+                                            subtomo_name)
+            channels = f[subtomo_h5_internal_path][:].shape[0]
+            internal_subtomo_data = np.zeros(lengths)
+            if channels > 1:
+                # ToDo: define if we want this to plot only one class at a time (delete for loop... not needed)
+                for n in range(1):  # leave out the background class
+                    channel_data = f[subtomo_h5_internal_path][
+                                   overlap:lengths[0] + overlap,
+                                   overlap:lengths[1] + overlap,
+                                   overlap:lengths[2] + overlap]
+                    print("channel ", n, ", min, max = ", np.min(channel_data),
+                          np.max(channel_data))
+                    internal_subtomo_data += channel_data
+                    # ToDo bring back to?:
+                    # for n in range(channels - 1):  # leave out the background class
+                    #     channel_data = f[subtomo_h5_internal_path][n + 1,
+                    #                    overlap:lengths[0] + overlap,
+                    #                    overlap:lengths[1] + overlap,
+                    #                    overlap:lengths[2] + overlap]
+                    #     print("channel ", n, ", min, max = ", np.min(channel_data),
+                    #           np.max(channel_data))
+                    #     internal_subtomo_data += channel_data
+            else:
+                internal_subtomo_data = f[subtomo_h5_internal_path][0,
+                                        overlap:lengths[0] + overlap,
+                                        overlap:lengths[1] + overlap,
+                                        overlap:lengths[2] + overlap]
+            tomo_data[start_corner[0]: end_corner[0],
+            start_corner[1]: end_corner[1],
+            start_corner[2]: end_corner[2]] = internal_subtomo_data
+            print("internal_subtomo_data = ",
+                  internal_subtomo_data.shape)
+    write_dataset_hdf(output_path, tomo_data)
+    print("right before deleting the maximum is", np.max(tomo_data))
+    del tomo_data
+
 
 def write_dataset_from_subtomos_with_overlap_multiclass_exponentiating(
         output_path,
