@@ -77,7 +77,7 @@ net_confs = [
      'initial_features': 8,
      "out_channels": output_classes},
     {'final_activation': nn.LogSoftmax(dim=1),
-     'depth': 3,
+     'depth': 1,
      'initial_features': 8,
      "out_channels": output_classes}
 ]

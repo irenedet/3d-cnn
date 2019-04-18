@@ -242,11 +242,8 @@ max_F1 = np.max(F1_score)
 optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
 auPRC = pr_auc_score(precision=precision, recall=recall)
 
-<<<<<<< HEAD
 print("auPRC = ", auPRC, "and max_F1 = ", max_F1)
 
-=======
->>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 pr_legend_str = "auPRC = " + str(round(auPRC, 4))
 f1_legend_str = "(max_F1, best_peaks) = (" + str(
     round(max_F1, 4)) + ", " + str(

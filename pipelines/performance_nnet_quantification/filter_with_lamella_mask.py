@@ -1,19 +1,65 @@
 import numpy as np
 from os import makedirs
+from os.path import join
 from src.python.filereaders.hdf import _load_hdf_dataset
 from src.python.filereaders.csv import read_motl_from_csv
 from src.python.filewriters.csv import motl_writer
 
-lamella_file = "/scratch/trueba/3d-cnn/clean/180426_004/004_lamellamask_subtomo.hdf"
-csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/multi-class/G_s1_D4_IF8_w_1_64_1200_250/motl_3266_class_2.csv"
-conserved_points_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/multi-class/G_s1_D4_IF8_w_1_64_1200_250/fas/in_lamella_wide"
-discarded_points_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/multi-class/G_s1_D4_IF8_w_1_64_1200_250/fas/outside_lamella_wide"
-border_thickness = 20
-lamella_border = 40 # because lamella mask does not cover all the region of interest
-x_shape = 928
-y_shape = 928
-z_shape = 221
-z_shift = 380
+# lamella_file = "/scratch/trueba/3d-cnn/clean/180426_004/004_lamellamask_subtomo.hdf"
+# csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/multi-class/G_s1_D4_IF8_w_1_64_1200_250/motl_3266_class_2.csv"
+# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/multi-class/G_s1_D4_IF8_w_1_64_1200_250/fas"
+# dataset_border_xy = 20
+# lamella_extension = 40 # because lamella mask does not cover all the region of interest
+# x_dim = 928
+# y_dim = 928
+# z_dim = 221
+# z_shift = 380
+
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-output_dir", "--output_dir",
+                    help="path to the output directory",
+                    type=str)
+parser.add_argument("-lamella_file", "--lamella_file",
+                    help="path to lamella mask file",
+                    type=str)
+parser.add_argument("-csv_motl", "--csv_motl",
+                    help="path to motl in csv format",
+                    type=str)
+parser.add_argument("-border_xy", "--dataset_border_xy",
+                    help="border thickness in xy plane to discard particles",
+                    type=int)
+parser.add_argument("-lamella_extension", "--lamella_extension",
+                    help="pixels up and down the lamella that will be added",
+                    type=int)
+parser.add_argument("-x_dim", "--output_xdim",
+                    help="name of category to be segmented",
+                    type=int)
+parser.add_argument("-y_dim", "--output_ydim",
+                    help="name of category to be segmented",
+                    type=int)
+parser.add_argument("-z_dim", "--output_zdim",
+                    help="name of category to be segmented",
+                    type=int)
+parser.add_argument("-z_shift", "--z_shift_original",
+                    help="name of category to be segmented",
+                    type=int)
+
+args = parser.parse_args()
+lamella_file = args.lamella_file
+csv_motl = args.csv_motl
+x_dim = args.output_xdim
+y_dim = args.output_ydim
+z_dim = args.output_zdim
+dataset_border_xy = args.dataset_border_xy
+lamella_extension = args.lamella_extension
+output_dir = args.output_dir
+z_shift = args.z_shift_original
+
+
+conserved_points_dir = join(output_dir, "in_lamella")
+discarded_points_dir = join(output_dir, "outside_lamella")
 makedirs(name=conserved_points_dir, exist_ok=True)
 makedirs(name=discarded_points_dir, exist_ok=True)
 
@@ -31,20 +77,20 @@ discarded_values = []
 for value, point in zip(motl_values, predicted_coordinates):
     point = [int(entry) for entry in point]
     x, y, z = point
-    z_up = z - z_shift + lamella_border
-    z_down = z - z_shift - lamella_border
-    lamella_border_up = np.min([z_up, z_shape - 1])
+    z_up = z - z_shift + lamella_extension
+    z_down = z - z_shift - lamella_extension
+    lamella_border_up = np.min([z_up, z_dim - 1])
     lamella_border_down = np.max([z_down, 0])
     if lamella_indicator[z - z_shift, y, x] == 1 and np.min(
-            [x, y, x_shape - x, y_shape - y]) > border_thickness:
+            [x, y, x_dim - x, y_dim - y]) > dataset_border_xy:
         conserved_values += [value]
         conserved_points += [point]
     elif lamella_indicator[lamella_border_up, y, x] == 1 and np.min(
-            [x, y, x_shape - x, y_shape - y]) > border_thickness:
+            [x, y, x_dim - x, y_dim - y]) > dataset_border_xy:
         conserved_values += [value]
         conserved_points += [point]
     elif lamella_indicator[lamella_border_down, y, x] == 1 and np.min(
-            [x, y, x_shape - x, y_shape - y]) > border_thickness:
+            [x, y, x_dim - x, y_dim - y]) > dataset_border_xy:
         conserved_values += [value]
         conserved_points += [point]
     else:

@@ -26,9 +26,9 @@ export label_name="ribo_fas_memb"
 export split=110
 export output_classes=3 #background is not a class
 export log_dir="/g/scb2/zaugg/trueba/3d-cnn/log_dice_multi_label"
-export model_initial_name="w_1_1_1_"
+export model_initial_name="0_w_1_1_1_"
 export model_path="models/dice_multi_label"
-export n_epochs=50
+export n_epochs=90
 export weight='1,1,1' #ribo, fas, membranes
 
 echo 'Training dice multi-label network'

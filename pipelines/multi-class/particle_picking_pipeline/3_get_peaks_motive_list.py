@@ -66,7 +66,6 @@ makedirs(name=output_dir, exist_ok=True)
 peaks_per_subtomo = 40
 number_peaks_uniquify = 7000
 
-#Todo change to accept class_number argument and get mot associated to it
 motl_file_name = write_global_motl_from_overlapping_subtomograms_multiclass(
     subtomograms_path=subtomo_path,
     motive_list_output_dir=output_dir,
