@@ -153,13 +153,14 @@ def write_dataset_from_subtomos_with_overlap_multiclass(output_path,
     print("right before deleting the maximum is", np.max(tomo_data))
     del tomo_data
 
+
 def write_dataset_from_subtomos_with_overlap_dice_multiclass(output_path,
-                                                        subtomo_path,
-                                                        output_shape,
-                                                        subtomo_shape,
-                                                        subtomos_internal_path,
-                                                        class_number,
-                                                        overlap):
+                                                             subtomo_path,
+                                                             output_shape,
+                                                             subtomo_shape,
+                                                             subtomos_internal_path,
+                                                             class_number,
+                                                             overlap):
     output_shape_with_overlap = output_shape  # [dim + overlap_thickness for
     # dim in
     # output_shape]
@@ -605,19 +606,19 @@ def split_and_write_h5_partition_dice_multi_class(h5_partition_data_path: str,
                         subtomo_name)
                     data_label_train = f[labels_subtomo_h5_internal_path][:]
                     f_train[labels_subtomo_h5_internal_path] = data_label_train
-                    # with h5py.File(h5_test_patition_path, "w") as f_test:
-                    #     for subtomo_name in raw_subtomo_names[split:]:
-                    #         raw_subtomo_h5_internal_path \
-                    #             = join(h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
-                    #         data_raw_test = f[raw_subtomo_h5_internal_path][:]
-                    #         f_test[raw_subtomo_h5_internal_path] = data_raw_test
-                    #         for label_name in segmentation_names:
-                    #             labels_subtomo_h5_internal_path = join(
-                    #                 h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
-                    #             labels_subtomo_h5_internal_path = join(
-                    #                 labels_subtomo_h5_internal_path,
-                    #                 subtomo_name)
-                    #             data_label_test = f[labels_subtomo_h5_internal_path][:]
-                    #             f_test[labels_subtomo_h5_internal_path] = data_label_test
 
+        with h5py.File(h5_test_patition_path, "w") as f_test:
+            for subtomo_name in raw_subtomo_names[split:]:
+                raw_subtomo_h5_internal_path = join(
+                    h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
+                data_raw_test = f[raw_subtomo_h5_internal_path][:]
+                f_test[raw_subtomo_h5_internal_path] = data_raw_test
+                for label_name in segmentation_names:
+                    labels_subtomo_h5_internal_path = join(
+                        h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
+                    labels_subtomo_h5_internal_path = join(
+                        labels_subtomo_h5_internal_path,
+                        subtomo_name)
+                    data_label_test = f[labels_subtomo_h5_internal_path][:]
+                    f_test[labels_subtomo_h5_internal_path] = data_label_test
     return
