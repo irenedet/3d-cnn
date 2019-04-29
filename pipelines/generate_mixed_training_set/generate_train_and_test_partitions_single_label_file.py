@@ -2,6 +2,7 @@
 from os import makedirs
 
 from src.python.filereaders.hdf import _load_hdf_dataset
+from src.python.tensors.actions import crop_window
 from src.python.datasets.transformations import transform_data_from_h5
 from src.python.datasets.actions import partition_raw_and_labels_tomograms
 from src.python.filewriters.h5 import split_and_write_h5_partition
@@ -31,9 +32,9 @@ parser.add_argument("-shapez", "--output_shape_z",
 parser.add_argument("-number_iter", "--number_iter",
                     type=int)
 parser.add_argument("-split", "--split",
-                    type=int)
+                    type=float)
 parser.add_argument("-train_split", "--train_split",
-                    type=int)
+                    type=float)
 parser.add_argument("-overlap", "--overlap",
                     type=int)
 
@@ -68,7 +69,7 @@ from os.path import join
 # train_split = 110  # within training data for nnet training
 # overlap = 12
 
-assert split > train_split
+
 
 output_shape = (shape_y, shape_y, shape_x)
 subtomogram_shape = (box_side, box_side, box_side)
@@ -88,6 +89,20 @@ makedirs(name=output_dir, exist_ok=True)
 
 raw_dataset = _load_hdf_dataset(hdf_file_path=path_to_raw)
 labels_dataset = _load_hdf_dataset(hdf_file_path=path_to_labeled)
+
+print("raw_dataset.shape =", raw_dataset.shape)
+print("labels_dataset.shape =", labels_dataset.shape)
+
+crop_shape = tuple([min([r_shape, l_shape]) for r_shape, l_shape in
+                    zip(raw_dataset.shape, labels_dataset.shape)])
+
+raw_dataset = crop_window(input=raw_dataset, shape_to_crop=crop_shape,
+                          window_corner=(0, 0, 0))
+labels_dataset = crop_window(input=labels_dataset, shape_to_crop=crop_shape,
+                             window_corner=(0, 0, 0))
+
+print("crop_shape =", crop_shape)
+
 partition_raw_and_labels_tomograms(raw_dataset=raw_dataset,
                                    labels_dataset=labels_dataset,
                                    label_name=label_name,

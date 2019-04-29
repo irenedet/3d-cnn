@@ -13,6 +13,8 @@ def read_training_data(training_data_path: str,
     labels = []
     with h5py.File(training_data_path, 'r') as f:
         raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
+        if split > 0:
+            split = int(split*len(raw_subtomo_names))
         for subtomo_name in raw_subtomo_names[:split]:
             raw_subtomo_h5_internal_path = join(
                 h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)

@@ -90,6 +90,8 @@ def partition_raw_and_labels_tomograms(raw_dataset: np.array,
                                        ):
     padded_raw_dataset = pad_dataset(raw_dataset, subtomo_shape, overlap)
     padded_labels_dataset = pad_dataset(labels_dataset, subtomo_shape, overlap)
+    assert padded_raw_dataset.shape == padded_labels_dataset.shape
+
     padded_particles_coordinates = get_particle_coordinates_grid_with_overlap(
         padded_raw_dataset.shape,
         subtomo_shape,

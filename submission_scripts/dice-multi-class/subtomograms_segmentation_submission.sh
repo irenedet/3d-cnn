@@ -6,7 +6,7 @@
 #SBATCH --mem 32G
 #SBATCH --time 0-10:00
 #SBATCH -o slurm.%N.%j.out
-#SBAtCH -e slurm.%N.%j.err
+#SBATCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=irene.de.teresa@embl.de
 

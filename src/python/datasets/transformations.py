@@ -314,7 +314,7 @@ class AdditiveGaussianNoise(Transform):
 
 
 def transform_data_from_h5(training_data_path: str, label_name: str,
-                           number_iter: int, output_data_path: str, split: int):
+                           number_iter: int, output_data_path: str, split: float):
     raw_data, labeled_data = h5.read_training_data(training_data_path,
                                                    label_name=label_name,
                                                    split=split)

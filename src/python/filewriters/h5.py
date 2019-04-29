@@ -301,6 +301,7 @@ def write_joint_raw_and_labels_subtomograms(output_path: str,
             subtomo_label_h5_internal_path = join(
                 subtomo_label_h5_internal_path,
                 subtomo_name)
+
             subtomo_label_data = crop_window_around_point(
                 input=padded_labels_dataset,
                 crop_shape=crop_shape,
@@ -537,7 +538,7 @@ def write_hdf_particles_from_motl(path_to_motl: str,
 def split_and_write_h5_partition(h5_partition_data_path: str,
                                  h5_train_patition_path: str,
                                  h5_test_patition_path: str,
-                                 split: int,
+                                 split: float,
                                  label_name="particles",
                                  shuffle=True) -> tuple:
     with h5py.File(h5_partition_data_path, 'r') as f:
@@ -546,6 +547,7 @@ def split_and_write_h5_partition(h5_partition_data_path: str,
             random.shuffle(raw_subtomo_names)
         else:
             print("Splitting sets without shuffling")
+        split = int(split * len(raw_subtomo_names))
         with h5py.File(h5_train_patition_path, "w") as f_train:
             for subtomo_name in raw_subtomo_names[:split]:
                 raw_subtomo_h5_internal_path \
