@@ -2,7 +2,7 @@
 
 import sys
 from os.path import join
-
+from src.python.pytorch_cnn.utils import save_unet_model
 # import os
 # import re
 
@@ -33,7 +33,7 @@ print("*************************************")
 
 
 def get_testing_and_training_sets_from_partition(training_data_path: str,
-                                                 split: tuple):
+                                                 split=0.8):
     print("The training data path is ", training_data_path)
     raw_data, labels = h5.read_training_data(training_data_path,
                                              label_name=label_name)
@@ -53,43 +53,37 @@ def get_testing_and_training_sets_from_partition(training_data_path: str,
 
 # check if we have  a gpu
 device = get_device()
-
+training_data_paths = [
+    "/struct/mahamid/Irene/yeast/ribosomes/180426_004/G_sigma1/train_and_test_partitions/train_partition.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180426_005/G_sigma1/train_and_test_partitions/train_partition.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180426_021/G_sigma1/train_and_test_partitions/train_partition.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180426_024/G_sigma1/train_and_test_partitions/train_partition.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180711_003/G_sigma1/train_and_test_partitions/train_partition.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180711_004/G_sigma1/train_and_test_partitions/train_partition.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180711_005/G_sigma1/train_and_test_partitions/train_partition.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180711_018/G_sigma1/train_and_test_partitions/train_partition.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180713_027/G_sigma1/train_and_test_partitions/train_partition.h5",
+]
 # Loading training and testing sets from different files
-training_data_path = \
-    "/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/004/train_and_test_partitions/partition_training.h5"
-label_name = "ribosomes"
-# split = (110, 130)  # this works for 004 and 006
-split = 110
-print("Done loading training set from 004.")
-train_data, train_labels, val_data, val_labels, _ = \
-    get_testing_and_training_sets_from_partition(training_data_path, split)
+for n, training_data_path in enumerate(training_data_paths):
+    label_name = "ribosomes"
+    split = 0.8
+    print("Done loading training set from ", training_data_path)
+    if n == 0:
+        train_data, train_labels, val_data, val_labels, _ = \
+            get_testing_and_training_sets_from_partition(training_data_path,
+                                                         split)
+    else:
+        train_data_tmp, train_labels_tmp, val_data_tmp, val_labels_tmp, _ = \
+            get_testing_and_training_sets_from_partition(training_data_path,
+                                                         split)
 
-training_data_path = \
-    "/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/005/train_and_test_partitions/partition_training.h5"
+        train_data = np.concatenate((train_data, train_data_tmp), axis=0)
+        train_labels = np.concatenate((train_labels, train_labels_tmp), axis=0)
+        val_data = np.concatenate((val_data, val_data_tmp), axis=0)
+        val_labels = np.concatenate((val_labels, val_labels_tmp), axis=0)
 
-train_data_tmp, train_labels_tmp, val_data_tmp, val_labels_tmp, _ = \
-    get_testing_and_training_sets_from_partition(training_data_path,
-                                                 split=77)
-                                                 # split=(77, 90))
-
-print("Done loading training set from 005.")
-train_data = np.concatenate((train_data, train_data_tmp), axis=0)
-train_labels = np.concatenate((train_labels, train_labels_tmp), axis=0)
-val_data = np.concatenate((val_data, val_data_tmp), axis=0)
-val_labels = np.concatenate((val_labels, val_labels_tmp), axis=0)
-
-training_data_path = \
-    "/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/006/train_and_test_partitions/partition_training.h5"
-
-train_data_tmp, train_labels_tmp, val_data_tmp, val_labels_tmp, _ = \
-    get_testing_and_training_sets_from_partition(training_data_path, split)
-print("Done loading training set from 006.")
-train_data = np.concatenate((train_data, train_data_tmp), axis=0)
-train_labels = np.concatenate((train_labels, train_labels_tmp), axis=0)
-val_data = np.concatenate((val_data, val_data_tmp), axis=0)
-val_labels = np.concatenate((val_labels, val_labels_tmp), axis=0)
-
-######################### Unet preparation##############################
+######################### Unet preparation ##############################
 
 # wrap into datasets
 train_set = du.TensorDataset(torch.from_numpy(train_data),
@@ -99,16 +93,17 @@ val_set = du.TensorDataset(torch.from_numpy(val_data),
 
 # wrap into data-loader
 train_loader = du.DataLoader(train_set, shuffle=True,  # we shuffle before
-                             batch_size=5)
-val_loader = du.DataLoader(val_set, batch_size=5)
+                             batch_size=10)
+val_loader = du.DataLoader(val_set, batch_size=10)
 
-for test_index in range(2):
+for test_index in range(1):
 
     net_confs = [{'depth': 5, 'initial_features': 4},
                  # {'depth': 5, 'initial_features': 8},
                  ]
 
     for conf in net_confs:
+        print("Starting training for UNET with conf =", conf)
         net = UNet(**conf)
         net = net.to(device)
 
@@ -123,13 +118,17 @@ for test_index in range(2):
         metric = metric.to(device)
 
         # built tensorboard logger
-        model_name = str(test_index) + '_UNET_shuffle_mixed_G_sigma1-5_' + \
+        model_name = str(test_index) + '_UNET_9TOMOS_' + \
                      "D_" + str(conf['depth']) + \
-                     "_IF_" + str(conf['initial_features']) + "_"
+                     "_IF_" + str(conf['initial_features'])
+        print("The model name is ", model_name)
+
         log_dir = join('mixed_logs/', model_name)
         logger = TensorBoard(log_dir=log_dir, log_image_interval=1)
         print("The neural network training is now starting")
         n_epochs = 30
+        model_name_pkl = model_name + ".pkl"
+        model_path_pkl = join("./mixed_models/", model_name_pkl)
         for epoch in range(n_epochs):
             # apply training for one epoch
             train_float(net, train_loader, optimizer=optimizer,
@@ -138,12 +137,23 @@ for test_index in range(2):
                         tb_logger=logger)
             step = epoch * len(train_loader.dataset)
             # run validation after training epoch
-            validate_float(net, val_loader, loss, metric, device=device,
-                           step=step,
-                           tb_logger=logger)
-        model_name_pkl = model_name + ".pkl"
-        model_path = join("./mixed_models/", model_name_pkl)
-        torch.save(net.state_dict(), model_path)
+            current_validation_loss = validate_float(net, val_loader, loss,
+                                                     metric,
+                                                     device=device,
+                                                     step=step,
+                                                     tb_logger=logger)
+
+            if epoch == 0:
+                validation_loss = current_validation_loss
+            else:
+                if current_validation_loss <= validation_loss:
+                    best_epoch = epoch
+                    validation_loss = current_validation_loss
+                    save_unet_model(path_to_model=model_path_pkl, epoch=epoch,
+                                    net=net, optimizer=optimizer, loss=loss)
+                else:
+                    print("this model was not the best")
+
 
         model_name_txt = model_name + ".txt"
         data_txt_path = join("./mixed_models", model_name_txt)

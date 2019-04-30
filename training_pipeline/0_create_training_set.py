@@ -2,7 +2,7 @@
 from os import makedirs
 
 from src.python.filereaders.hdf import _load_hdf_dataset
-from src.python.datasets.transformations import transform_data_from_h5
+from src.python.datasets.random_transformations import transform_data_from_h5
 from src.python.datasets.actions import partition_raw_and_labels_tomograms
 
 import argparse

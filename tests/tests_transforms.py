@@ -1,4 +1,4 @@
-from src.python.datasets.transformations import ElasticTransform, RandomRot3D, \
+from src.python.datasets.random_transformations import ElasticTransform, RandomRot3D, \
     RandomFlip3D, AdditiveGaussianNoise
 # import h5py
 from os.path import join

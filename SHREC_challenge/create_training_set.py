@@ -2,7 +2,7 @@ from os.path import join
 from os import makedirs
 
 from src.python.filereaders.hdf import _load_hdf_dataset
-from src.python.datasets.transformations import transform_data_from_h5
+from src.python.datasets.random_transformations import transform_data_from_h5
 
 path_to_raw = "/scratch/trueba/shrec/0/reconstruction_model_0.hdf"
 # path_to_labeled = "/struct/mahamid/Irene/shrec/0/all_classes_differentiated_mask_0.hdf"

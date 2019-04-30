@@ -286,7 +286,7 @@ def write_joint_raw_and_labels_subtomograms(output_path: str,
                                             crop_shape: tuple):
     with h5py.File(output_path, 'w') as f:
         for window_center in window_centers:
-            print("window_center", window_center)
+            # print("window_center", window_center)
             subtomo_name = "subtomo_{0}".format(str(window_center))
             subtomo_raw_h5_internal_path = join(
                 h5_internal_paths.RAW_SUBTOMOGRAMS,
@@ -306,7 +306,6 @@ def write_joint_raw_and_labels_subtomograms(output_path: str,
                 input=padded_labels_dataset,
                 crop_shape=crop_shape,
                 window_center=window_center)
-            print("subtomo_max = ", np.max(subtomo_label_data))
             if np.max(subtomo_label_data) > 0.5:
                 f[subtomo_raw_h5_internal_path] = subtomo_raw_data
                 f[subtomo_label_h5_internal_path] = subtomo_label_data

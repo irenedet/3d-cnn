@@ -24,20 +24,19 @@
 #export shape_y=928
 #export shape_z=251
 
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/004/TM/004_bin4.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/005/TM/005_bin4.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/005/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/021/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/024/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/003/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/004/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/005/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/018/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180713/027/TM/motl_clean_4b.em
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/004/etomo/bin4/004_df_sorted.rec done
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/005/TM/005_bin4.em done
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/021/etomo/bin4/021_df_sorted.rec done
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/024/etomo/bin4/024_df_sorted.rec done
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/003/etomo/bin4/003_df_sorted.rec done
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/004/etomo/bin4/004_df_sorted.rec done
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/005/etomo/bin4/005_df_sorted.rec done
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/018/etomo/bin4/018_df_sorted.rec done
+#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180713/027/etomo/bin4/027_df_sorted.rec done
 
-export raw_em="/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/005/TM/005_bin4.em"
+export raw_em="/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/005/etomo/bin4/005_df_sorted.rec"
 export path_to_raw="/struct/mahamid/Irene/yeast/ribosomes/180426_005/005_bin4.hdf"
-export path_to_labeled="/struct/mahamid/Irene/yeast/ribosomes/180426_005/particles_corrected.hdf"
+export path_to_labeled="/struct/mahamid/Irene/yeast/ribosomes/180426_005/particles_mask.hdf"
 export output_dir="/struct/mahamid/Irene/yeast/ribosomes/180426_005/G_sigma1/"
 
 
@@ -51,7 +50,7 @@ export box_side=128
 
 # For data augmentation:
 export number_iter=6
-export train_split=0.8  # percentage of training set
+export train_split=0.8  # percentage of training set (within training + validation)
 export overlap=12
 
 echo "applying EMAN2 filter to tomogram"

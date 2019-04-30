@@ -1,6 +1,6 @@
 from os import makedirs
 from os.path import join
-from src.python.datasets.transformations import \
+from src.python.datasets.random_transformations import \
     transform_data_from_h5_dice_multi_class
 from src.python.datasets.actions import \
     partition_raw_and_labels_tomograms_dice_multiclass

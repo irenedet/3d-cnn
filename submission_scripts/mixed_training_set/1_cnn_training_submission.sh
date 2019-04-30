@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 64G
-#SBATCH --time 0-7:00
+#SBATCH --mem 400G
+#SBATCH --time 0-10:00
 #SBATCH -o slurm.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL

@@ -3,7 +3,7 @@ from os import makedirs
 
 from src.python.filereaders.hdf import _load_hdf_dataset
 from src.python.tensors.actions import crop_window
-from src.python.datasets.transformations import transform_data_from_h5
+from src.python.datasets.random_transformations import transform_data_from_h5
 from src.python.datasets.actions import partition_raw_and_labels_tomograms
 from src.python.filewriters.h5 import split_and_write_h5_partition
 

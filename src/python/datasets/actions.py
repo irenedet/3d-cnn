@@ -13,7 +13,7 @@ from src.python.filewriters.h5 import write_subtomograms_from_dataset, \
     write_joint_raw_and_labels_subtomograms
 
 
-def split_dataset(data: np.array, labels: np.array, split: int,
+def split_dataset(data: np.array, labels: np.array, split: float,
                   shuffle=True) -> tuple:
     data = list(data)
     labels = list(labels)
@@ -29,6 +29,12 @@ def split_dataset(data: np.array, labels: np.array, split: int,
     if isinstance(split, int):
         train_data, train_labels = data[:split], labels[:split]
         val_data, val_labels = data[split:], labels[split:]
+    elif isinstance(split, float):
+        assert 0 < split < 1
+        print("split = ", split)
+        split = int(split*len(data))
+        train_data, train_labels = data[:split], labels[:split]
+        val_data, val_labels = data[split:], labels[split:]
     elif isinstance(split, tuple):
         assert len(split) == 2
         train_data0, train_labels0 = data[:split[0]], labels[:split[0]]
@@ -39,7 +45,7 @@ def split_dataset(data: np.array, labels: np.array, split: int,
         val_data, val_labels = data[split[0]:split[1]], labels[
                                                         split[0]:split[1]]
     else:
-        print("split should be an integer or a tuple of integers")
+        print("split should be an int, a float in (0,1), or a tuple of int.")
     print("Shape of training data:", train_data.shape)
     print("Shape of validation data", val_data.shape)
     return train_data, train_labels, val_data, val_labels, data_order
