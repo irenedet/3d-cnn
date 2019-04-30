@@ -186,7 +186,7 @@ def write_dataset_from_subtomos_with_overlap_dice_multiclass(output_path,
             if channels > 1:
                 # ToDo: define if we want this to plot only one class at a time (delete for loop... not needed)
                 for n in range(1):  # leave out the background class
-                    channel_data = f[subtomo_h5_internal_path][
+                    channel_data = f[subtomo_h5_internal_path][class_number,
                                    overlap:lengths[0] + overlap,
                                    overlap:lengths[1] + overlap,
                                    overlap:lengths[2] + overlap]
