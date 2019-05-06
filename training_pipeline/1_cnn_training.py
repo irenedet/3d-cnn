@@ -38,17 +38,10 @@ print("*************************************")
 device = get_device()
 
 training_data_path = \
-<<<<<<< HEAD
     "/scratch/trueba/3d-cnn/training_data/TEST/004_last/data_aug_004_iter10_split130_more_noise.h5"
 # "/scratch/trueba/3d-cnn/training_data/TEST/004_last/data_aug_004_iter5_split130.h5"
 # "/scratch/trueba/3d-cnn/training_data/TEST/data_aug.h5"
 # "/scratch/trueba/shrec/0_test/particle1_training.h5"
-=======
-"/scratch/trueba/3d-cnn/training_data/TEST/004_last/data_aug_004_iter10_split130_more_noise.h5"
-# "/scratch/trueba/3d-cnn/training_data/TEST/004_last/data_aug_004_iter5_split130.h5"
-# "/scratch/trueba/3d-cnn/training_data/TEST/data_aug.h5"
-    # "/scratch/trueba/shrec/0_test/particle1_training.h5"
->>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 # '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
 # '/scratch/trueba/3d-cnn/training_data/training_data_side128_49examples.h5'
 # '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
@@ -102,19 +95,11 @@ for test_index in range(1):
 
 
     net_confs = [
-<<<<<<< HEAD
         # {'depth': 5, 'initial_features': 2, 'final_activation':nn.Sigmoid()},
         {'depth': 5, 'initial_features': 4, 'final_activation': nn.Sigmoid()},
         {'depth': 5, 'initial_features': 8, 'final_activation': nn.Sigmoid()},
         # {'depth': 3, 'initial_features': 16, 'final_activation':nn.Sigmoid()}
     ]
-=======
-                 # {'depth': 5, 'initial_features': 2},
-                 {'depth': 5, 'initial_features': 4},
-                 {'depth': 5, 'initial_features': 8},
-                 # {'depth': 3, 'initial_features': 16}
-                 ]
->>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
 
     for conf in net_confs:
         net = UNet(**conf)
@@ -140,7 +125,6 @@ for test_index in range(1):
         n_epochs = 30
         for epoch in range(n_epochs):
             # apply training for one epoch
-<<<<<<< HEAD
             train_float(net, train_loader, optimizer=optimizer,
                         loss_function=loss,
                         epoch=epoch, device=device, log_interval=1,
@@ -150,14 +134,6 @@ for test_index in range(1):
             validate_float(net, val_loader, loss, metric, device=device,
                            step=step,
                            tb_logger=logger)
-=======
-            train_float(net, train_loader, optimizer=optimizer, loss_function=loss,
-                  epoch=epoch, device=device, log_interval=1, tb_logger=logger)
-            step = epoch * len(train_loader.dataset)
-            # run validation after training epoch
-            validate_float(net, val_loader, loss, metric, device=device, step=step,
-                     tb_logger=logger)
->>>>>>> a989e851b8c49f42fa934d68991d6e56448b2c0f
         model_name_pkl = model_name + ".pkl"
         model_path = join("./models/", model_name_pkl)
         torch.save(net.state_dict(), model_path)

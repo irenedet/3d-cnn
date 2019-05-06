@@ -75,7 +75,8 @@ Header, motl_true = load_em_motl(path_to_emfile=path_to_motl_clean)
 
 true_coordinates = extract_coordinates_from_em_motl(motl_true)
 print("len(true_coordinates) = ", len(true_coordinates))
-print("min_z", np.min([point[2] for point in true_coordinates]))
+print("true_coordinates.shape", true_coordinates[:10])
+
 predicted_coordinates = [np.array([row[7], row[8], row[9]]) for row in
                          motl_predicted]
 motl_values = [row[0] for row in motl_predicted]

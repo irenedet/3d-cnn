@@ -389,10 +389,10 @@ def segment_and_write(data_path: str, model: UNet, label_name: str):
             subtomo_data = subtomo_data[:, None]
             print("subtomo_shape ", subtomo_data.shape)
             print("segmenting ", subtomo_name)
-            segmentated_data = model(torch.from_numpy(subtomo_data))
-            segmentated_data = segmentated_data.detach().numpy()
+            segmented_data = model(torch.from_numpy(subtomo_data))
+            segmented_data = segmented_data.detach().numpy()
             _write_segmented_subtomo_data(data_file=data_file,
-                                          segmented_data=segmentated_data,
+                                          segmented_data=segmented_data,
                                           label_name=label_name,
                                           subtomo_name=subtomo_name)
 
@@ -406,7 +406,6 @@ def _write_segmented_subtomo_data(data_file: h5py.File,
     subtomo_h5_internal_path = join(
         h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS,
         label_name)
-
     subtomo_h5_internal_path = join(subtomo_h5_internal_path,
                                     subtomo_name)
     print(subtomo_h5_internal_path)

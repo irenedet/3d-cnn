@@ -49,13 +49,14 @@ parser.add_argument("-z_shift", "--z_shift_original",
 args = parser.parse_args()
 lamella_file = args.lamella_file
 csv_motl = args.csv_motl
-# x_dim = args.output_xdim
-# y_dim = args.output_ydim
-# z_dim = args.output_zdim
+x_dim = args.output_xdim
+y_dim = args.output_ydim
+z_dim = args.output_zdim
 dataset_border_xy = args.dataset_border_xy
 lamella_extension = args.lamella_extension
 output_dir = args.output_dir
 z_shift = args.z_shift_original
+
 
 conserved_points_dir = join(output_dir, "in_lamella")
 discarded_points_dir = join(output_dir, "outside_lamella")
@@ -64,10 +65,6 @@ makedirs(name=discarded_points_dir, exist_ok=True)
 
 lamella_indicator = _load_hdf_dataset(hdf_file_path=lamella_file)
 motl_predicted = read_motl_from_csv(path_to_csv_motl=csv_motl)
-
-lamella_indicator = np.array(lamella_indicator)
-z_dim, y_dim, x_dim = lamella_indicator.shape
-print("(x_dim, y_dim, z_dim) =", x_dim, y_dim, z_dim)
 
 motl_values = [row[0] for row in motl_predicted]
 predicted_coordinates = [np.array([row[7], row[8], row[9]]) for row in
@@ -99,6 +96,7 @@ for value, point in zip(motl_values, predicted_coordinates):
     else:
         discarded_points += [point]
         discarded_values += [value]
+
 
 motl_writer(path_to_output_folder=conserved_points_dir,
             list_of_peak_scores=conserved_values,

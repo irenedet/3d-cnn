@@ -41,7 +41,8 @@ parser.add_argument("-min_peak_distance", "--min_peak_distance",
                     type=int)
 parser.add_argument("-z_shift", "--z_shift_original",
                     help="name of category to be segmented",
-                    type=int)
+                    type=int,
+                    default=0)
 
 args = parser.parse_args()
 output_dir = args.output_dir

@@ -3,6 +3,7 @@
 import sys
 from os.path import join
 from src.python.pytorch_cnn.utils import save_unet_model
+
 # import os
 # import re
 
@@ -54,15 +55,15 @@ def get_testing_and_training_sets_from_partition(training_data_path: str,
 # check if we have  a gpu
 device = get_device()
 training_data_paths = [
-    "/struct/mahamid/Irene/yeast/ribosomes/180426_004/G_sigma1/train_and_test_partitions/train_partition.h5",
-    "/struct/mahamid/Irene/yeast/ribosomes/180426_005/G_sigma1/train_and_test_partitions/train_partition.h5",
-    "/struct/mahamid/Irene/yeast/ribosomes/180426_021/G_sigma1/train_and_test_partitions/train_partition.h5",
-    "/struct/mahamid/Irene/yeast/ribosomes/180426_024/G_sigma1/train_and_test_partitions/train_partition.h5",
-    "/struct/mahamid/Irene/yeast/ribosomes/180711_003/G_sigma1/train_and_test_partitions/train_partition.h5",
-    "/struct/mahamid/Irene/yeast/ribosomes/180711_004/G_sigma1/train_and_test_partitions/train_partition.h5",
-    "/struct/mahamid/Irene/yeast/ribosomes/180711_005/G_sigma1/train_and_test_partitions/train_partition.h5",
-    "/struct/mahamid/Irene/yeast/ribosomes/180711_018/G_sigma1/train_and_test_partitions/train_partition.h5",
-    "/struct/mahamid/Irene/yeast/ribosomes/180713_027/G_sigma1/train_and_test_partitions/train_partition.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180426_004/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180426_005/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180426_021/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180426_024/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180711_003/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180711_004/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180711_005/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180711_018/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
+    "/struct/mahamid/Irene/yeast/ribosomes/180713_027/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
 ]
 # Loading training and testing sets from different files
 for n, training_data_path in enumerate(training_data_paths):
@@ -98,8 +99,7 @@ val_loader = du.DataLoader(val_set, batch_size=10)
 
 for test_index in range(1):
 
-    net_confs = [{'depth': 5, 'initial_features': 4},
-                 # {'depth': 5, 'initial_features': 8},
+    net_confs = [{'depth': 5, 'initial_features': 8},
                  ]
 
     for conf in net_confs:
@@ -118,7 +118,7 @@ for test_index in range(1):
         metric = metric.to(device)
 
         # built tensorboard logger
-        model_name = str(test_index) + '_UNET_9TOMOS_' + \
+        model_name = str(test_index) + '_UNET_9TOMOS_DATA_AUG' + \
                      "D_" + str(conf['depth']) + \
                      "_IF_" + str(conf['initial_features'])
         print("The model name is ", model_name)
@@ -126,7 +126,7 @@ for test_index in range(1):
         log_dir = join('mixed_logs/', model_name)
         logger = TensorBoard(log_dir=log_dir, log_image_interval=1)
         print("The neural network training is now starting")
-        n_epochs = 30
+        n_epochs = 50
         model_name_pkl = model_name + ".pkl"
         model_path_pkl = join("./mixed_models/", model_name_pkl)
         for epoch in range(n_epochs):
@@ -153,7 +153,6 @@ for test_index in range(1):
                                     net=net, optimizer=optimizer, loss=loss)
                 else:
                     print("this model was not the best")
-
 
         model_name_txt = model_name + ".txt"
         data_txt_path = join("./mixed_models", model_name_txt)

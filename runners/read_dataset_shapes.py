@@ -1,0 +1,10 @@
+dataset_list = [" /struct/mahamid/twalther/Processing/190301/001",
+                "/struct/mahamid/twalther/Processing/190301/002",
+                "/struct/mahamid/twalther/Processing/190301/004",
+                "/struct/mahamid/twalther/Processing/190301/005",
+                "/struct/mahamid/twalther/Processing/190301/006",
+                "/struct/mahamid/twalther/Processing/190301/007",
+                "/struct/mahamid/twalther/Processing/190301/010",
+                "/struct/mahamid/twalther/Processing/190301/011",
+                "/struct/mahamid/twalther/Processing/190301/013",
+                ]

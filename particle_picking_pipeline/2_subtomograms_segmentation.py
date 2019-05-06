@@ -6,6 +6,7 @@ from src.python.pytorch_cnn.classes.unet import UNet
 from src.python.pytorch_cnn.io import get_device
 from src.python.filewriters.h5 import segment_and_write
 
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-model", "--path_to_model",
@@ -23,6 +24,10 @@ parser.add_argument("-init_feat", "--initial_features",
 parser.add_argument("-depth", "--unet_depth",
                     help="Depth of the UNet",
                     type=int)
+parser.add_argument("-new_loader", "--new_loader",
+                    help="Boolean, if True, cnn loader is in the new format",
+                    default=False,
+                    type=bool)
 
 args = parser.parse_args()
 path_to_model = args.path_to_model
@@ -30,14 +35,20 @@ label_name = args.label_name
 output_h5file = args.output_h5_path
 init_feat = args.initial_features
 depth = args.unet_depth
+new_loader = args.new_loader
 
 conf = {'depth': depth, 'initial_features': init_feat}
 
 model = UNet(**conf, final_activation=nn.ELU())
 device = get_device()
-model.load_state_dict(torch.load(path_to_model, map_location=device))
+if new_loader:
+    checkpoint = torch.load(path_to_model, map_location=device)
+    model.load_state_dict(checkpoint['model_state_dict'])
+else:
+    model.load_state_dict(torch.load(path_to_model, map_location=device))
 model = model.eval()
 
 # save the segmented data in the same data file
+print("label_name = ", label_name)
 segment_and_write(data_path=output_h5file, model=model, label_name=label_name)
 print("The script has finished!")
