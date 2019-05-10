@@ -56,11 +56,12 @@ z_shift = args.output_z_shift
 x_shift = args.output_x_shift
 box = args.subtomo_box_length
 
-print("path_to_csv_motl = ", path_to_csv_motl)
+print("")
 print("output_dir = ", output_dir)
-print("testing_set_data_path = ", testing_set_data_path)
+# print("testing_set_data_path = ", testing_set_data_path)
+# print("path_to_csv_motl = ", path_to_csv_motl)
 
-#ToDo add these as input parameters for user:
+# ToDo add these as input parameters for user:
 # top_peaks = 6000
 training_split = 0
 dataset_shape = (shape_z, shape_y, shape_x)
@@ -74,8 +75,8 @@ motl_predicted = read_motl_from_csv(path_to_csv_motl)
 Header, motl_true = load_em_motl(path_to_emfile=path_to_motl_clean)
 
 true_coordinates = extract_coordinates_from_em_motl(motl_true)
-print("len(true_coordinates) = ", len(true_coordinates))
-print("min_z", np.min([point[2] for point in true_coordinates]))
+# print("len(true_coordinates) = ", len(true_coordinates))
+# print("min_z", np.min([point[2] for point in true_coordinates]))
 predicted_coordinates = [np.array([row[7], row[8], row[9]]) for row in
                          motl_predicted]
 motl_values = [row[0] for row in motl_predicted]
@@ -94,9 +95,9 @@ true_coordinates_test, _ = \
         shift=z_shift)
 true_coordinates_test = np.array(true_coordinates_test)
 end = time.time()
-print("elapsed time for splitting test and train true coordinates", end - start,
-      "sec")
-print("len(true_coordinates_test) = ", len(true_coordinates_test))
+# print("elapsed time for splitting test and train true coordinates", end - start,
+#       "sec")
+# print("len(true_coordinates_test) = ", len(true_coordinates_test))
 
 start = time.time()
 predicted_coordinates_test, _, test_predicted_coordinates_values, _ = \
@@ -110,9 +111,9 @@ predicted_coordinates_test, _, test_predicted_coordinates_values, _ = \
         subtomo_shape=subtomo_shape,
         shift=z_shift)
 end = time.time()
-print("elapsed time for splitting test and train predicted coordinates",
-      end - start, "sec")
-print("len(predicted_coordinates_test) = ", len(predicted_coordinates_test))
+# print("elapsed time for splitting test and train predicted coordinates",
+#       end - start, "sec")
+# print("len(predicted_coordinates_test) = ", len(predicted_coordinates_test))
 
 y_shift = 0
 z_shift = 0
@@ -129,8 +130,8 @@ undetected_predicted, value_detected_predicted, value_undetected_predicted = \
         true_coordinates_test,
         radius=radius)
 
-print("len(test_predicted_coordinates_values)",
-      len(test_predicted_coordinates_values))
+# print("len(test_predicted_coordinates_values)",
+#       len(test_predicted_coordinates_values))
 
 thresholded_predicted_indices = \
     np.where(np.array(test_predicted_coordinates_values) > 0)[0]
@@ -270,4 +271,4 @@ fig_name = join(figures_dir, "pr_" + title_str + ".png")
 plt.savefig(fname=fig_name,
             format="png")
 
-print("Tha script has finished. All plotes saved at ", figures_dir)
+print("All plots saved in ", figures_dir)

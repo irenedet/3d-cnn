@@ -355,7 +355,7 @@ def select_coordinates_in_subtomos(coordinates: list, subtomo_file_path: str,
                                    shift: int):
     subtomo_names = read_subtomo_names(subtomo_file_path)
     if isinstance(data_order, str):
-        print("Keeping data order from the h5 file.")
+        # print("Keeping data order from the h5 file.")
         subtomo_names_reordered = subtomo_names
     else:
         subtomo_names_reordered = [subtomo_names[i] for i in data_order]

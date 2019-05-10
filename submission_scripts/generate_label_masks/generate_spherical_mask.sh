@@ -24,8 +24,8 @@ source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/e
 #/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/005/TM/motl_clean_4b.em
 #/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/018/TM/motl_clean_4b.em
 #/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180713/027/TM/motl_clean_4b.em
-export output_dir="/struct/mahamid/Irene/yeast/ribosomes/180426_005/corrected/"
-export path_to_motl="/struct/mahamid/Shared/For_Irene/predictions/180426/005/motl_307_checked.csv"
+export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/004/D_2_IF_8_0_w_1_1_1/full_dataset/"
+export path_to_motl="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/004/D_2_IF_8_0_w_1_1_1/full_dataset/motl_1826_class_0.csv"
 
 export z_shift=0  # shift between original tomogram and subtomogram of analysis
 export shape_x=928
@@ -40,3 +40,7 @@ echo "starting to generate hdf of particles in the motl"
 python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/generate_label_masks/generate_hdf_from_motl.py -motl $path_to_motl -output $output_dir -shape_x $shape_x -shape_y $shape_y -shape_z $shape_z -radius $radius -z_shift $z_shift -coords_in_tom_format $coords_in_tom_format
 echo "...done."
 
+# ... Finally:
+echo "Save a copy of this script for future reference"
+SCRIPT=`realpath $0`
+cp $SCRIPT $output_dir"/SCRIPT_SPH_PARTICLE.txt"

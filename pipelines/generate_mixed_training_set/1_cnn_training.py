@@ -63,7 +63,7 @@ training_data_paths = [
     "/struct/mahamid/Irene/yeast/ribosomes/180711_004/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
     "/struct/mahamid/Irene/yeast/ribosomes/180711_005/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
     "/struct/mahamid/Irene/yeast/ribosomes/180711_018/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
-    "/struct/mahamid/Irene/yeast/ribosomes/180713_027/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
+    # "/struct/mahamid/Irene/yeast/ribosomes/180713_027/G_sigma1/train_and_test_partitions/data_aug_on_training_split.h5",
 ]
 # Loading training and testing sets from different files
 for n, training_data_path in enumerate(training_data_paths):
@@ -97,9 +97,9 @@ train_loader = du.DataLoader(train_set, shuffle=True,  # we shuffle before
                              batch_size=10)
 val_loader = du.DataLoader(val_set, batch_size=10)
 
-for test_index in range(1):
+for test_index in range(2):
 
-    net_confs = [{'depth': 5, 'initial_features': 8},
+    net_confs = [{'depth': 2, 'initial_features': 8},
                  ]
 
     for conf in net_confs:
@@ -118,7 +118,7 @@ for test_index in range(1):
         metric = metric.to(device)
 
         # built tensorboard logger
-        model_name = str(test_index) + '_UNET_9TOMOS_DATA_AUG' + \
+        model_name = str(test_index) + '_UNET_8TOMOS_DATA_AUG_' + \
                      "D_" + str(conf['depth']) + \
                      "_IF_" + str(conf['initial_features'])
         print("The model name is ", model_name)
