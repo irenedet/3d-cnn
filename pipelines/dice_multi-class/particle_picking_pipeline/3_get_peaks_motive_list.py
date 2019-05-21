@@ -59,12 +59,21 @@ class_number = args.class_number
 min_peak_distance = args.min_peak_distance
 z_shift = args.z_shift_original
 
+
 subtomo_shape = tuple(box_side * np.array([1, 1, 1]))
 output_shape = (output_zdim, output_ydim, output_xdim)
 makedirs(name=output_dir, exist_ok=True)
 # Future local parameters:
-peaks_per_subtomo = 40
+peaks_per_subtomo = int(box_side ** 3 / (2 * min_peak_distance) ** 3)
+print("peaks per subtomo = ", peaks_per_subtomo)
 number_peaks_uniquify = 7000
+
+# subtomo_shape = tuple(box_side * np.array([1, 1, 1]))
+# output_shape = (output_zdim, output_ydim, output_xdim)
+# makedirs(name=output_dir, exist_ok=True)
+# # Future local parameters:
+# peaks_per_subtomo = 40
+# number_peaks_uniquify = 7000
 
 motl_file_name = write_global_motl_from_overlapping_subtomograms_multiclass(
     subtomograms_path=subtomo_path,

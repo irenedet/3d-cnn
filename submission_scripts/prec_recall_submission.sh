@@ -11,14 +11,23 @@
 #SBATCH --mail-user=irene.de.teresa@embl.de
 
 
+export QT_QPA_PLATFORM='offscreen'
 
-export path_to_motl='/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_16_5_bis_/motl_4621.csv'
-export output_dir='/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_16_5_bis_/'
-export path_to_clean='/scratch/trueba/3d-cnn/clean/180426_006/motl_clean_4b.em'
+export path_to_motl="/home/papalotl/Desktop/TEST2.csv"
+export output_dir='/home/papalotl/Desktop/test_unite_motls'
+export path_to_clean="/home/papalotl/Desktop/TEST2.csv"
+
+echo path_to_motl_predicted=$path_to_motl
+echo path_to_motl_true=$path_to_clean
 export label_name='ribosomes'
+export min_peak_distance=5
+export x_shift=0
+
 
 module load Anaconda3
 echo 'starting virtual environment'
 source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
 
-bash ./prec_recall_runner.sh -motl $path_to_motl -output $output_dir -clean $path_to_clean -label $label_name
+echo 'Starting precision-recall analysis'
+python3 /g/scb2/zaugg/trueba/3d-cnn/runners/prec_recall_analysis.py -motl $path_to_motl -output $output_dir -clean $path_to_clean -label $label_name -min_peak_distance $min_peak_distance -x_shift $x_shift
+echo '... done.'

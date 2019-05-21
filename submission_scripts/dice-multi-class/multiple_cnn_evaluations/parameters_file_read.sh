@@ -3,10 +3,10 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 32G
-#SBATCH --time 0-01:00
-#SBATCH -o slurm.%N.%j.out
-#SBAtCH -e slurm.%N.%j.err
+#SBATCH --mem 64G
+#SBATCH --time 0-0:50
+#SBATCH -o slurm_outputs/cnn_evaluation.slurm.%N.%j.out
+#SBAtCH -e slurm_outputs/cnn_evaluation.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=irene.de.teresa@embl.de
 
@@ -33,6 +33,12 @@ while [ "$1" != "" ]; do
                                 ;;
         -output_dir | --output_dir )   shift
                                 output_dir=$1
+                                ;;
+        -class_number | --class_number )   shift
+                                class_number=$1
+                                ;;
+        -output_classes | --output_classes )   shift
+                                output_classes=$1
                                 ;;
         -path_to_model | --path_to_model )   shift
                                 path_to_model=$1
@@ -87,13 +93,29 @@ echo minimum_peak_distance = $minimum_peak_distance
 echo border_xy = $border_xy
 echo lamella_extension = $lamella_extension
 echo same_peak_distance = $same_peak_distance
+echo class_number = $class_number
+echo output_classes = $output_classes
+
+export path_to_model=$path_to_model
+export label_name=$label_name
+export depth=$depth
+export init_feat=$init_feat
+export box_side=$box_side
+export new_loader=$new_loader
+export minimum_peak_distance=$minimum_peak_distance
+export border_xy=$border_xy
+export lamella_extension=$lamella_extension
+export same_peak_distance=$same_peak_distance
+export class_number=$class_number
+export output_classes=$output_classes
 
 source $parameters_file
 export output_dir=$output_dir
 export summary_file=$output_dir"/summary_analysis.txt"
 touch $summary_file
 
-export output_dir=$output_dir"/"$tomo_name
+export tomo_name=$tomo_name
+export output_dir=$output_dir"/"$tomo_name"/class_"$class_number
 export test_partition=$test_partition
 export input_xdim=$input_xdim
 export input_ydim=$input_ydim
@@ -101,7 +123,8 @@ export input_zdim=$input_zdim
 export z_shift=$z_shift
 export x_shift=$x_shift
 export hdf_lamella_file=$hdf_lamella_file
-export path_to_motl_clean=$path_to_motl_clean
+export path_to_motl_clean_0=$path_to_motl_clean_0
+export path_to_motl_clean_1=$path_to_motl_clean_1
 
 echo output_dir = $output_dir
 echo test_partition = $test_partition
@@ -111,14 +134,33 @@ echo input_zdim = $input_zdim
 echo z_shift = $z_shift
 echo x_shift = $x_shift
 echo hdf_lamella_file = $hdf_lamella_file
-echo path_to_motl_clean = $path_to_motl_clean
+echo path_to_motl_clean_0=$path_to_motl_clean_0
+echo path_to_motl_clean_1=$path_to_motl_clean_1
 
+
+if [ $class_number == 0 ]; then
+    echo "class_number is 0"
+    export path_to_motl_clean=$path_to_motl_clean_0
+elif [ $class_number == 1 ]; then
+    echo "class_number is 1"
+    export path_to_motl_clean=$path_to_motl_clean_1
+else
+    echo "class_number non-supported for now"
+fi
+
+echo path_to_motl_clean = $path_to_motl_clean
+export box_overlap=12
 
 
 # 1. Segmenting, peak calling and motl writing
 echo "Calling particle picking pipeline"
-bash /g/scb2/zaugg/trueba/3d-cnn/particle_picking_pipeline/runner_in_partirtion_set.sh -test_partition $test_partition -output $output_dir -model $path_to_model -label $label_name -init_feat $init_feat -depth $depth -box $box_side -xdim $input_xdim -ydim $input_ydim -zdim $input_zdim -min_peak_distance $minimum_peak_distance -z_shift $z_shift -new_loader $new_loader
+bash /g/scb2/zaugg/trueba/3d-cnn/pipelines/dice_multi-class/particle_picking_pipeline/runner_in_partition_set.sh -test_partition $test_partition -output $output_dir -model $path_to_model -label $label_name -init_feat $init_feat -depth $depth -box $box_side -xdim $input_xdim -ydim $input_ydim -zdim $input_zdim -min_peak_distance $minimum_peak_distance -z_shift $z_shift -class_number $class_number -out_classes $output_classes -new_loader $new_loader
 echo "... done with particle picking pipeline."
+
+
+#echo "Calling particle picking pipeline"
+#python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/dice_multi-class/particle_picking_pipeline/3_get_peaks_motive_list.py -output $output_dir -label $label_name -subtomo $test_partition -box $box_side -xdim $input_xdim -ydim $input_ydim -zdim $input_zdim -class_number $class_number -min_peak_distance $minimum_peak_distance -z_shift $z_shift -overlap $box_overlap
+#echo "... done with particle picking pipeline."
 
 
 # 2. Mask coordinate points with lamella mask
@@ -131,9 +173,9 @@ echo "...done filtering points in lamella mask."
 
 # 3. Precision-Recall analysis
 export lamella_output_dir=$output_dir"/in_lamella"
-export path_to_csv_motl=$(ls $lamella_output_dir/motl*)
-
+export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir/motl*)
 
 echo "Starting to generate precision recall plots"
-python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/performance_nnet_quantification/precision_recall_plots.py -motl $path_to_csv_motl -clean $path_to_motl_clean -output $lamella_output_dir -test_file $test_partition -radius $same_peak_distance -shape_x $input_xdim -shape_y $input_ydim -shape_z $input_zdim -x_shift $x_shift -z_shift $z_shift -box $box_side >> $summary_file
+python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/performance_nnet_quantification/precision_recall_plots.py -motl $path_to_csv_motl_in_lamella -clean $path_to_motl_clean -output $lamella_output_dir -test_file $test_partition -radius $same_peak_distance -shape_x $input_xdim -shape_y $input_ydim -shape_z $input_zdim -x_shift $x_shift -z_shift $z_shift -box $box_side >> $summary_file
 echo "...done with precision recall plots."
+

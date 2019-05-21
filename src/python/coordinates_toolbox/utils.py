@@ -71,6 +71,12 @@ def extract_coordinates_from_em_motl(motl: np.array) -> np.array:
     return np.array(motl[0, :, 7:10])
 
 
+def extract_coordinates_and_values_from_em_motl(motl: np.array) -> np.array:
+    values = np.array(motl[0, :, 0])
+    coordinates = np.array(motl[0, :, 7:10])
+    return values, coordinates
+
+
 def extract_coordinates_from_txt_shrec(motive_list: np.array,
                                        particle_class=1) -> np.array:
     n = motive_list.shape[0]
@@ -98,11 +104,14 @@ def filtering_duplicate_coords(motl_coords: list, min_peak_distance: int):
     return unique_motl_coords
 
 
-def filtering_duplicate_coords_with_values(motl_coords: list, motl_values: list,
-                                           min_peak_distance: int):
+def filtering_duplicate_coords_with_values(motl_coords: list,
+                                           motl_values: list,
+                                           min_peak_distance: int,
+                                           preference_by_score=True):
     motl_coords = np.array(motl_coords)
     unique_motl_coords = [motl_coords[0]]
     unique_motl_values = [motl_values[0]]
+
     for value, point in zip(motl_values[1:], motl_coords[1:]):
         flag = "unique"
         n_point = 0
@@ -111,12 +120,13 @@ def filtering_duplicate_coords_with_values(motl_coords: list, motl_values: list,
             x_val = unique_motl_values[n_point]
             n_point += 1
             if np.linalg.norm(x - point) <= min_peak_distance:
-                if x_val < value:
+                flag = "repeated"
+                if preference_by_score and (x_val < value):
                     unique_motl_coords[n_point] = point
                     unique_motl_values[n_point] = value
-                flag = "repeated"
-                # print("repeated point = ", point)
         if flag == "unique":
             unique_motl_coords += [point]
             unique_motl_values += [value]
+    print("Number of unique coordinates after filtering:",
+          len(unique_motl_coords))
     return unique_motl_values, unique_motl_coords

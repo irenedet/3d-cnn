@@ -17,9 +17,9 @@ def _get_numb_peaks(subtomo_shape: tuple, min_peak_distance: int) -> int:
     return int(numb_peaks)
 
 
-def _shift_coordinates_by_vector(coordinates: list,
-                                 shift_vector: list) -> list:
-    return [coord + np.array(shift_vector) for coord in
+def shift_coordinates_by_vector(coordinates: list,
+                                shift_vector: np.array) -> list:
+    return [np.array(coord) + np.array(shift_vector) for coord in
             np.array(coordinates)]
 
 
@@ -34,9 +34,9 @@ def _extract_data_subtomo(h5file: h5py.File,  # before h5py._hl.files.File
            overlap:subtomo_side_lengths[2] + overlap]
 
 
-def _get_subtomo_corner_and_side_lengths(subtomo_name: str,
-                                         subtomo_shape: tuple,
-                                         output_shape: tuple) -> tuple:
+def get_subtomo_corner_and_side_lengths(subtomo_name: str,
+                                        subtomo_shape: tuple,
+                                        output_shape: tuple) -> tuple:
     subtomo_center = subtomos.get_coord_from_name(subtomo_name)
     init_points, _, subtomo_side_lengths = \
         subtomos.get_subtomo_corners(output_shape, subtomo_shape,
@@ -72,9 +72,9 @@ def _get_peaks_per_subtomo(h5file: h5py.File, subtomo_name: str,
                            overlap: int) -> tuple:  # todo verify this
 
     subtomo_corner, subtomo_side_lengths = \
-        _get_subtomo_corner_and_side_lengths(subtomo_name,
-                                             subtomo_shape,
-                                             output_shape)
+        get_subtomo_corner_and_side_lengths(subtomo_name,
+                                            subtomo_shape,
+                                            output_shape)
     print(subtomo_side_lengths)
     print("Subtomogram corner", subtomo_corner)
     # subtomo_corner -= overlap * np.array([1, 1, 1])
@@ -100,18 +100,18 @@ def _get_peaks_per_subtomo(h5file: h5py.File, subtomo_name: str,
         extract_peaks(dataset=data_subtomo, numb_peaks=numb_peaks,
                       radius=min_peak_distance)
     shifted_subtomo_maxima_coords = \
-        _shift_coordinates_by_vector(subtomo_list_of_maxima_coords,
-                                     subtomo_corner)
+        shift_coordinates_by_vector(subtomo_list_of_maxima_coords,
+                                    subtomo_corner)
     return subtomo_list_of_maxima, shifted_subtomo_maxima_coords
 
 
-def _get_peaks_per_subtomo_with_overlap(h5file: h5py.File, subtomo_name: str,
-                                        subtomo_shape: tuple,
-                                        output_shape: tuple,
-                                        subtomos_internal_path: str,
-                                        numb_peaks: int,
-                                        min_peak_distance: int,
-                                        overlap: int) -> tuple:
+def get_peaks_per_subtomo_with_overlap(h5file: h5py.File, subtomo_name: str,
+                                       subtomo_shape: tuple,
+                                       output_shape: tuple,
+                                       subtomos_internal_path: str,
+                                       numb_peaks: int,
+                                       min_peak_distance: int,
+                                       overlap: int) -> tuple:
     subtomo_corner, subtomo_side_lengths, zero_padding = \
         _get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name,
                                                           subtomo_shape,
@@ -135,12 +135,12 @@ def _get_peaks_per_subtomo_with_overlap(h5file: h5py.File, subtomo_name: str,
         extract_peaks(dataset=data_subtomo, numb_peaks=numb_peaks,
                       radius=min_peak_distance)
     shifted_subtomo_maxima_coords = \
-        _shift_coordinates_by_vector(subtomo_list_of_maxima_coords,
-                                     subtomo_corner)
+        shift_coordinates_by_vector(subtomo_list_of_maxima_coords,
+                                    subtomo_corner)
     return subtomo_list_of_maxima, shifted_subtomo_maxima_coords
 
 
-def _get_peaks_per_subtomo_with_overlap_multiclass(
+def get_peaks_per_subtomo_with_overlap_multiclass(
         h5file: h5py.File, subtomo_name: str,
         subtomo_shape: tuple,
         output_shape: tuple,
@@ -158,11 +158,12 @@ def _get_peaks_per_subtomo_with_overlap_multiclass(
     subtomo_h5_internal_path = join(subtomos_internal_path,
                                     subtomo_name)
 
-    data_subtomo = _extract_data_subtomo(h5file=h5file,
-                                         subtomo_h5_internal_path=subtomo_h5_internal_path,
-                                         subtomo_side_lengths=subtomo_side_lengths,
-                                         overlap=0,
-                                         class_number=class_number)
+    data_subtomo = _extract_data_subtomo(
+        h5file=h5file,
+        subtomo_h5_internal_path=subtomo_h5_internal_path,
+        subtomo_side_lengths=subtomo_side_lengths,
+        overlap=0,
+        class_number=class_number)
     shape_minus_overlap = tuple([dim - pad[0] - pad[1] for pad, dim in
                                  zip(zero_padding, data_subtomo.shape)])
     mask_out_overlap = np.ones(shape_minus_overlap)
@@ -172,9 +173,12 @@ def _get_peaks_per_subtomo_with_overlap_multiclass(
     subtomo_list_of_maxima, subtomo_list_of_maxima_coords = \
         extract_peaks(dataset=data_subtomo, numb_peaks=numb_peaks,
                       radius=min_peak_distance)
+    print("len(subtomo_list_of_maxima_coords) = ",
+          len(subtomo_list_of_maxima_coords))
+
     shifted_subtomo_maxima_coords = \
-        _shift_coordinates_by_vector(subtomo_list_of_maxima_coords,
-                                     subtomo_corner)
+        shift_coordinates_by_vector(subtomo_list_of_maxima_coords,
+                                    subtomo_corner)
     return subtomo_list_of_maxima, shifted_subtomo_maxima_coords
 
 
@@ -190,9 +194,9 @@ def _get_peaks_per_subtomo_old(h5file: h5py._hl.files.File, subtomo_name: str,
                                subtomos_internal_path: str, numb_peaks: int,
                                min_peak_distance: int) -> tuple:
     subtomo_corner, subtomo_side_lengths = \
-        _get_subtomo_corner_and_side_lengths(subtomo_name,
-                                             subtomo_shape,
-                                             output_shape)
+        get_subtomo_corner_and_side_lengths(subtomo_name,
+                                            subtomo_shape,
+                                            output_shape)
     # subtomo_corner -= 12*np.array([1,1,1])
     print("Subtomogram corner", subtomo_corner)
     print("subtomogram side_lengths = ", subtomo_side_lengths)
@@ -208,8 +212,8 @@ def _get_peaks_per_subtomo_old(h5file: h5py._hl.files.File, subtomo_name: str,
                       radius=min_peak_distance)
 
     shifted_subtomo_maxima_coords = \
-        _shift_coordinates_by_vector(subtomo_list_of_maxima_coords,
-                                     subtomo_corner)
+        shift_coordinates_by_vector(subtomo_list_of_maxima_coords,
+                                    subtomo_corner)
     return subtomo_list_of_maxima, shifted_subtomo_maxima_coords
 
 

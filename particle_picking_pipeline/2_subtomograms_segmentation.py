@@ -36,6 +36,7 @@ data_path = args.data_path
 init_feat = args.initial_features
 depth = args.unet_depth
 new_loader = args.new_loader
+print("new_loader", new_loader)
 
 conf = {'depth': depth, 'initial_features': init_feat}
 

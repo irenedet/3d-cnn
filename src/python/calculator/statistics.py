@@ -35,6 +35,9 @@ def precision_recall_calculator_and_detected(predicted_coordinates: np.array,
     value_detected_predicted = []
     undetected_predicted = set()
     value_undetected_predicted = []
+    redundantly_detected_true = set()
+    redundantly_detected_predicted = set()
+    value_redudndantly_detected_predicted = []
     precision = []
     recall = []
     total_current_predicted_points = 0
@@ -51,12 +54,20 @@ def precision_recall_calculator_and_detected(predicted_coordinates: np.array,
                     detected_predicted |= {tuple(predicted_point)}
                     value_detected_predicted += [score_value]
                     flag = 'detected'
+                elif ((dist <= radius) and (
+                            tuple(true_point) in detected_true)):
+                    redundantly_detected_true |= {tuple(true_point)}
+                    redundantly_detected_predicted |= {tuple(predicted_point)}
+                    value_redudndantly_detected_predicted += [score_value]
+                    flag = 'redundantly_detected'
         if flag == "undetected":
             undetected_predicted |= {tuple(predicted_point)}
             value_undetected_predicted += [score_value]
         true_positives = len(detected_true)
         precision += [true_positives / total_current_predicted_points]
         recall += [true_positives / total_true_points]
+    print("len(redundantly_detected_predicted) = ",
+          len(redundantly_detected_predicted))
     return precision, recall, detected_true, detected_predicted, \
            undetected_predicted, value_detected_predicted, \
            value_undetected_predicted

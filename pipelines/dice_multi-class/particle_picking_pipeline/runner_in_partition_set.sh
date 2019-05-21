@@ -80,18 +80,17 @@ echo box = $box_side
 echo class_number = $class_number
 echo min_peak_distance = $min_peak_distance
 echo z_shift = $z_shift_original
-echo new_loader=$new_loader
+echo new_loader = $new_loader
 
 
 export box_overlap=12
 export output_h5_file_path=$test_partition
 
-
-echo 'running python3 scripts: 2. Segmenting raw subtomograms'
+echo 'running python3 scripts: Segmenting raw subtomograms'
 python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/dice_multi-class/particle_picking_pipeline/2_subtomograms_segmentation.py -model $path_to_model -label $label_name -data_path $output_h5_file_path -init_feat $initial_features -depth $unet_depth -out_classes $output_classes -new_loader $new_loader
 echo '... done.'
 
-echo 'running python3 scripts: 3. getting particles motive list'
+echo 'running python3 scripts: getting particles motive list'
 python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/dice_multi-class/particle_picking_pipeline/3_get_peaks_motive_list.py -output $output_dir -label $label_name -subtomo $output_h5_file_path -box $box_side -xdim $output_xdim -ydim $output_ydim -zdim $output_zdim -class_number $class_number -min_peak_distance $min_peak_distance -z_shift $z_shift_original -overlap $box_overlap
 echo 'finished whole script'
 

@@ -1,8 +1,12 @@
 import csv
+import os
 from os.path import join
 
 import numpy as np
-
+from src.python.coordinates_toolbox.utils import \
+    extract_coordinates_and_values_from_em_motl
+from src.python.filereaders.csv import read_motl_from_csv
+from src.python.filereaders.em import load_em_motl
 from src.python.osactions.filesystem import create_dir
 
 
@@ -67,11 +71,14 @@ def _get_next_max(dataset: np.array, coordinates_list: list, radius: int,
 
 
 def extract_peaks(dataset: np.array, numb_peaks: int, radius: int):
+    # Todo: instead of -100 use global_min - 1...
+    # global_min = np.min(dataset)
     global_max = np.ndarray.max(dataset)
     global_max_coords = np.where(dataset == global_max)
+    print(global_max_coords)
     coordinates_list = [(global_max_coords[0][0], global_max_coords[1][0],
                          global_max_coords[2][0])]
-
+    print(coordinates_list)
     list_of_maxima = [global_max]
     list_of_maxima_coords = coordinates_list
 
@@ -82,10 +89,10 @@ def extract_peaks(dataset: np.array, numb_peaks: int, radius: int):
                                                          numb_peaks)
         if "overloaded" == flag:
             print("overloaded, reached a level with no more local maxima")
-            print("maxima in subtomo:", n)
+            print("maxima in subtomo:", len(list_of_maxima_coords))
             return list_of_maxima, list_of_maxima_coords
         elif next_max == -100:
-            print("maxima in subtomo:", n)
+            print("maxima in subtomo:", list_of_maxima_coords)
             return list_of_maxima, list_of_maxima_coords
         else:
             list_of_maxima += [next_max for _ in coordinates_list]
@@ -112,7 +119,7 @@ def write_csv_motl(list_of_maxima: list, list_of_maxima_coords: list,
     return
 
 
-def extract_motl_coordinates_and_score_values(motl: list):
+def extract_motl_coordinates_and_score_values(motl: list) -> tuple:
     coordinates = [np.array([row[7], row[8], row[9]]) for row in
                    motl]
     score_values = [row[0] for row in motl]
@@ -176,3 +183,31 @@ def paste_rotated_disk(dataset: np.array, center: tuple, radius: int,
         dataset[i + cx, j + cy, k + cz] = 1
 
     return dataset
+
+
+def read_motl_coordinates_and_values(path_to_motl: str):
+    _, motl_extension = os.path.splitext(path_to_motl)
+    if motl_extension == ".em":
+        print("motl in .em format")
+        header, motl = load_em_motl(path_to_emfile=path_to_motl)
+        motl_values, motl_coords = extract_coordinates_and_values_from_em_motl(
+            motl)
+        return motl_values, motl_coords
+    elif motl_extension == ".csv":
+        print("motl in .csv format")
+        motl = read_motl_from_csv(path_to_motl)
+        motl_values, motl_coords = extract_motl_coordinates_and_score_values(
+            motl)
+        return motl_values, np.array(motl_coords)
+    else:
+        print("motl clean should be in a valid format .em or .csv")
+
+
+def union_of_motls(path_to_motl_1: str, path_to_motl_2: str):
+    values_1, coordinates_1 = read_motl_coordinates_and_values(
+        path_to_motl=path_to_motl_1)
+    values_2, coordinates_2 = read_motl_coordinates_and_values(
+        path_to_motl=path_to_motl_2)
+    coordinates = np.concatenate((coordinates_1, coordinates_2), axis=0)
+    values = list(values_1) + list(values_2)
+    return values, coordinates

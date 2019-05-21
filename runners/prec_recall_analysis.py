@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 from os.path import join
 from os import makedirs
+import os
 
 from src.python.calculator.statistics import \
     precision_recall_calculator_and_detected, \
@@ -25,66 +26,47 @@ parser.add_argument("-motl", "--path_to_motl",
                     help="path to the motive list in csv format",
                     type=str)
 parser.add_argument("-clean", "--path_to_clean",
-                    help="path to the motive list of true particles in em format",
+                    help="path to the motive list of true particles",
                     type=str)
 parser.add_argument("-label", "--label_name",
                     help="name of segmentation",
                     type=str)
+parser.add_argument("-min_peak_distance", "--min_peak_distance",
+                    help="radius in pixels to be considered same particle",
+                    type=int)
+parser.add_argument("-x_shift", "--x_shift",
+                    help="shift between motls in the x coordinate",
+                    type=int)
 
 args = parser.parse_args()
 output_dir = args.output_dir
 path_to_csv_motl = args.path_to_motl
 path_to_motl_clean = args.path_to_clean
 label_name = args.label_name
+min_peak_distance = args.min_peak_distance
+x_shift = args.x_shift
 
-label_name = "ribosomes"
-# path_to_csv_motl = "/home/papalotl/Sara_Goetz/180426/005/motl/motl_3000.csv"
-# path_to_motl_clean = '/home/papalotl/Sara_Goetz/180426/005/motl/motl_clean_4b.em'
-# output_dir = "/home/papalotl/Sara_Goetz/180426/005/_2000_peaks"
-
-# path_to_csv_motl = "/home/papalotl/Sara_Goetz/180426/006/motl_4004.csv"
-# path_to_motl_clean = '/home/papalotl/Sara_Goetz/180426/006/motl/motl_clean_4b.em'
-# output_dir = "/home/papalotl/Sara_Goetz/180426/006"
-
-# output_dir = "/home/papalotl/Sara_Goetz/180426/004/cnn_sph_train/23postrain/motl/"
-# path_to_csv_motl = "/home/papalotl/Sara_Goetz/180426/004/cnn_sph_train/23postrain/motl/motl_4000.csv"
-# path_to_motl_clean = '/home/papalotl/Sara_Goetz/180426/004/motl_clean_4b.em'
-# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_16_5_bis_/"
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_16_5_bis_/motl_4654.csv"
-
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_4_5_bis_/motl_4662.csv"
-# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_4_5_bis_"
-output_dir = "/home/papalotl/006_confs_4_5_bis_"
-path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_4_5_bis_/motl_4896.csv"
-
-# path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_4_5_bis_/motl_4896.csv"
-
-
-# path_to_csv_motl = \
-# "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/from_004_training/gaussian_aug/confs_4_5_/motl_4810.csv"
-#"/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/gaussian_aug/confs_4_5_/motl_4470.csv"
-# "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/motl_4431.csv"#"/scratch/trueba/3d-cnn/TEST/motl_unique/motl_4444.csv"
-# path_to_motl_clean = '/scratch/trueba/cnn/004/4bin/cnn/motl_clean_4b.em'
-
-# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/gaussian_aug/confs_4_5_/"
-# "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/from_004_training/gaussian_aug/confs_4_5_/"
-# "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/from_004_training/gaussian_aug/confs_4_5_/_peaks_test_and_training_set/"
-#
-# path_to_motl_clean = '/scratch/trueba/cnn/004/4bin/cnn/motl_clean_4b.em'
-# path_to_motl_clean = '/scratch/trueba/3d-cnn/clean/180426_005/motl_clean_4b.em'
-path_to_motl_clean = '/scratch/trueba/3d-cnn/clean/180426_006/motl_clean_4b.em'
 figures_dir = join(output_dir, "figures")
 makedirs(name=figures_dir, exist_ok=True)
 # Extract coordinates from template matching
-Header, motl_true = load_em_motl(path_to_emfile=path_to_motl_clean)
-motl_clean_coords = extract_coordinates_from_em_motl(motl_true)
-# motl_clean_coords[:, 0] += -16*np.ones(motl_clean_coords.shape[0])
-# motl_clean_coords[:, 2] += -40*np.ones(motl_clean_coords.shape[0])
-# Extract coordinates from the UNet segmentation:
+
+_, motl_extension = os.path.splitext(path_to_motl_clean)
+assert motl_extension == ".em" or motl_extension == ".csv"
+if motl_extension == ".em":
+    print("motl clean in .em format")
+    Header, motl_true = load_em_motl(path_to_emfile=path_to_motl_clean)
+    motl_clean_coords = extract_coordinates_from_em_motl(motl_true)
+else:
+    print("motl clean in .csv format")
+    motl_true = read_motl_from_csv(path_to_motl_clean)
+    _, motl_clean_coords = extract_motl_coordinates_and_score_values(
+        motl_true)
+    motl_clean_coords = np.array(motl_clean_coords)
+
+
 motl_predicted = read_motl_from_csv(path_to_csv_motl)
 motl_values, motl_coordinates = extract_motl_coordinates_and_score_values(
     motl_predicted)
-del motl_predicted
 
 sigmoid = lambda t: 1 / (1 + np.exp(-t))
 
@@ -104,15 +86,11 @@ plt.savefig(fname=figure_name,
             format="png")
 # motl_values /= np.max(motl_values)
 n = 5000
-print("len(motl_clean_coords)", n)
 motl_values, motl_coordinates = motl_values[:n], motl_coordinates[:n]
-motl_values = np.array(motl_values)
-# For old motl:
-# motl_coordinates = [[row[1]+16, row[0], row[2] + 370] for row in motl_coordinates]
 
-# Adjust to original tomogram dimensions:
-# motl_coordinates = [point + np.array([16, 0, 0]) for point in
-#                     motl_coordinates]  # for 005
+print("motl_clean_coords.shape", motl_clean_coords.shape)
+motl_coordinates = [[row[0] + x_shift, row[1], row[2]] for row in
+                    motl_coordinates]
 
 precision, recall, detected_true, detected_predicted, undetected_predicted, \
 value_detected_predicted, value_undetected_predicted = \
@@ -120,7 +98,7 @@ value_detected_predicted, value_undetected_predicted = \
         motl_coordinates,
         motl_values,
         motl_clean_coords,
-        radius=8)
+        radius=min_peak_distance)
 
 detected_predicted = [np.array(point) for point in detected_predicted]
 from src.python.filewriters.csv import unique_coordinates_motl_writer
@@ -129,7 +107,7 @@ unique_coordinates_motl_writer(path_to_output_folder=output_dir,
                                list_of_peak_scores=value_detected_predicted,
                                list_of_peak_coords=detected_predicted,
                                number_peaks_to_uniquify=5000,
-                               minimum_peaks_distance=12)
+                               minimum_peaks_distance=min_peak_distance)
 
 sigmoid_value_detected_predicted = [sigmoid(value) for value in
                                     value_detected_predicted]
@@ -197,6 +175,7 @@ F1_score = F1_score_calculator(precision, recall)
 max_F1 = np.max(F1_score)
 optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
 auPRC = pr_auc_score(precision=precision, recall=recall)
+print("auPRC = ", auPRC, "max_F1 = ", max_F1)
 
 pr_legend_str = label_name + " , auPRC = " + str(round(auPRC, 4))
 f1_legend_str = label_name + " , (max_F1, best_peaks) = (" + str(

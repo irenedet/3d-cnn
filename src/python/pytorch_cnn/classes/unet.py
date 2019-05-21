@@ -24,13 +24,23 @@ class UNet(nn.Module):
             # nn.ELU(),
             nn.ReLU())
 
+    def _conv_block_elu(self, in_channels, out_channels):
+        # I have personally had better experience using relu instead of elu,
+        # but this is worth confirming experimentally
+        return nn.Sequential(
+            nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1),
+            nn.ELU(),
+            # nn.ReLU(),
+            nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1),
+            nn.ELU())
+
     # upsampling via transposed 3d convolutions
     def _upsampler(self, in_channels, out_channels):
         return nn.ConvTranspose3d(in_channels, out_channels,
                                   kernel_size=2, stride=2)
 
     def __init__(self, in_channels=1, out_channels=1,
-                 depth=4, initial_features=16,
+                 depth=4, initial_features=16, elu=False,
                  final_activation=None):
         super().__init__()
         self.depth = depth
@@ -44,15 +54,28 @@ class UNet(nn.Module):
                       for level in range(self.depth)]
         # modules of the encoder path
         n_features_encode = [in_channels] + n_features
-        self.encoder = nn.ModuleList([self._conv_block(n_features_encode[level],
-                                                       n_features_encode[
-                                                           level + 1])
-                                      for level in range(self.depth)])
+        if elu == False:
+            self.encoder = nn.ModuleList(
+                [self._conv_block(n_features_encode[level],
+                                  n_features_encode[
+                                      level + 1])
+                 for level in range(self.depth)])
 
-        # the base convolution block
-        n_features_base = n_features_encode[-1] * 2
-        self.base = self._conv_block(n_features_encode[-1],
-                                     n_features_base)
+            # the base convolution block
+            n_features_base = n_features_encode[-1] * 2
+            self.base = self._conv_block(n_features_encode[-1],
+                                         n_features_base)
+        else:
+            self.encoder = nn.ModuleList(
+                [self._conv_block_elu(n_features_encode[level],
+                                      n_features_encode[
+                                          level + 1])
+                 for level in range(self.depth)])
+
+            # the base convolution block
+            n_features_base = n_features_encode[-1] * 2
+            self.base = self._conv_block_elu(n_features_encode[-1],
+                                             n_features_base)
 
         # modules of the decoder path
         n_features_decode = [n_features_base] + n_features[::-1]

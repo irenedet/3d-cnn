@@ -65,7 +65,8 @@ segmentation_names = ["ribo", "fas", "memb"]
 
 assert split > train_split
 
-output_shape = (shape_y, shape_y, shape_x)
+#ToDo check this!
+output_shape = (shape_z, shape_y, shape_x)
 subtomogram_shape = (box_side, box_side, box_side)
 output_dir = join(output_dir, "train_and_test_partitions")
 output_h5_file_name = "partition_training.h5"

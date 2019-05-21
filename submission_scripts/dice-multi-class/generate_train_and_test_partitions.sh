@@ -24,20 +24,20 @@
 #export shape_y=928
 #export shape_z=251
 
-export path_to_raw="/scratch/trueba/3d-cnn/clean/180426_004/subtomo380-600.hdf"
+export path_to_raw="/struct/mahamid/Irene/yeast/ribosomes/180426_004/004_bin4.hdf"
 #export labels_dataset_list="/struct/mahamid/Irene/yeast/180426/004/training/dice_multi_class/ribos_corrected.hdf:"
-export output_dir="/scratch/trueba/3d-cnn/training_data/dice-multi-class/004/G_sigma1/"
+export output_dir="/scratch/trueba/3d-cnn/training_data/dice-multi-class/180426_004/G_sigma1/"
 export shape_x=928
 export shape_y=928
-export shape_z=221
+export shape_z=1000
 
 #export segmentation_names="ribo,fas,memb"
-export split=180  # Between partitions of testing and training data
+export split=0.8  # Between partitions of testing and training data
 export box_side=128
 
 # For data augmentation:
 export number_iter=6
-export train_split=144  # within training data for nnet training & data aug
+export train_split=0.8  # within training data for nnet training & data aug
 export overlap=12
 
 

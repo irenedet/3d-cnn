@@ -2,6 +2,7 @@ import numpy as np
 import random
 
 from src.python.filereaders.hdf import _load_hdf_dataset
+from src.python.filewriters.h5 import write_raw_subtomograms_intersecting_mask
 from src.python.coordinates_toolbox.subtomos import \
     get_particle_coordinates_grid_with_overlap
 from src.python.filewriters.h5 import write_subtomograms_from_dataset, \
@@ -32,7 +33,7 @@ def split_dataset(data: np.array, labels: np.array, split: float,
     elif isinstance(split, float):
         assert 0 < split < 1
         print("split = ", split)
-        split = int(split*len(data))
+        split = int(split * len(data))
         train_data, train_labels = data[:split], labels[:split]
         val_data, val_labels = data[split:], labels[split:]
     elif isinstance(split, tuple):
@@ -107,6 +108,28 @@ def partition_raw_and_labels_tomograms(raw_dataset: np.array,
         padded_raw_dataset=padded_raw_dataset,
         padded_labels_dataset=padded_labels_dataset,
         label_name=label_name,
+        window_centers=padded_particles_coordinates,
+        crop_shape=subtomo_shape)
+
+
+def partition_raw_intersecting_mask(dataset: np.array,
+                                    mask_dataset: np.array,
+                                    output_h5_file_path: str,
+                                    subtomo_shape: tuple,
+                                    overlap: int
+                                    ):
+    padded_raw_dataset = pad_dataset(dataset, subtomo_shape, overlap)
+    padded_mask_dataset = pad_dataset(mask_dataset, subtomo_shape, overlap)
+
+    padded_particles_coordinates = get_particle_coordinates_grid_with_overlap(
+        padded_raw_dataset.shape,
+        subtomo_shape,
+        overlap)
+
+    write_raw_subtomograms_intersecting_mask(
+        output_path=output_h5_file_path,
+        padded_raw_dataset=padded_raw_dataset,
+        padded_mask_dataset=padded_mask_dataset,
         window_centers=padded_particles_coordinates,
         crop_shape=subtomo_shape)
 
