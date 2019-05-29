@@ -17,4 +17,4 @@ source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/e
 export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
 
 echo "Starting python script"
-python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/generate_label_masks/sum_particles_masks.py
+python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/generate_label_masks/threshold_maps.py

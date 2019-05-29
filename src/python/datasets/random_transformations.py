@@ -353,11 +353,11 @@ def transform_data_from_h5(training_data_path: str, label_name: str,
 def transform_data_from_h5_dice_multi_class(training_data_path: str,
                                             segmentation_names: list,
                                             number_iter: int,
-                                            output_data_path: str, split: int):
+                                            output_data_path: str):
     raw_data, labeled_data = h5.read_training_data_dice_multi_class(
         training_data_path,
         segmentation_names=segmentation_names,
-        split=split)
+        split=-1)
     numb_train = raw_data.shape[0]
     print(numb_train)
     raw_data = raw_data[None, :]

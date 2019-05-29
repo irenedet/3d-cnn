@@ -59,8 +59,8 @@ def get_right_padding_lengths(tomo_shape, shape_to_crop_zyx):
 
 
 def pad_dataset(dataset: np.array,
-                cubes_with_border_shape: list,
-                overlap_thickness: int):
+                cubes_with_border_shape: tuple,
+                overlap_thickness: int) -> np.array:
     internal_cube_shape = [dim - 2 * overlap_thickness for dim in
                            cubes_with_border_shape]
     right_padding = get_right_padding_lengths(dataset.shape,
@@ -151,10 +151,14 @@ def partition_raw_and_labels_tomograms_dice_multiclass(
     padded_labels_dataset_list = []
     for path_to_labeled in labels_dataset_list:
         labels_dataset = _load_hdf_dataset(hdf_file_path=path_to_labeled)
+        labels_dataset = np.array(labels_dataset)
+        print(path_to_labeled, "shape", labels_dataset.shape)
         padded_labels_dataset = pad_dataset(labels_dataset, subtomo_shape,
                                             overlap)
         padded_labels_dataset_list += [padded_labels_dataset]
-
+    datasets_shapes = [padded.shape for padded in padded_labels_dataset_list]
+    datasets_shapes += [padded_raw_dataset.shape]
+    print("padded_dataset.shapes = ", datasets_shapes)
     write_joint_raw_and_labels_subtomograms_dice_multiclass(
         output_path=output_h5_file_path,
         padded_raw_dataset=padded_raw_dataset,

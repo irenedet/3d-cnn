@@ -18,9 +18,8 @@ import torch
 import torch.optim as optim
 import torch.utils.data as du
 
-from src.python.datasets.actions import split_dataset
-from src.python.filereaders import h5
-from src.python.image.filters import preprocess_data
+from src.python.pytorch_cnn.utils import \
+    get_testing_and_training_sets_from_partition
 from src.python.pytorch_cnn.classes.unet import UNet
 from src.python.pytorch_cnn.classes.loss import BCELoss, DiceCoefficient, \
     DiceCoefficientLoss
@@ -33,23 +32,6 @@ print("The cnn_training.py script is running")
 print("*************************************")
 
 
-def get_testing_and_training_sets_from_partition(training_data_path: str,
-                                                 split=0.8):
-    print("The training data path is ", training_data_path)
-    raw_data, labels = h5.read_training_data(training_data_path,
-                                             label_name=label_name)
-    print("Initial unique labels", np.unique(labels))
-
-    # Normalize data
-    preprocessed_data = preprocess_data(raw_data)
-
-    # add a channel dimension
-    preprocessed_data = np.array(preprocessed_data)[:, None]
-    labels = np.array(labels)[:, None]
-
-    train_data, train_labels, val_data, val_labels, data_order = \
-        split_dataset(preprocessed_data, labels, split)
-    return train_data, train_labels, val_data, val_labels, data_order
 
 
 # check if we have  a gpu
@@ -114,10 +96,12 @@ for n, training_data_path in enumerate(training_data_paths):
     if n == 0:
         train_data, train_labels, val_data, val_labels, _ = \
             get_testing_and_training_sets_from_partition(training_data_path,
+                                                         label_name,
                                                          split)
     else:
         train_data_tmp, train_labels_tmp, val_data_tmp, val_labels_tmp, _ = \
             get_testing_and_training_sets_from_partition(training_data_path,
+                                                         label_name,
                                                          split)
         train_data = np.concatenate((train_data, train_data_tmp), axis=0)
         train_labels = np.concatenate((train_labels, train_labels_tmp), axis=0)

@@ -424,12 +424,20 @@ def write_segmented_data(data_path: str, output_segmentation: np.array,
 
 def segment_and_write(data_path: str, model: UNet, label_name: str):
     with h5py.File(data_path, 'a') as data_file:
-        predictions = list(
-            data_file[h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS])
-        print("Predictions list", predictions)
-        if label_name in predictions:
-            print("The segmentation", label_name, " exists already.")
+        if 'predictions' in list(data_file['volumes']):
+            predictions = list(
+                data_file[
+                    h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS])
+            print("Predictions list", predictions)
+            if label_name in predictions:
+                print("The segmentation", label_name, " exists already.")
+                flag = 'segmentation_exists'
+            else:
+                flag = 'segmentation_nonexistent'
         else:
+            flag = 'segmentation_nonexistent'
+
+        if 'segmentation_nonexistent' == flag:
             print(h5_internal_paths.RAW_SUBTOMOGRAMS)
             print(list(data_file[h5_internal_paths.RAW_SUBTOMOGRAMS]))
             for subtomo_name in list(
@@ -448,7 +456,8 @@ def segment_and_write(data_path: str, model: UNet, label_name: str):
                                               segmented_data=segmented_data,
                                               label_name=label_name,
                                               subtomo_name=subtomo_name)
-
+        else:
+            print(flag)
     return
 
 
@@ -637,7 +646,7 @@ def split_and_write_h5_partition(h5_partition_data_path: str,
 def split_and_write_h5_partition_dice_multi_class(h5_partition_data_path: str,
                                                   h5_train_patition_path: str,
                                                   h5_test_patition_path: str,
-                                                  split: int,
+                                                  split: float,
                                                   segmentation_names: list,
                                                   shuffle=True) -> None:
     with h5py.File(h5_partition_data_path, 'r') as f:
@@ -646,6 +655,7 @@ def split_and_write_h5_partition_dice_multi_class(h5_partition_data_path: str,
             random.shuffle(raw_subtomo_names)
         else:
             print("Splitting sets without shuffling")
+        split = int(split * len(raw_subtomo_names))
         with h5py.File(h5_train_patition_path, "w") as f_train:
             for subtomo_name in raw_subtomo_names[:split]:
                 raw_subtomo_h5_internal_path \

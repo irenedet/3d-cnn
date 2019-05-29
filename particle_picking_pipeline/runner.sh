@@ -72,7 +72,7 @@ echo zdim = $output_zdim
 echo box = $box_side
 echo min_peak_distance = $min_peak_distance
 echo z_shift = $z_shift_original
-echo new_loader=$new_loader
+echo new_loader = $new_loader
 
 export box_overlap=12
 export output_h5_file_path=$output_dir'/partition_subtomograms_.h5'
@@ -82,7 +82,7 @@ python3 particle_picking_pipeline/1_partition_tomogram.py -raw $path_to_raw -out
 echo '... done.'
 
 echo 'running python3 scripts: 2. Segmenting raw subtomograms'
-python3 particle_picking_pipeline/2_subtomograms_segmentation.py -model $path_to_model -label $label_name -outh5 $output_h5_file_path -init_feat $initial_features -depth $unet_depth -new_loader $new_loader
+python3 particle_picking_pipeline/2_subtomograms_segmentation.py -model $path_to_model -label $label_name -data_path $output_h5_file_path -init_feat $initial_features -depth $unet_depth -new_loader $new_loader
 echo '... done.'
 
 echo 'running python3 scripts: 3. getting particles motive list'

@@ -37,13 +37,12 @@
 export raw_em="/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/005/etomo/bin4/005_df_sorted.rec"
 export path_to_raw="/struct/mahamid/Irene/yeast/ribosomes/180426_005/005_bin4.hdf"
 export path_to_labeled="/struct/mahamid/Irene/yeast/ribosomes/180426_005/particles_mask.hdf"
-export output_dir="/struct/mahamid/Irene/yeast/ribosomes/180426_005/G_sigma1/"
-
-
 export shape_x=928
 export shape_y=928
 export shape_z=1000
 
+
+export output_dir="/struct/mahamid/Irene/yeast/ribosomes/180426_005/G_sigma1/"
 export label_name="ribosomes"
 export split=0.8  # percentage of training + validation set
 export box_side=128
@@ -53,10 +52,10 @@ export number_iter=6
 export train_split=0.8  # percentage of training set (within training + validation)
 export overlap=12
 
-echo "applying EMAN2 filter to tomogram"
-module load EMAN2
-e2proc3d.py $raw_em $path_to_raw --process filter.lowpass.gauss:cutoff_abs=.25 --process filter.highpass.gauss:cutoff_pixels=5 --process normalize --process threshold.clampminmax.nsigma:nsigma=3
-echo "... done."
+#echo "applying EMAN2 filter to tomogram"
+#module load EMAN2
+#e2proc3d.py $raw_em $path_to_raw --process filter.lowpass.gauss:cutoff_abs=.25 --process filter.highpass.gauss:cutoff_pixels=5 --process normalize --process threshold.clampminmax.nsigma:nsigma=3
+#echo "... done."
 
 module load Anaconda3
 echo 'starting virtual environment'
