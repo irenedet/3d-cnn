@@ -9,6 +9,8 @@ from src.python.peak_toolbox.subtomos import select_coordinates_in_subtomos, \
 from src.python.calculator.statistics import pr_auc_score, \
     F1_score_calculator, precision_recall_calculator_and_detected
 from src.python.peak_toolbox.utils import read_motl_coordinates_and_values
+from src.python.filewriters.csv import motl_writer, \
+    unique_coordinates_motl_writer
 
 import argparse
 
@@ -137,6 +139,42 @@ optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
 auPRC = pr_auc_score(precision=precision, recall=recall)
 print("auPRC = ", auPRC, "and max_F1 = ", max_F1)
 
+path_to_detected_predicted = join(output_dir, "detetected")
+path_to_undetected_predicted = join(output_dir, "undetetected")
+makedirs(name=path_to_detected_predicted, exist_ok=True)
+makedirs(name=path_to_undetected_predicted, exist_ok=True)
+
+motl_writer(path_to_output_folder=path_to_detected_predicted,
+            list_of_peak_coords=detected_predicted,
+            list_of_peak_scores=value_detected_predicted,
+            in_tom_format=True)
+motl_writer(path_to_output_folder=path_to_undetected_predicted,
+            list_of_peak_coords=undetected_predicted,
+            list_of_peak_scores=value_undetected_predicted,
+            in_tom_format=True)
+
+# unique_coordinates_motl_writer(path_to_output_folder=output_dir,
+#                                list_of_peak_scores=value_detected_predicted,
+#                                list_of_peak_coords=detected_predicted,
+#                                number_peaks_to_uniquify=len(
+#                                    value_detected_predicted),
+#                                minimum_peaks_distance=2*radius,
+#                                class_number=None,
+#                                in_tom_format=True,
+#                                motl_name="motl_detetected.csv",
+#                                uniquify_by_score=True)
+
+# unique_coordinates_motl_writer(path_to_output_folder=output_dir,
+#                                list_of_peak_scores=value_undetected_predicted,
+#                                list_of_peak_coords=undetected_predicted,
+#                                number_peaks_to_uniquify=len(
+#                                    value_undetected_predicted),
+#                                minimum_peaks_distance=2*radius,
+#                                class_number=None,
+#                                in_tom_format=True,
+#                                motl_name="motl_undetetected.csv",
+#                                uniquify_by_score=True)
+
 thresholded_predicted_indices = \
     np.where(np.array(predicted_values_test) > threshold)[0]
 thresholded_predicted_values = [predicted_values_test[index] for
@@ -178,23 +216,23 @@ plt.savefig(fname=fig_name,
             format="png")
 
 # to do, in dice multi class should be softmax!
-sigmoid = lambda t: 1 / (1 + np.exp(-t))
-
-sigmoid_predicted_coordinates_test_values = [sigmoid(t) for t in
-                                             thresholded_predicted_values]
-
+# sigmoid = lambda t: 1 / (1 + np.exp(-t))
+#
+# sigmoid_predicted_coordinates_test_values = [sigmoid(t) for t in
+#                                              thresholded_predicted_values]
+#
 # Second plot
-plt.figure(2)
-plt.hist(sigmoid_predicted_coordinates_test_values, bins=10,
-         label="thresholded predicted")
-plt.xlabel("sigmoid(score value)")
-plt.ylabel("frequency")
-plt.title(str(len(predicted_coordinates)) + " peaks")
-plt.legend()
-plt.gcf()
-fig_name = join(figures_dir, "histogram_sigmoid_testset.png")
-plt.savefig(fname=fig_name,
-            format="png")
+# plt.figure(2)
+# plt.hist(sigmoid_predicted_coordinates_test_values, bins=10,
+#          label="thresholded predicted")
+# plt.xlabel("sigmoid(score value)")
+# plt.ylabel("frequency")
+# plt.title(str(len(predicted_coordinates)) + " peaks")
+# plt.legend()
+# plt.gcf()
+# fig_name = join(figures_dir, "histogram_sigmoid_testset.png")
+# plt.savefig(fname=fig_name,
+#             format="png")
 
 plt.figure(3)
 plt.hist(value_detected_predicted_range, bins=15, label="true positives",
@@ -226,27 +264,27 @@ fig_name = join(figures_dir,
 plt.savefig(fname=fig_name,
             format="png")
 
-sigmoid_detected_predicted_values = [sigmoid(value) for value in
-                                     value_detected_predicted_tight]
-sigmoid_undetected_predicted_values = [sigmoid(value) for value in
-                                       value_undetected_predicted_tight]
-
-plt.figure(5)
-plt.hist(sigmoid_detected_predicted_values, bins=15, label="true positives",
-         fc=(0, 0, 1, 0.5))
-plt.hist(sigmoid_undetected_predicted_values, bins=15, label="false positives",
-         fc=(1, 0, 0, 0.5))
-plt.xlabel("sigmoid(score value)")
-plt.ylabel("frequency")
-plt.title(str(len(predicted_coordinates)) + " peaks, threshold on score = "
-          + str(tight_threshold))
-
-plt.legend()
-plt.gcf()
-fig_name = join(figures_dir,
-                "histogram-sigmoid-detected-undetected_thr_testset.png")
-plt.savefig(fname=fig_name,
-            format="png")
+# sigmoid_detected_predicted_values = [sigmoid(value) for value in
+#                                      value_detected_predicted_tight]
+# sigmoid_undetected_predicted_values = [sigmoid(value) for value in
+#                                        value_undetected_predicted_tight]
+#
+# plt.figure(5)
+# plt.hist(sigmoid_detected_predicted_values, bins=15, label="true positives",
+#          fc=(0, 0, 1, 0.5))
+# plt.hist(sigmoid_undetected_predicted_values, bins=15, label="false positives",
+#          fc=(1, 0, 0, 0.5))
+# plt.xlabel("sigmoid(score value)")
+# plt.ylabel("frequency")
+# plt.title(str(len(predicted_coordinates)) + " peaks, threshold on score = "
+#           + str(tight_threshold))
+#
+# plt.legend()
+# plt.gcf()
+# fig_name = join(figures_dir,
+#                 "histogram-sigmoid-detected-undetected_thr_testset.png")
+# plt.savefig(fname=fig_name,
+#             format="png")
 
 plt.figure(6)
 pr_legend_str = "auPRC = " + str(round(auPRC, 4))

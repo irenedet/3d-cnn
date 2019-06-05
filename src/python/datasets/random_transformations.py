@@ -65,8 +65,14 @@ class Transform(object):
         self._random_variables.update({key: value})
 
     def __call__(self, *tensors, **transform_function_kwargs):
-        tensors = pyu.to_iterable(tensors)
-        # Get the list of the indices of the tensors to which we're going to apply the transform
+        print(type(tensors[0]))
+        print(tensors[0].shape)
+        # FIXME here this should be taken:
+        tensors = tensors[0]
+        tensors = pyu.to_iterable(tensors) #this sets tensors = [tensors]
+        print("len(tensors)", len(tensors))
+        # Get the list of the indices of the tensors to which we're going to
+        # apply the transform
         apply_to = list(
             range(len(tensors))) if self._apply_to is None else self._apply_to
         # Flush random variables and assume they're built by image_function
@@ -83,12 +89,14 @@ class Transform(object):
             return pyu.from_iterable(transformed)
         elif hasattr(self, 'volume_function'):
             # Loop over all tensors
-            print("tensors shape", tensors[0].shape)
+            # print("tensors shape", tensors[0].shape)
+            # print("holaaaa")
+            # print("apply_to = ", apply_to)
             transformed = [
                 self._apply_volume_function(tensor, **transform_function_kwargs)
                 if tensor_index in apply_to else tensor
                 for tensor_index, tensor in
-                enumerate(tensors[0])]  # changed by, orig: enumerate(tensors)]
+                enumerate(tensors)]  #changbyIrene,orig:enumerate(tensors)]
             return pyu.from_iterable(transformed)
         elif hasattr(self, 'image_function'):
             # Loop over all tensors
@@ -175,24 +183,22 @@ class RandomFlip3D(Transform):
 
 
 class RandomRot3D(Transform):
-    def __init__(self, rot_range, p=0.125, only_one=True, **super_kwargs):
+    def __init__(self, rot_range=30, p=0.5, only_xy=False, **super_kwargs):
         super(RandomRot3D, self).__init__(**super_kwargs)
         self.rot_range = rot_range
         self.p = p
+        self.only_xy = only_xy
 
     def build_random_variables(self, **kwargs):
         np.random.seed()
 
-        self.set_random_variable('do_z', np.random.uniform() < self.p)
-        self.set_random_variable('do_y', np.random.uniform() < self.p)
-        self.set_random_variable('do_x', np.random.uniform() < self.p)
+        if self.only_xy:
+            self.set_random_variable('do_x', np.random.uniform() < self.p)
+        else:
+            self.set_random_variable('do_z', np.random.uniform() < self.p)
+            self.set_random_variable('do_y', np.random.uniform() < self.p)
+            self.set_random_variable('do_x', np.random.uniform() < self.p)
 
-        # self.set_random_variable('angle_z', np.random.uniform(-self.rot_range,
-        #                                                       self.rot_range))
-        # self.set_random_variable('angle_y', np.random.uniform(-self.rot_range,
-        #                                                       self.rot_range))
-        # self.set_random_variable('angle_x', np.random.uniform(-self.rot_range,
-        #                                                       self.rot_range))
         self.set_random_variable('angle_z', np.random.uniform(-self.rot_range,
                                                               self.rot_range))
         self.set_random_variable('angle_y', np.random.uniform(-self.rot_range,
@@ -222,7 +228,7 @@ class RandomRot3D(Transform):
                                                         axes=(0, 2),
                                                         reshape=False)
         # rotate along x-axis
-        if self.get_random_variable('do_y'):
+        if self.get_random_variable('do_x'):
             volume = scipy.ndimage.interpolation.rotate(volume, angle_x,
                                                         order=0,
                                                         # mode='nearest',
@@ -233,17 +239,29 @@ class RandomRot3D(Transform):
 
 
 class ElasticTransform(Transform):
-    """Random Elastic Transformation."""
     NATIVE_DTYPES = {'float32', 'float64'}
     PREFERRED_DTYPE = 'float32'
 
-    def __init__(self, alpha, sigma, order=1, invert=False, **super_kwargs):
+    def __init__(self, alpha, sigma, order=1, invert=False,
+                 **super_kwargs):
         self._initial_dtype = None
         super(ElasticTransform, self).__init__(**super_kwargs)
         self.alpha = alpha
         self.sigma = sigma
         self.order = order
         self.invert = invert
+
+    def cast(self, image):
+        if image.dtype not in self.NATIVE_DTYPES:
+            self._initial_dtype = image.dtype
+            image = image.astype(self.PREFERRED_DTYPE)
+        return image
+
+    def uncast(self, image):
+        if self._initial_dtype is not None:
+            image = image.astype(self._initial_dtype)
+        self._initial_dtype = None
+        return image
 
     def build_random_variables(self, **kwargs):
         # All this is done just once per batch (i.e. until `clear_random_variables` is called)
@@ -266,18 +284,6 @@ class ElasticTransform(Transform):
         self.set_random_variable('flow_x', flow_x)
         self.set_random_variable('flow_y', flow_y)
 
-    def cast(self, image):
-        if image.dtype not in self.NATIVE_DTYPES:
-            self._initial_dtype = image.dtype
-            image = image.astype(self.PREFERRED_DTYPE)
-        return image
-
-    def uncast(self, image):
-        if self._initial_dtype is not None:
-            image = image.astype(self._initial_dtype)
-        self._initial_dtype = None
-        return image
-
     def image_function(self, image):
         # Cast image to one of the native dtypes (one which that is supported by scipy)
         image = self.cast(image)
@@ -290,6 +296,174 @@ class ElasticTransform(Transform):
         transformed_image = map_coordinates(image, flows,
                                             mode='reflect',
                                             order=self.order).reshape(imshape)
+        # Uncast image to the original dtype
+        transformed_image = self.uncast(transformed_image)
+        return transformed_image
+
+
+class ElasticTransform3D(Transform):
+    """Random Elastic Transformation 3D. Modified by Irene"""
+    NATIVE_DTYPES = {'float32', 'float64'}
+    PREFERRED_DTYPE = 'float32'
+
+    def __init__(self, alpha, sigma, order=1, invert=False,
+                 **super_kwargs):
+        self._initial_dtype = None
+        super(ElasticTransform3D, self).__init__(**super_kwargs)
+        self.alpha = alpha
+        self.sigma = sigma
+        self.order = order
+        self.invert = invert
+
+    def cast(self, image):
+        if image.dtype not in self.NATIVE_DTYPES:
+            self._initial_dtype = image.dtype
+            image = image.astype(self.PREFERRED_DTYPE)
+        return image
+
+    def uncast(self, image):
+        if self._initial_dtype is not None:
+            image = image.astype(self._initial_dtype)
+        self._initial_dtype = None
+        return image
+
+    def build_random_variables(self, **kwargs):
+        # All this is done just once per batch (i.e. until `clear_random_variables` is called)
+        np.random.seed()
+        imshape = kwargs.get('imshape')
+        # Build and scale random fields
+        random_field_x = np.random.uniform(-1, 1, imshape) * self.alpha
+        random_field_y = np.random.uniform(-1, 1, imshape) * self.alpha
+        random_field_z = np.random.uniform(-1, 1, imshape) * self.alpha
+        # Smooth random field (this has to be done just once per reset)
+        sdx = gaussian_filter(random_field_x, self.sigma, mode='reflect')
+        sdy = gaussian_filter(random_field_y, self.sigma, mode='reflect')
+        sdz = gaussian_filter(random_field_z, self.sigma, mode='reflect')
+        # Make meshgrid
+        x, y, z = np.meshgrid(np.arange(imshape[2]), np.arange(imshape[1]),
+                              np.arange(imshape[0]))
+        # Make inversion coefficient
+        _inverter = 1. if not self.invert else -1.
+        # Distort meshgrid indices (invert if required)
+        flow_z, flow_y, flow_x = (z + _inverter * sdz).reshape(-1, 1), \
+                                 (y + _inverter * sdy).reshape(-1, 1), \
+                                 (x + _inverter * sdx).reshape(-1, 1)
+        # Set random states
+        self.set_random_variable('flow_x', flow_x)
+        self.set_random_variable('flow_y', flow_y)
+        self.set_random_variable('flow_z', flow_z)
+
+    def volume_function(self, volume):
+        # Cast image to one of the native dtypes (one which that is supported by scipy)
+        volume = self.cast(volume)
+        # Take measurements
+        imshape = volume.shape
+        # print(imshape)
+
+        # Obtain flows
+        flow_z, flow_y, flow_x = self.get_random_variable('flow_z',
+                                                          imshape=imshape), \
+                                 self.get_random_variable('flow_y',
+                                                          imshape=imshape), \
+                                 self.get_random_variable('flow_x',
+                                                          imshape=imshape)
+        # To preserve orientation
+        flows = flow_y, flow_z, flow_x
+
+        # Map cooordinates from image to distorted index set
+        transformed_image = map_coordinates(volume, flows, mode='reflect',
+                                            order=0).reshape(imshape)
+        # Uncast image to the original dtype
+        transformed_image = self.uncast(transformed_image)
+        return transformed_image
+
+
+class SinusoidalElasticTransform3D(Transform):
+    """Random Elastic Transformation 3D. Modified by Irene"""
+    NATIVE_DTYPES = {'float32', 'float64'}
+    PREFERRED_DTYPE = 'float32'
+
+    def __init__(self, alpha, interp_step, order=1, **super_kwargs):
+        self._initial_dtype = None
+        super(SinusoidalElasticTransform3D, self).__init__(**super_kwargs)
+        self.alpha = alpha
+        self.order = order
+        self.interp_factor = interp_step
+
+    def cast(self, image):
+        if image.dtype not in self.NATIVE_DTYPES:
+            self._initial_dtype = image.dtype
+            image = image.astype(self.PREFERRED_DTYPE)
+        return image
+
+    def uncast(self, image):
+        if self._initial_dtype is not None:
+            image = image.astype(self._initial_dtype)
+        self._initial_dtype = None
+        return image
+
+    def build_random_variables(self, **kwargs):
+        # All this is done just once per batch (i.e. until `clear_random_variables` is called)
+        np.random.seed()
+        imshape = kwargs.get('imshape')
+        nz, ny, nx = [sh // self.interp_factor for sh in imshape]
+        coarse_imshape = nz, ny, nx
+
+        coarse_random_field_x = np.random.uniform(0, 2 * np.pi, coarse_imshape)
+        coarse_random_field_y = np.random.uniform(0, 2 * np.pi, coarse_imshape)
+        coarse_random_field_z = np.random.uniform(0, 2 * np.pi, coarse_imshape)
+
+        coarse_random_field_x = np.sin(coarse_random_field_x) * self.alpha
+        coarse_random_field_y = np.sin(coarse_random_field_y) * self.alpha
+        coarse_random_field_z = np.sin(coarse_random_field_z) * self.alpha
+
+        new_indices = np.mgrid[0:nz - 1:self.interp_factor * nz * 1j,
+                      0:ny - 1:self.interp_factor * ny * 1j,
+                      0:nx - 1:self.interp_factor * nx * 1j]
+
+        sdx = map_coordinates(coarse_random_field_x, new_indices,
+                              order=3, output=coarse_random_field_x.dtype)
+        sdy = map_coordinates(coarse_random_field_y, new_indices,
+                              order=3, output=coarse_random_field_y.dtype)
+        sdz = map_coordinates(coarse_random_field_z, new_indices,
+                              order=3, output=coarse_random_field_z.dtype)
+
+        sdx = sdx.reshape((self.interp_factor * nz, self.interp_factor * ny,
+                           self.interp_factor * nx))
+        sdy = sdy.reshape((self.interp_factor * nz, self.interp_factor * ny,
+                           self.interp_factor * nx))
+        sdz = sdz.reshape((self.interp_factor * nz, self.interp_factor * ny,
+                           self.interp_factor * nx))
+        # Make meshgrid
+        x, y, z = np.meshgrid(np.arange(imshape[2]), np.arange(imshape[1]),
+                              np.arange(imshape[0]))
+        print(x.shape)
+        # Distort meshgrid indices (invert if required)
+        flow_z, flow_y, flow_x = (z + sdz), (y + sdy), (x + sdx)
+        # Set random states
+        self.set_random_variable('flow_x', flow_x)
+        self.set_random_variable('flow_y', flow_y)
+        self.set_random_variable('flow_z', flow_z)
+
+    def volume_function(self, volume):
+        # Cast image to one of the native dtypes (one which that is supported by scipy)
+        volume = self.cast(volume)
+        # Take measurements
+        imshape = volume.shape
+        # print(imshape)
+
+        # Obtain flows
+        flow_z, flow_y, flow_x = self.get_random_variable('flow_z',
+                                                          imshape=imshape), \
+                                 self.get_random_variable('flow_y',
+                                                          imshape=imshape), \
+                                 self.get_random_variable('flow_x',
+                                                          imshape=imshape)
+        # To preserve orientation
+        flows = flow_y, flow_z, flow_x
+        # Map cooordinates from image to distorted index set
+        transformed_image = map_coordinates(volume, flows, mode='reflect',
+                                            order=0).reshape(imshape)
         # Uncast image to the original dtype
         transformed_image = self.uncast(transformed_image)
         return transformed_image
@@ -314,7 +488,14 @@ class AdditiveGaussianNoise(Transform):
 
 
 def transform_data_from_h5(training_data_path: str, label_name: str,
-                           number_iter: int, output_data_path: str, split: float):
+                           number_iter: int, output_data_path: str,
+                           split=-1, transform_type='Gaussian',
+                           sigma_gauss=1,
+                           alpha_elastic=5,
+                           interp_step=8,
+                           p_rotation=0.8,
+                           max_angle_rotation=90,
+                           only_rotate_xy=False):
     raw_data, labeled_data = h5.read_training_data(training_data_path,
                                                    label_name=label_name,
                                                    split=split)
@@ -324,13 +505,21 @@ def transform_data_from_h5(training_data_path: str, label_name: str,
     labeled_data = labeled_data[None, :]
     for iteration in range(number_iter):
         if iteration == 0:
-            transform = False
+            # transform = False
+            transformed_raw, transformed_labeled = raw_data, labeled_data
         else:
             transform = True
-
-        transformed_raw, transformed_labeled = transform_data(raw_data,
-                                                              labeled_data,
-                                                              transform)
+            transformed_raw, transformed_labeled = \
+                transform_data(raw_data=raw_data,
+                               labeled_data=labeled_data,
+                               transform=transform,
+                               transform_type=transform_type,
+                               sigma_gauss=sigma_gauss,
+                               alpha_elastic=alpha_elastic,
+                               interp_step=interp_step,
+                               p_rotation=p_rotation,
+                               max_angle_rotation=max_angle_rotation,
+                               only_rotate_xy=only_rotate_xy)
 
         with h5py.File(output_data_path, 'a') as f:
             for img_index in range(numb_train):
@@ -387,42 +576,70 @@ def transform_data_from_h5_dice_multi_class(training_data_path: str,
                     subtomo_label_h5_name = join(subtomo_label_h5_name,
                                                  subtomo_name)
                     f[subtomo_label_h5_name] = transformed_labeled[img_index,
-                                               channel,
-                                               :, :, :]
+                                               channel, :, :, :]
     return
 
 
-def transform_data(raw_data: np.array, labeled_data: np.array,
-                   transform=True) -> tuple:
+def transform_data(raw_data: np.array,
+                   labeled_data: np.array,
+                   transform=True,
+                   transform_type='Gaussian',
+                   sigma_gauss=1,
+                   alpha_elastic=0.5,
+                   interp_step=5,
+                   p_rotation=0.8,
+                   max_angle_rotation=90,
+                   only_rotate_xy=False) -> tuple:
     if transform:
-        # sigma = np.random.random()
-        # alpha = np.random.random()
-        # transform = ElasticTransform(alpha=alpha, sigma=sigma)
-        # transformed_raw = transform(raw_data)
-        # transformed_labeled = transform(labeled_data)
+        if transform_type == 'Gaussian':
+            sigma_gauss *= np.random.random()
+            transform = AdditiveGaussianNoise(sigma=sigma_gauss)
+            transformed_raw = transform(raw_data)
+            return transformed_raw, labeled_data
+        elif transform_type == 'SinElastic':
+            interp_step = np.random.randint(1, interp_step)
+            interp_step = 2 ** interp_step
+            alpha = alpha_elastic * np.random.random()
+            transform = SinusoidalElasticTransform3D(alpha=alpha,
+                                                     interp_step=interp_step)
+            transformed_raw = transform(raw_data)
+            transformed_labeled = transform(labeled_data)
+            return transformed_raw, transformed_labeled
+        elif transform_type == "Rotation":
+            # erases channel dim:
+            transform = RandomRot3D(rot_range=max_angle_rotation, p=p_rotation,
+                                    only_xy=only_rotate_xy)
+            transformed_raw = transform(raw_data)
+            transformed_labeled = transform(labeled_data)
+            transformed_raw = transformed_raw[None, :]
+            transformed_labeled = transformed_labeled[None, :]
+            return transformed_raw, transformed_labeled
+        elif transform_type == 'All':
+            interp_step = np.random.randint(1, interp_step)
+            interp_step = 2 ** interp_step
+            alpha = alpha_elastic * np.random.random()
+            transform = SinusoidalElasticTransform3D(alpha=alpha,
+                                                     interp_step=interp_step)
+            transformed_raw = transform(raw_data)
+            transformed_labeled = transform(labeled_data)
 
-        # transform = RandomRot3D(rot_range=90,
-        #                         p=0.2)  # erases the channel dimension
-        # transformed_raw = transform(transformed_raw)
-        # transformed_labeled = transform(transformed_labeled)
+            print("Rotations are blocked for the moment")
+            transform = RandomRot3D(rot_range=max_angle_rotation,
+                                    p=p_rotation,
+                                    only_xy=only_rotate_xy)
+            transformed_raw = np.array(transform(transformed_raw))
+            transformed_labeled = np.array(transform(transformed_labeled))
+            print("transformed_raw.shape = ", transformed_raw)
+            print("transformed_labeled.shape = ", transformed_labeled.shape)
+            transformed_raw = transformed_raw[None, :]
+            transformed_labeled = transformed_labeled[None, :]
 
-        # transformed_raw = transformed_raw[None, :]
-        # transformed_labeled = transformed_labeled[None, :]
-
-        # No flip, to avoid wrong particle chirality
-        # transform = RandomFlip3D()  # erases the channel dimension
-        # transformed_raw = transform(transformed_raw)
-        # transformed_labeled = transform(transformed_labeled)
-        #
-        # transformed_raw = transformed_raw[None, :]
-        # transformed_labeled = transformed_labeled[None, :]
-
-        sigma = np.random.random()
-        transform = AdditiveGaussianNoise(sigma=sigma)
-        # transformed_raw = transform(transformed_raw)
-        transformed_raw = transform(raw_data)
-        transformed_labeled = labeled_data
-        return transformed_raw, transformed_labeled
+            sigma_gauss *= np.random.random()
+            transform = AdditiveGaussianNoise(sigma=sigma_gauss)
+            transformed_raw = transform(transformed_raw)
+            return transformed_raw, transformed_labeled
+        else:
+            print("The requested transformation name is not valid.")
     else:
         print("The data in the first iteration is intact.")
         return raw_data, labeled_data
@@ -433,7 +650,6 @@ def transform_data_dice_multi_class(raw_data: np.array, labeled_data: np.array,
     if transform:
         sigma = np.random.random()
         transform = AdditiveGaussianNoise(sigma=sigma)
-        # transformed_raw = transform(transformed_raw)
         transformed_raw = transform(raw_data)
         transformed_labeled = labeled_data
         return transformed_raw, transformed_labeled

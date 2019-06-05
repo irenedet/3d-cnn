@@ -63,7 +63,7 @@ def train_float(model, loader, optimizer, loss_function,
 
 
 def train(model, loader, optimizer, loss_function,
-          epoch, device, log_interval=20, tb_logger=None):
+          epoch, device, log_interval=20, tb_logger=None, log_image=True):
     # set the model to train mode
     model.train()
 
@@ -97,8 +97,8 @@ def train(model, loader, optimizer, loss_function,
             if step % log_image_interval == 0:
                 # we always log the last validation images:
                 batch, channel, size_x, size_y, size_z = x.shape
-                print("y.shape = ", y.shape)
-                print("x.shape = ", x.shape)
+                # print("y.shape = ", y.shape)
+                # print("x.shape = ", x.shape)
                 single_tomo_shape = (1, 1, size_x, size_y, size_z)
                 # we log four slices per cube:
                 for slice_index in range(1):
@@ -107,57 +107,63 @@ def train(model, loader, optimizer, loss_function,
                     batch = 0
                     channel = 0  # logging the segmentation of background
                     slice_index *= size_z // 2
-                    tb_logger.log_image(tag='val_input',
-                                        image=actions.crop_tensor(
-                                            x, single_tomo_shape)[
-                                            batch, channel, slice_index].to(
-                                            'cpu'),
-                                        step=step)
-                    if len(y.shape) == 5:
-                        _, classes_to_log, _, _, _ = y.shape
-                        for class_to_log in range(classes_to_log):
-                            window_corner = (0, class_to_log, 0, 0, 0)
-                            title_target = 'val_target class ' + str(
-                                class_to_log)
-                            image = actions.crop_window(y, single_tomo_shape,
-                                                        window_corner)
-                            print("image.shape = ", image.shape)
-                            tb_logger.log_image(
-                                tag=title_target,
-                                image=image[
-                                    0, 0, slice_index].to(
-                                    'cpu'),
-                                step=step)
-
-                            title_pred = 'val_pred class ' + str(
-                                class_to_log)
-                            image_prediction = actions.crop_window(
-                                prediction, single_tomo_shape,
-                                window_corner)
-                            tb_logger.log_image(
-                                tag=title_pred,
-                                image=image_prediction[
-                                    0, 0, slice_index].to(
-                                    'cpu'),
-                                step=step)
-                    elif len(y.shape) == 4:
-                        window_corner = (0, 0, 0, 0)
-                        y_single_tomoshape = (1, size_x, size_y, size_z)
-                        tb_logger.log_image(
-                            tag='val_target class ' + str(channel),
-                            image=actions.crop_tensor(y, y_single_tomoshape)[
-                                batch, slice_index].to('cpu'),
-                            step=step)
-                        tb_logger.log_image(tag='val_pred_class' + str(channel),
-                                            image=
-                                            actions.crop_window(
-                                                prediction, single_tomo_shape,
-                                                window_corner)[
+                    if log_image:
+                        tb_logger.log_image(tag='val_input',
+                                            image=actions.crop_tensor(
+                                                x, single_tomo_shape)[
                                                 batch, channel, slice_index].to(
                                                 'cpu'),
                                             step=step)
+
+                        if len(y.shape) == 5:
+                            _, classes_to_log, _, _, _ = y.shape
+                            for class_to_log in range(classes_to_log):
+                                window_corner = (0, class_to_log, 0, 0, 0)
+                                title_target = 'val_target class ' + str(
+                                    class_to_log)
+                                image = actions.crop_window(y,
+                                                            single_tomo_shape,
+                                                            window_corner)
+                                # print("image.shape = ", image.shape)
+
+                                tb_logger.log_image(
+                                    tag=title_target,
+                                    image=image[0, 0, slice_index].to('cpu'),
+                                    step=step)
+
+                                title_pred = 'val_pred class ' + str(
+                                    class_to_log)
+                                image_prediction = actions.crop_window(
+                                    prediction, single_tomo_shape,
+                                    window_corner)
+                                tb_logger.log_image(
+                                    tag=title_pred,
+                                    image=image_prediction[
+                                        0, 0, slice_index].to(
+                                        'cpu'),
+                                    step=step)
+                        elif len(y.shape) == 4:
+                            window_corner = (0, 0, 0, 0)
+                            y_single_tomoshape = (1, size_x, size_y, size_z)
+                            tb_logger.log_image(
+                                tag='val_target class ' + str(channel),
+                                image=
+                                actions.crop_tensor(y, y_single_tomoshape)[
+                                    batch, slice_index].to('cpu'),
+                                step=step)
+                            tb_logger.log_image(
+                                tag='val_pred_class' + str(channel),
+                                image=
+                                actions.crop_window(
+                                    prediction, single_tomo_shape,
+                                    window_corner)[
+                                    batch, channel, slice_index].to(
+                                    'cpu'),
+                                step=step)
+                        else:
+                            print("the size of the target tensor isnt loggable")
                     else:
-                        print("the size of the target tensor is loggable")
+                        print("Not logging images.")
 
 
 def validate(model, loader, loss_function, metric, device, step=None,

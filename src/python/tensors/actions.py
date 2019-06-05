@@ -38,11 +38,12 @@ def crop_window(input, shape_to_crop, window_corner):
     # get the difference between the shapes
     crop = tuple(slice(wc, wc + csh)
                  for wc, csh in zip(window_corner, shape_to_crop))
-    print(crop)
+    # print(crop)
     return input[crop]
 
 
-def crop_window_around_point(input, crop_shape, window_center):
+def crop_window_around_point(input: np.array, crop_shape: tuple,
+                             window_center: tuple) -> np.array:
     input_shape = input.shape
     assert all(ish - csh // 2 - center >= 0 for ish, csh, center in
                zip(input_shape, crop_shape, window_center)), \

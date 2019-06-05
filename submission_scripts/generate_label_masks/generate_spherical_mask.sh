@@ -11,18 +11,9 @@
 #SBATCH --mail-user=irene.de.teresa@embl.de
 
 
-#/struct/mahamid/Shared/For_Irene/predictions/180426/004/motl_482_checked.csv
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/004/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/005/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/021/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/024/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/003/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/004/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/005/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/018/TM/motl_clean_4b.em
-#/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180713/027/TM/motl_clean_4b.em
-export output_dir="/scratch/trueba/3d-cnn/clean/180713_027/ribos/"
-export path_to_motl="/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180713/027/TM/motl_clean_4b.em"
+
+export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/retrained_D4_IF8_NA_except_180711_003/180711_003/class_0/in_lamella"
+export path_to_motl="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/retrained_D4_IF8_NA_except_180711_003/180711_003/class_0/in_lamella/motl_3390.csv"
 echo output_dir = $output_dir
 echo path_to_motl = $path_to_motl
 #export path_to_motl="/struct/mahamid/Shared/For_Irene/predictions/180426/004/motl_482_checked.csv"

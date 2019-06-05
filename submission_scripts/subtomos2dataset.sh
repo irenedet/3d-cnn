@@ -20,13 +20,13 @@ echo "... done."
 #export output_path="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/D2_IF8_NA/180711_005/class_0/predicted_segmentation.hdf"
 
 export class_number=0
-export output_shape=(960,928,1000)
+export output_shape=(960,928,500)
 export box_length=128
 export box_overlap=12
-export label_name="D2_IF8_NA"
-
+export label_name="Retrained_D4_IF8_NA"
+export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrained_D4_IF8_NA/180711_003"
 DIRS="
-/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/D2_IF8_NA/180426_004
+/struct/mahamid/Irene/yeast/vpp/180711_003/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5
 "
 #/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/D2_IF8_NA/180426_021
 #/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/D2_IF8_NA/180426_024
@@ -38,8 +38,8 @@ DIRS="
 
 for dir in $DIRS
 do
-    export subtomos_path=$dir"/tomo_partition.h5"
-    export output_path=$dir"/class_"$class_number"/predicted_segmentation.hdf"
+    export subtomos_path=$dir
+    export output_path=$output_dir"/class_"$class_number"/predicted_segmentation.hdf"
 	echo "Reading file $subtomos_path"
 	echo "Running python script"
     python3 /g/scb2/zaugg/trueba/3d-cnn/runners/subtomos2dataset_new.py -subtomos_path $subtomos_path -class_number $class_number -output_path $output_path -output_shape $output_shape -box_length $box_length -overlap $box_overlap -label_name $label_name

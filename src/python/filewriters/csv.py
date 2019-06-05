@@ -282,6 +282,7 @@ def unique_coordinates_motl_writer(path_to_output_folder: str,
     return motl_file_name
 
 
+# FIXME this does not work properly:
 def write_union_of_motls(path_to_motl_1: str, path_to_motl_2: str,
                          path_to_output_folder: str,
                          min_peak_distance: int,

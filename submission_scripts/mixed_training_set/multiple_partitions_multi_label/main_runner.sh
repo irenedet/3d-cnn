@@ -33,7 +33,7 @@ do
 	export mask_0=$class_0_mask
 	export mask_1=$class_1_mask
 	export mask_2=$class_2_mask
-	sbatch /g/scb2/zaugg/trueba/3d-cnn/submission_scripts/mixed_training_set/multiple_partitions/parameters_file_read.sh -parameters_file $parameters_file -output_dir $output_dir -raw $eman2_filtered_file -mask_0 $mask_0 -mask_1 $mask_1 -mask_2 $mask_2 -partition_dir_name $partition_dir_name -label_name $label_name -split $split -box_side $box_side -number_iter $number_iter -overlap $overlap
+	sbatch /g/scb2/zaugg/trueba/3d-cnn/submission_scripts/mixed_training_set/multiple_partitions_multi_label/parameters_file_read.sh -parameters_file $parameters_file -output_dir $output_dir -raw $eman2_filtered_file -mask_0 $mask_0 -mask_1 $mask_1 -mask_2 $mask_2 -partition_dir_name $partition_dir_name -label_name $label_name -split $split -box_side $box_side -number_iter $number_iter -overlap $overlap
 done
 
 # ... Finally:

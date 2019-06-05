@@ -16,6 +16,7 @@ from src.python.filereaders.csv import read_motl_from_csv
 from src.python.filereaders.em import load_em_motl
 from src.python.peak_toolbox.utils import \
     extract_motl_coordinates_and_score_values
+from src.python.filewriters.csv import motl_writer
 
 parser = argparse.ArgumentParser()
 
@@ -68,22 +69,6 @@ motl_predicted = read_motl_from_csv(path_to_csv_motl)
 motl_values, motl_coordinates = extract_motl_coordinates_and_score_values(
     motl_predicted)
 
-sigmoid = lambda t: 1 / (1 + np.exp(-t))
-
-sigmoid_motl_values = [sigmoid(value) for value in motl_values if value > 0]
-
-matplotlib.use('Agg')
-plt.ioff()
-plt.figure(7)
-plt.hist(sigmoid_motl_values, bins=15, label="Predicted particles")
-plt.xlabel("sigmoid(score value)")
-plt.ylabel("frequency")
-plt.title(str(len(motl_coordinates)) + " peaks, " + label_name)
-plt.legend()
-plt.gcf()
-figure_name = join(figures_dir, "histogram_sigmoid_all_values.png")
-plt.savefig(fname=figure_name,
-            format="png")
 # motl_values /= np.max(motl_values)
 n = 5000
 motl_values, motl_coordinates = motl_values[:n], motl_coordinates[:n]
@@ -101,18 +86,22 @@ value_detected_predicted, value_undetected_predicted = \
         radius=min_peak_distance)
 
 detected_predicted = [np.array(point) for point in detected_predicted]
-from src.python.filewriters.csv import unique_coordinates_motl_writer
 
-unique_coordinates_motl_writer(path_to_output_folder=output_dir,
-                               list_of_peak_scores=value_detected_predicted,
-                               list_of_peak_coords=detected_predicted,
-                               number_peaks_to_uniquify=5000,
-                               minimum_peaks_distance=min_peak_distance)
+path_to_detected_predicted = join(output_dir, "detetected")
+path_to_undetected_predicted = join(output_dir, "undetetected")
+makedirs(name=path_to_detected_predicted, exist_ok=True)
+makedirs(name=path_to_undetected_predicted, exist_ok=True)
 
-sigmoid_value_detected_predicted = [sigmoid(value) for value in
-                                    value_detected_predicted]
-sigmoid_value_undetected_predicted = [sigmoid(value) for value in
-                                      value_undetected_predicted]
+motl_writer(path_to_output_folder=path_to_detected_predicted,
+            list_of_peak_coords=detected_predicted,
+            list_of_peak_scores=value_detected_predicted,
+            in_tom_format=True)
+motl_writer(path_to_output_folder=path_to_undetected_predicted,
+            list_of_peak_coords=undetected_predicted,
+            list_of_peak_scores=value_undetected_predicted,
+            in_tom_format=True)
+
+
 matplotlib.use('Agg')
 plt.ioff()
 plt.figure(1)
@@ -128,41 +117,12 @@ plt.savefig(fname=figure_name,
 
 matplotlib.use('Agg')
 plt.ioff()
-plt.figure(6)
-plt.hist(sigmoid_motl_values, bins=30, label="Predicted particles")
-plt.xlabel("sigmoid(score value)")
-plt.ylabel("frequency")
-plt.title(str(len(motl_coordinates)) + " peaks, " + label_name)
-plt.legend()
-plt.gcf()
-figure_name = join(figures_dir, "histogram_sigmoid.png")
-plt.savefig(fname=figure_name,
-            format="png")
-
-matplotlib.use('Agg')
-plt.ioff()
-plt.figure(5)
-plt.hist(sigmoid_value_detected_predicted, bins=25, label="true positives",
-         fc=(0, 0, 1, 0.5))
-plt.hist(sigmoid_value_undetected_predicted, bins=25, label="false positives",
-         fc=(1, 0, 0, 0.5))
-plt.xlabel("score value")
-plt.ylabel("frequency")
-plt.title(str(len(motl_coordinates)) + " peaks, " + label_name)
-plt.legend()
-plt.gcf()
-figure_name = join(figures_dir, "sigmoid_histogram-detected-undetected.png")
-plt.savefig(fname=figure_name,
-            format="png")
-
-matplotlib.use('Agg')
-plt.ioff()
 plt.figure(2)
 plt.hist(value_detected_predicted, bins=25, label="true positives",
          fc=(0, 0, 1, 0.5))
 plt.hist(value_undetected_predicted, bins=25, label="false positives",
          fc=(1, 0, 0, 0.5))
-plt.xlabel("sigmoid(score value)")
+plt.xlabel("score value")
 plt.ylabel("frequency")
 plt.title(str(len(motl_coordinates)) + " peaks, " + label_name)
 plt.legend()

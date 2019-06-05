@@ -53,7 +53,8 @@ def is_listlike(x):
 
 
 def to_iterable(x):
-    return [x] if not is_listlike(x) else x
+    return list(x) if not is_listlike(x) else x
+    # original: return [x] if not is_listlike(x) else x
 
 
 def from_iterable(x):

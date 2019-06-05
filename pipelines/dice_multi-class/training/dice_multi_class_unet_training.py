@@ -26,9 +26,6 @@ from src.python.filewriters.txt import write_model_description
 import argparse
 
 parser = argparse.ArgumentParser()
-# parser.add_argument("-data_path", "--training_data_path",
-#                     help="path to training set in h5 format",
-#                     type=str)
 parser.add_argument("-label", "--label_name",
                     help="label name of segmentation class",
                     type=str)
@@ -54,8 +51,8 @@ parser.add_argument("-weights", "--weights_per_class",
                     type=str,
                     default='1,1,1')
 parser.add_argument("-retrain", "--retrain",
-                    default=False,
-                    type=bool)
+                    default="False",
+                    type=str)
 parser.add_argument("-path_to_old_model", "--path_to_old_model",
                     default=False,
                     type=str)
@@ -92,12 +89,15 @@ segmentation_names = args.segmentation_names
 segmentation_names = list(map(str, segmentation_names.split(',')))
 # segmentation_names = ["ribo", "fas", "memb"]
 
+if retrain == "True":
+    retrain = True
+else:
+    retrain = False
+
 makedirs(name=log_dir, exist_ok=True)
 makedirs(name=model_path, exist_ok=True)
-# ToDO later add from runner
 
 final_activation = nn.Sigmoid()
-
 net_confs = [
     {'final_activation': final_activation,
      'depth': depth,
@@ -115,10 +115,11 @@ print(training_paths_list)
 device = get_device()
 
 for n, training_data_path in enumerate(training_paths_list):
-    print("Done loading training set from ", training_data_path)
+    print("\n")
     if skip_training == n:
         print("Skipping ", training_data_path)
     else:
+        print("Loading training set from ", training_data_path)
         if 'train_data' not in locals():
             raw_data, labels = h5.read_training_data_dice_multi_class(
                 training_data_path=training_data_path,
@@ -202,9 +203,11 @@ for conf in net_confs:
     model_path_pkl = join(model_path, model_name_pkl)
     model_name_txt = model_name + ".txt"
     data_txt_path = join(model_path, model_name_txt)
-    write_model_description(data_txt_path, str(training_paths_list), label_name,
-                            split, model_name_pkl, conf)
-
+    write_model_description(file_path=data_txt_path,
+                            training_data_path=str(training_paths_list),
+                            label_name=label_name, split=split,
+                            model_name_pkl=model_path_pkl, conf=conf,
+                            skip_training_set=skip_training)
     log_model = join(log_dir, model_name)
     logger = TensorBoard_multiclass(log_dir=log_model, log_image_interval=1)
     print("The neural network training is now starting")
@@ -212,7 +215,8 @@ for conf in net_confs:
         # apply training for one epoch
         new_epoch = epoch + old_epoch
         train(net, train_loader, optimizer=optimizer, loss_function=loss,
-              epoch=new_epoch, device=device, log_interval=1, tb_logger=logger)
+              epoch=new_epoch, device=device, log_interval=1, tb_logger=logger,
+              log_image=False)
         step = new_epoch * len(train_loader.dataset)
         # run validation after training epoch
         current_validation_loss = validate(net, val_loader, loss, metric,

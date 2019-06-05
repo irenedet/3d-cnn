@@ -11,20 +11,37 @@ def read_training_data(training_data_path: str,
                        split=-1) -> tuple:
     data = []
     labels = []
-    with h5py.File(training_data_path, 'r') as f:
-        raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
-        if split > 0:
-            split = int(split*len(raw_subtomo_names))
-        for subtomo_name in raw_subtomo_names[:split]:
-            raw_subtomo_h5_internal_path = join(
-                h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
-            data += [f[raw_subtomo_h5_internal_path][:]]
-            labels_subtomo_h5_internal_path = join(
-                h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
-            labels_subtomo_h5_internal_path = join(
-                labels_subtomo_h5_internal_path,
-                subtomo_name)
-            labels += [f[labels_subtomo_h5_internal_path][:]]
+    if split < 0:
+        print("split = ", split)
+        with h5py.File(training_data_path, 'r') as f:
+            raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
+            for subtomo_name in raw_subtomo_names:
+                raw_subtomo_h5_internal_path = join(
+                    h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
+                data += [f[raw_subtomo_h5_internal_path][:]]
+                labels_subtomo_h5_internal_path = join(
+                    h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
+                labels_subtomo_h5_internal_path = join(
+                    labels_subtomo_h5_internal_path,
+                    subtomo_name)
+                labels += [f[labels_subtomo_h5_internal_path][:]]
+    else:
+        with h5py.File(training_data_path, 'r') as f:
+            raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
+            if 1 > split > 0:
+                split = int(split*len(raw_subtomo_names))
+            else:
+                split = int(split)
+            for subtomo_name in raw_subtomo_names[:split]:
+                raw_subtomo_h5_internal_path = join(
+                    h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
+                data += [f[raw_subtomo_h5_internal_path][:]]
+                labels_subtomo_h5_internal_path = join(
+                    h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
+                labels_subtomo_h5_internal_path = join(
+                    labels_subtomo_h5_internal_path,
+                    subtomo_name)
+                labels += [f[labels_subtomo_h5_internal_path][:]]
 
     data = np.array(data)
     labels = np.array(labels)

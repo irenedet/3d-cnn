@@ -162,10 +162,11 @@ def partition_raw_and_labels_tomograms_dice_multiclass(
     write_joint_raw_and_labels_subtomograms_dice_multiclass(
         output_path=output_h5_file_path,
         padded_raw_dataset=padded_raw_dataset,
-        padded_labels_dataset_list=padded_labels_dataset_list,
+        padded_labels_list=padded_labels_dataset_list,
         segmentation_names=segmentation_names,
         window_centers=padded_particles_coordinates,
         crop_shape=subtomo_shape)
+    return
 
 # def partition_tomograms(dataset: np.array,
 #                         label_name: str,

@@ -1,3 +1,7 @@
+runners/ElasticTansform3D_test.py
+slurm_outputs/
+submission_scripts/dice-multi-class/multiple_cnn_evaluations/main_runner.sh.save
+src/python/utils/__pycache__/
 submission_data/
 log_dice_multi_label_old/*
 src/python/pytorch_cnn/__pycache__/utils.cpython-36.pyc

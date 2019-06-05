@@ -1,4 +1,3 @@
-# from os.path import join
 from os import makedirs
 
 from src.python.filereaders.hdf import _load_hdf_dataset
@@ -7,6 +6,7 @@ from src.python.datasets.actions import partition_raw_and_labels_tomograms
 from src.python.filewriters.h5 import split_and_write_h5_partition
 
 import argparse
+from os.path import join
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-raw", "--path_to_raw",
@@ -31,9 +31,7 @@ parser.add_argument("-shapez", "--output_shape_z",
 parser.add_argument("-number_iter", "--number_iter",
                     type=int)
 parser.add_argument("-split", "--split",
-                    type=int)
-parser.add_argument("-train_split", "--train_split",
-                    type=int)
+                    type=float)
 parser.add_argument("-overlap", "--overlap",
                     type=int)
 
@@ -48,27 +46,7 @@ shape_z = args.output_shape_z
 box_side = args.box_side
 number_iter = args.number_iter
 split = args.split
-train_split = args.train_split
 overlap = args.overlap
-
-from os.path import join
-
-# path_to_raw = "/scratch/trueba/cnn/004/4bin/cnn/rawtomogram/180426_004_4bin.hdf"
-# path_to_labeled = "/scratch/trueba/cnn/004/4bin/cnn/centralregion_004.hdf"
-# output_dir = "/scratch/trueba/3d-cnn/training_data/TEST/004_last"
-# label_name = "ribosomes"
-# split = 130  # Between partitions of testing and training data
-# shape_x = 928
-# shape_y = 928
-# shape_z = 221
-# box_side = 128
-#
-# # For data augmentation:
-# number_iter = 6
-# train_split = 110  # within training data for nnet training
-# overlap = 12
-
-assert split > train_split
 
 output_shape = (shape_y, shape_y, shape_x)
 subtomogram_shape = (box_side, box_side, box_side)
@@ -88,6 +66,7 @@ makedirs(name=output_dir, exist_ok=True)
 
 raw_dataset = _load_hdf_dataset(hdf_file_path=path_to_raw)
 labels_dataset = _load_hdf_dataset(hdf_file_path=path_to_labeled)
+
 partition_raw_and_labels_tomograms(raw_dataset=raw_dataset,
                                    labels_dataset=labels_dataset,
                                    label_name=label_name,
@@ -109,7 +88,8 @@ print("The testing set has been written in ", h5_test_partition_path)
 print("The data augmentation is starting...")
 transform_data_from_h5(training_data_path=h5_train_partition_path,
                        label_name=label_name, number_iter=number_iter,
-                       output_data_path=output_data_path, split=train_split)
+                       output_data_path=output_data_path, split=-1,
+                       transform_type='All')
 print("The training data with data augmentation has been writen in ",
       output_data_path)
 

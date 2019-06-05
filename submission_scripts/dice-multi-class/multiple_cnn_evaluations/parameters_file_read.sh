@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 64G
-#SBATCH --time 0-0:50
+#SBATCH --mem 128G
+#SBATCH --time 0-2:00
 #SBATCH -o slurm_outputs/cnn_evaluation.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/cnn_evaluation.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -83,13 +83,6 @@ while [ "$1" != "" ]; do
 done
 
 
-echo path_to_model = $path_to_model
-echo label_name = $label_name
-echo depth = $depth
-echo init_feat = $init_feat
-echo box_side = $box_side
-echo new_loader = $new_loader
-echo minimum_peak_distance = $minimum_peak_distance
 echo border_xy = $border_xy
 echo lamella_extension = $lamella_extension
 echo same_peak_distance = $same_peak_distance
@@ -111,7 +104,7 @@ export output_classes=$output_classes
 
 source $parameters_file
 export output_dir=$output_dir
-export summary_file=$output_dir"/summary_analysis.txt"
+export summary_file=$output_dir"/summary_analysis_class"$class_number".txt"
 touch $summary_file
 
 export tomo_name=$tomo_name
@@ -126,11 +119,8 @@ export hdf_lamella_file=$hdf_lamella_file
 export path_to_motl_clean_0=$path_to_motl_clean_0
 export path_to_motl_clean_1=$path_to_motl_clean_1
 
+echo tomo_name = $tomo_name
 echo output_dir = $output_dir
-echo test_partition = $test_partition
-echo input_xdim = $input_xdim
-echo input_ydim = $input_ydim
-echo input_zdim = $input_zdim
 echo z_shift = $z_shift
 echo x_shift = $x_shift
 echo hdf_lamella_file = $hdf_lamella_file
@@ -154,20 +144,15 @@ export box_overlap=12
 
 # 1. Segmenting, peak calling and motl writing
 echo "Calling particle picking pipeline"
-bash /g/scb2/zaugg/trueba/3d-cnn/pipelines/dice_multi-class/particle_picking_pipeline/runner_in_partition_set.sh -test_partition $test_partition -output $output_dir -model $path_to_model -label $label_name -init_feat $init_feat -depth $depth -box $box_side -xdim $input_xdim -ydim $input_ydim -zdim $input_zdim -min_peak_distance $minimum_peak_distance -z_shift $z_shift -class_number $class_number -out_classes $output_classes -new_loader $new_loader
+bash ./pipelines/dice_multi-class/particle_picking_pipeline/runner_in_partition_set.sh -test_partition $test_partition -output $output_dir -model $path_to_model -label $label_name -init_feat $init_feat -depth $depth -box $box_side -xdim $input_xdim -ydim $input_ydim -zdim $input_zdim -min_peak_distance $minimum_peak_distance -z_shift $z_shift -class_number $class_number -out_classes $output_classes -new_loader $new_loader
 echo "... done with particle picking pipeline."
-
-
-#echo "Calling particle picking pipeline"
-#python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/dice_multi-class/particle_picking_pipeline/3_get_peaks_motive_list.py -output $output_dir -label $label_name -subtomo $test_partition -box $box_side -xdim $input_xdim -ydim $input_ydim -zdim $input_zdim -class_number $class_number -min_peak_distance $minimum_peak_distance -z_shift $z_shift -overlap $box_overlap
-#echo "... done with particle picking pipeline."
 
 
 # 2. Mask coordinate points with lamella mask
 export path_to_csv_motl=$(ls $output_dir/motl*)
 
 echo "Now filtering points in lamella mask"
-python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/performance_nnet_quantification/filter_with_lamella_mask.py -csv_motl $path_to_csv_motl -lamella_file $hdf_lamella_file -output_dir $output_dir -border_xy $border_xy -lamella_extension $lamella_extension -x_dim $input_xdim -y_dim $input_ydim -z_dim $input_zdim -z_shift $z_shift
+python3 ./pipelines/performance_nnet_quantification/filter_with_lamella_mask.py -csv_motl $path_to_csv_motl -lamella_file $hdf_lamella_file -output_dir $output_dir -border_xy $border_xy -lamella_extension $lamella_extension -x_dim $input_xdim -y_dim $input_ydim -z_dim $input_zdim -z_shift $z_shift
 echo "...done filtering points in lamella mask."
 
 
@@ -176,6 +161,6 @@ export lamella_output_dir=$output_dir"/in_lamella"
 export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir/motl*)
 
 echo "Starting to generate precision recall plots"
-python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/performance_nnet_quantification/precision_recall_plots.py -motl $path_to_csv_motl_in_lamella -clean $path_to_motl_clean -output $lamella_output_dir -test_file $test_partition -radius $same_peak_distance -shape_x $input_xdim -shape_y $input_ydim -shape_z $input_zdim -x_shift $x_shift -z_shift $z_shift -box $box_side >> $summary_file
+python3 ./pipelines/performance_nnet_quantification/precision_recall_plots.py -motl $path_to_csv_motl_in_lamella -clean $path_to_motl_clean -output $lamella_output_dir -test_file $test_partition -radius $same_peak_distance -shape_x $input_xdim -shape_y $input_ydim -shape_z $input_zdim -x_shift $x_shift -z_shift $z_shift -box $box_side >> $summary_file
 echo "...done with precision recall plots."
 

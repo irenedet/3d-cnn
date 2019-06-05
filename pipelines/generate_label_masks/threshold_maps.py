@@ -14,14 +14,14 @@ data_files = [
     "/struct/mahamid/Irene/NPC/11/clean/cylindrical_mask.hdf",
 ]
 output_paths = [
-    "/struct/mahamid/Irene/NPC/01/clean/binarized_cylindrical_mask.hdf",
-    "/struct/mahamid/Irene/NPC/02/clean/binarized_cylindrical_mask.hdf",
-    "/struct/mahamid/Irene/NPC/03/clean/binarized_cylindrical_mask.hdf",
-    "/struct/mahamid/Irene/NPC/04/clean/binarized_cylindrical_mask.hdf",
-    "/struct/mahamid/Irene/NPC/05/clean/binarized_cylindrical_mask.hdf",
-    "/struct/mahamid/Irene/NPC/06/clean/binarized_cylindrical_mask.hdf",
-    "/struct/mahamid/Irene/NPC/10/clean/binarized_cylindrical_mask.hdf",
-    "/struct/mahamid/Irene/NPC/11/clean/binarized_cylindrical_mask.hdf",
+    "/struct/mahamid/Irene/NPC/01/clean/thin_binarized_cylindrical_mask.hdf",
+    "/struct/mahamid/Irene/NPC/02/clean/thin_binarized_cylindrical_mask.hdf",
+    "/struct/mahamid/Irene/NPC/03/clean/thin_binarized_cylindrical_mask.hdf",
+    "/struct/mahamid/Irene/NPC/04/clean/thin_binarized_cylindrical_mask.hdf",
+    "/struct/mahamid/Irene/NPC/05/clean/thin_binarized_cylindrical_mask.hdf",
+    "/struct/mahamid/Irene/NPC/06/clean/thin_binarized_cylindrical_mask.hdf",
+    "/struct/mahamid/Irene/NPC/10/clean/thin_binarized_cylindrical_mask.hdf",
+    "/struct/mahamid/Irene/NPC/11/clean/thin_binarized_cylindrical_mask.hdf",
 ]
 
 thresholds = [
