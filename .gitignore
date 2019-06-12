@@ -1,3 +1,4 @@
+slurm-*
 runners/ElasticTansform3D_test.py
 slurm_outputs/
 submission_scripts/dice-multi-class/multiple_cnn_evaluations/main_runner.sh.save
