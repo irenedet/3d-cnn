@@ -13,7 +13,7 @@ from src.python.calculator.statistics import \
 from src.python.coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl
 from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import load_em_motl
+from src.python.filereaders.em import read_em
 from src.python.peak_toolbox.utils import \
     extract_motl_coordinates_and_score_values
 from src.python.filewriters.csv import motl_writer
@@ -55,7 +55,7 @@ _, motl_extension = os.path.splitext(path_to_motl_clean)
 assert motl_extension == ".em" or motl_extension == ".csv"
 if motl_extension == ".em":
     print("motl clean in .em format")
-    Header, motl_true = load_em_motl(path_to_emfile=path_to_motl_clean)
+    Header, motl_true = read_em(path_to_emfile=path_to_motl_clean)
     motl_clean_coords = extract_coordinates_from_em_motl(motl_true)
 else:
     print("motl clean in .csv format")
@@ -87,8 +87,8 @@ value_detected_predicted, value_undetected_predicted = \
 
 detected_predicted = [np.array(point) for point in detected_predicted]
 
-path_to_detected_predicted = join(output_dir, "detetected")
-path_to_undetected_predicted = join(output_dir, "undetetected")
+path_to_detected_predicted = join(output_dir, "detected")
+path_to_undetected_predicted = join(output_dir, "undetected")
 makedirs(name=path_to_detected_predicted, exist_ok=True)
 makedirs(name=path_to_undetected_predicted, exist_ok=True)
 

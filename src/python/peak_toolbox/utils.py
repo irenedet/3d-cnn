@@ -6,7 +6,7 @@ import numpy as np
 from src.python.coordinates_toolbox.utils import \
     extract_coordinates_and_values_from_em_motl
 from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import load_em_motl
+from src.python.filereaders.em import read_em
 from src.python.osactions.filesystem import create_dir
 
 
@@ -39,7 +39,7 @@ def paste_sphere_in_dataset(dataset: np.array, radius: int, value: float,
 
 
 def _get_next_max(dataset: np.array, coordinates_list: list, radius: int,
-                  numb_peaks: int) -> tuple:
+                  numb_peaks: int, global_min: float) -> tuple:
     dataset_dimensions = dataset.shape
     unit_particle = _generate_unit_particle(radius)
     if len(coordinates_list) < numb_peaks:
@@ -48,12 +48,12 @@ def _get_next_max(dataset: np.array, coordinates_list: list, radius: int,
                 (p[0] + delta_p[0], p[1] + delta_p[1], p[2] + delta_p[2])
                 for delta_p in unit_particle]
             for coord in particle:
-                if (coord[0] < dataset_dimensions[0]) and (
-                            coord[1] < dataset_dimensions[1]) and (
-                            coord[2] < dataset_dimensions[2]) and (
-                            0 <= coord[0]) and (
-                            0 <= coord[1]) and (0 <= coord[2]):
-                    dataset[coord[0]][coord[1]][coord[2]] = -100
+                if (coord[0] < dataset_dimensions[0]) and \
+                        (coord[1] < dataset_dimensions[1]) and \
+                        (coord[2] < dataset_dimensions[2]) and \
+                        (0 <= coord[0]) and (0 <= coord[1]) and \
+                        (0 <= coord[2]):
+                    dataset[coord[0]][coord[1]][coord[2]] = global_min - 1
         next_max = np.ndarray.max(dataset)
         next_max_coords = np.where(next_max == dataset)
         next_max_coords_list = []
@@ -71,9 +71,8 @@ def _get_next_max(dataset: np.array, coordinates_list: list, radius: int,
 
 
 def extract_peaks(dataset: np.array, numb_peaks: int, radius: int):
-    # Todo: instead of -100 use global_min - 1...
-    # global_min = np.min(dataset)
     global_max = np.ndarray.max(dataset)
+    global_min = np.ndarray.min(dataset)
     global_max_coords = np.where(dataset == global_max)
     print(global_max_coords)
     coordinates_list = [(global_max_coords[0][0], global_max_coords[1][0],
@@ -86,13 +85,15 @@ def extract_peaks(dataset: np.array, numb_peaks: int, radius: int):
         next_max, coordinates_list, flag = _get_next_max(dataset,
                                                          coordinates_list,
                                                          radius,
-                                                         numb_peaks)
+                                                         numb_peaks,
+                                                         global_min)
         if "overloaded" == flag:
             print("overloaded, reached a level with no more local maxima")
             print("maxima in subtomo:", len(list_of_maxima_coords))
             return list_of_maxima, list_of_maxima_coords
-        elif next_max == -100:
-            print("maxima in subtomo:", list_of_maxima_coords)
+        elif next_max == global_min - 1:
+            print("No more maxima, reached indicator  global_min - 1.")
+            print("maxima in subtomo:", len(list_of_maxima_coords))
             return list_of_maxima, list_of_maxima_coords
         else:
             list_of_maxima += [next_max for _ in coordinates_list]
@@ -189,7 +190,7 @@ def read_motl_coordinates_and_values(path_to_motl: str):
     _, motl_extension = os.path.splitext(path_to_motl)
     if motl_extension == ".em":
         print("motl in .em format")
-        header, motl = load_em_motl(path_to_emfile=path_to_motl)
+        header, motl = read_em(path_to_emfile=path_to_motl)
         motl_values, motl_coords = extract_coordinates_and_values_from_em_motl(
             motl)
         return motl_values, motl_coords

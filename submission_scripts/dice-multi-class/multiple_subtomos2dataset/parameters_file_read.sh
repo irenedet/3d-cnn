@@ -3,16 +3,16 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 128G
-#SBATCH --time 0-2:00
-#SBATCH -o slurm_outputs/cnn_evaluation.slurm.%N.%j.out
-#SBAtCH -e slurm_outputs/cnn_evaluation.slurm.%N.%j.err
+#SBATCH --mem 32G
+#SBATCH --time 0-0:20
+#SBATCH -o slurm_outputs/subtomo2dataset.slurm.%N.%j.out
+#SBAtCH -e slurm_outputs/subtomo2dataset.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=irene.de.teresa@embl.de
 
 module load Anaconda3
 echo "activating virtual environment"
-source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
+source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 echo "... done"
 
 export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
@@ -26,6 +26,7 @@ usage()
 }
 
 
+
 while [ "$1" != "" ]; do
     case $1 in
         -parameters_file | --parameters_file )   shift
@@ -34,44 +35,20 @@ while [ "$1" != "" ]; do
         -output_dir | --output_dir )   shift
                                 output_dir=$1
                                 ;;
-        -class_number | --class_number )   shift
-                                class_number=$1
+        -box_side | --box_side )   shift
+                                box_side=$1
+                                ;;
+        -overlap | --overlap )   shift
+                                overlap=$1
                                 ;;
         -output_classes | --output_classes )   shift
                                 output_classes=$1
                                 ;;
-        -path_to_model | --path_to_model )   shift
-                                path_to_model=$1
-                                ;;
         -label_name | --label_name )   shift
                                 label_name=$1
                                 ;;
-        -box_side | --box_side )   shift
-                                box_side=$1
-                                ;;
-        -min_peak_distance | --min_peak_distance )   shift
-                                min_peak_distance=$1
-                                ;;
-        -depth | --depth )   shift
-                                depth=$1
-                                ;;
-        -init_feat | --init_feat )   shift
-                                init_feat=$1
-                                ;;
-        -new_loader | --new_loader )   shift
-                                new_loader=$1
-                                ;;
-        -minimum_peak_distance | --minimum_peak_distance )   shift
-                                minimum_peak_distance=$1
-                                ;;
-        -border_xy | --border_xy )   shift
-                                border_xy=$1
-                                ;;
-        -lamella_extension | --lamella_extension )   shift
-                                lamella_extension=$1
-                                ;;
-        -same_peak_distance | --same_peak_distance )   shift
-                                same_peak_distance=$1
+        -segmentation_names | --segmentation_names )   shift
+                                segmentation_names=$1
                                 ;;
         -h | --help )           usage
                                 exit
@@ -83,84 +60,35 @@ while [ "$1" != "" ]; do
 done
 
 
-echo border_xy = $border_xy
-echo lamella_extension = $lamella_extension
-echo same_peak_distance = $same_peak_distance
-echo class_number = $class_number
-echo output_classes = $output_classes
+# parameters_file: subtomos_path, output_shape
+# output_dir
+# box
+# overlap_thickness
+# output_classes
+# label_name
+# segmentation_names
 
-export path_to_model=$path_to_model
+export box_overlap=$overlap
 export label_name=$label_name
-export depth=$depth
-export init_feat=$init_feat
 export box_side=$box_side
-export new_loader=$new_loader
-export minimum_peak_distance=$minimum_peak_distance
-export border_xy=$border_xy
-export lamella_extension=$lamella_extension
-export same_peak_distance=$same_peak_distance
-export class_number=$class_number
 export output_classes=$output_classes
-
-source $parameters_file
 export output_dir=$output_dir
-export summary_file=$output_dir"/summary_analysis_class"$class_number".txt"
-touch $summary_file
+export segmentation_names
 
+# Reading parameters file and translating to current script variables:
+source $parameters_file
 export tomo_name=$tomo_name
-export output_dir=$output_dir"/"$tomo_name"/class_"$class_number
-export test_partition=$test_partition
-export input_xdim=$input_xdim
-export input_ydim=$input_ydim
-export input_zdim=$input_zdim
-export z_shift=$z_shift
-export x_shift=$x_shift
-export hdf_lamella_file=$hdf_lamella_file
-export path_to_motl_clean_0=$path_to_motl_clean_0
-export path_to_motl_clean_1=$path_to_motl_clean_1
+export output_dir=$output_dir"/"$tomo_name
+export subtomos_path=$test_partition
+export output_xdim=$input_xdim
+export output_ydim=$input_ydim
+export output_zdim=$input_zdim
 
 echo tomo_name = $tomo_name
 echo output_dir = $output_dir
-echo z_shift = $z_shift
-echo x_shift = $x_shift
-echo hdf_lamella_file = $hdf_lamella_file
-echo path_to_motl_clean_0=$path_to_motl_clean_0
-echo path_to_motl_clean_1=$path_to_motl_clean_1
 
 
-if [ $class_number == 0 ]; then
-    echo "class_number is 0"
-    export path_to_motl_clean=$path_to_motl_clean_0
-elif [ $class_number == 1 ]; then
-    echo "class_number is 1"
-    export path_to_motl_clean=$path_to_motl_clean_1
-else
-    echo "class_number non-supported for now"
-fi
-
-echo path_to_motl_clean = $path_to_motl_clean
-export box_overlap=12
-
-
-# 1. Segmenting, peak calling and motl writing
-echo "Calling particle picking pipeline"
-bash ./pipelines/dice_multi-class/particle_picking_pipeline/runner_in_partition_set.sh -test_partition $test_partition -output $output_dir -model $path_to_model -label $label_name -init_feat $init_feat -depth $depth -box $box_side -xdim $input_xdim -ydim $input_ydim -zdim $input_zdim -min_peak_distance $minimum_peak_distance -z_shift $z_shift -class_number $class_number -out_classes $output_classes -new_loader $new_loader
-echo "... done with particle picking pipeline."
-
-
-# 2. Mask coordinate points with lamella mask
-export path_to_csv_motl=$(ls $output_dir/motl*)
-
-echo "Now filtering points in lamella mask"
-python3 ./pipelines/performance_nnet_quantification/filter_with_lamella_mask.py -csv_motl $path_to_csv_motl -lamella_file $hdf_lamella_file -output_dir $output_dir -border_xy $border_xy -lamella_extension $lamella_extension -x_dim $input_xdim -y_dim $input_ydim -z_dim $input_zdim -z_shift $z_shift
-echo "...done filtering points in lamella mask."
-
-
-# 3. Precision-Recall analysis
-export lamella_output_dir=$output_dir"/in_lamella"
-export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir/motl*)
-
-echo "Starting to generate precision recall plots"
-python3 ./pipelines/performance_nnet_quantification/precision_recall_plots.py -motl $path_to_csv_motl_in_lamella -clean $path_to_motl_clean -output $lamella_output_dir -test_file $test_partition -radius $same_peak_distance -shape_x $input_xdim -shape_y $input_ydim -shape_z $input_zdim -x_shift $x_shift -z_shift $z_shift -box $box_side >> $summary_file
-echo "...done with precision recall plots."
+echo "Starting python script..."
+python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/dice_multi-class/evaluation/subtomos2dataset.py -subtomos_path $subtomos_path -output_xdim $output_xdim -output_ydim $output_ydim -output_zdim $output_zdim -output_dir $output_dir -box $box_side -overlap_thickness $overlap -output_classes $output_classes -label_name $label_name -segmentation_names $segmentation_names
+echo "... done."
 

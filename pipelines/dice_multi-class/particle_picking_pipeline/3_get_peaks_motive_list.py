@@ -63,7 +63,8 @@ z_shift = args.z_shift_original
 subtomo_shape = tuple(box_side * np.array([1, 1, 1]))
 output_shape = (output_zdim, output_ydim, output_xdim)
 makedirs(name=output_dir, exist_ok=True)
-# Future local parameters:
+
+# Todo? Future local parameters:
 peaks_per_subtomo = int(box_side ** 3 / (2 * min_peak_distance) ** 3)
 print("peaks per subtomo = ", peaks_per_subtomo)
 number_peaks_uniquify = 7000

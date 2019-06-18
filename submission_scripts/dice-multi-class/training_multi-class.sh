@@ -20,29 +20,27 @@ source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 echo '... done.'
 
 # Training set parameters:
-training_list="/struct/mahamid/Irene/yeast/vpp/180426_004/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5
-/struct/mahamid/Irene/yeast/vpp/180426_005/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5
-/struct/mahamid/Irene/yeast/vpp/180426_021/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5
-/struct/mahamid/Irene/yeast/vpp/180426_024/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5
-/struct/mahamid/Irene/yeast/vpp/180711_003/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5
-/struct/mahamid/Irene/yeast/vpp/180711_004/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5
-/struct/mahamid/Irene/yeast/vpp/180711_005/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5
-/struct/mahamid/Irene/yeast/vpp/180711_018/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5"
+training_list="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/ED/181119_002/tomo_partition.h5
+/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/ED/181119_030/tomo_partition.h5
+/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/ED/181126_002/tomo_partition.h5
+/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/ED/181126_012/tomo_partition.h5
+/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/ED/181126_025/tomo_partition.h5
+/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/ED/190301_005/tomo_partition.h5"
 
 export label_name="ribo_fas_memb"
 export segmentation_names='ribo,fas,memb'
 export split=0.7
-export skip=4 #except 180711_003
+export skip=3 #4 except 180711_003 (healthy), except 181126_012 (ED)
 
 # Data for the new model
 export log_dir="/g/scb2/zaugg/trueba/3d-cnn/log_dice_multi_label"
-export model_initial_name="RRrR_180711_all_except_180711_003_"
-export model_path="/g/scb2/zaugg/trueba/3d-cnn/models/dice_multi_label/retrained"
+export model_initial_name="R_ED_all_but_012__RR_all_but_003_"
+export model_path="/g/scb2/zaugg/trueba/3d-cnn/models/dice_multi_label/retrained/ED"
 export n_epochs=40
 export depth=2
 export initial_features=8
 export output_classes=3
-
+mkdir $model_path
 # Data for old models for resuming training:
 export retrain="True"
 export path_to_old_model="/g/scb2/zaugg/trueba/3d-cnn/models/dice_multi_label/retrained/Retrain_retrained_except_180711_003ribo_fas_memb_D_2_IF_8.pkl"

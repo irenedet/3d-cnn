@@ -5,14 +5,35 @@ import numpy as np
 from src.python.naming.particles import create_particle_file_name
 
 
-def rearrange_hdf_coordinates(p: list) -> tuple:
+def to_tom_coordinate_system(p: list) -> np.array:
     """
-    Function that rearranges a tuple from hdf load in the x,y,z
-    order.
-    :param p: a point comming from hdf.load_dataset with format [z, y, x]
-    :return: (x, y, z)
+    Function that rearranges a list of coordinates from the python hdf load
+    coordinates system into the tom coordinate system.
+    :param p: a point coming from hdf.load_dataset with format [z, y, x]
+    :return: [x, y, z]
     """
-    return p[2], p[1], p[0]
+    return np.array([p[2], p[1], p[0]])
+
+
+def invert_tom_coordinate_system(p: list) -> np.array:
+    """
+    Function that rearranges a list of coordinates from the python hdf load
+    coordinates system into the tom coordinate system.
+    :param p: a point coming from hdf.load_dataset with format [z, y, x]
+    :return: [x, y, z]
+    """
+    return np.array([p[2], p[1], p[0]])
+
+
+def arrange_coordinates_list_by_score(list_of_peak_scores: list,
+                                      list_of_peak_coordinates: list) -> tuple:
+    take_first_entry = lambda pair: pair[0]
+    joint_list = list(zip(list_of_peak_scores, list_of_peak_coordinates))
+    joint_list = sorted(joint_list, key=take_first_entry, reverse=1)
+    unzipped_list = list(zip(*joint_list))
+    list_of_peak_scores, list_of_peak_coordinates = list(
+        unzipped_list[0]), list(unzipped_list[1])
+    return list_of_peak_scores, list_of_peak_coordinates
 
 
 def shift_coordinates(coordinates: np.array, origin: tuple) -> np.array:

@@ -7,7 +7,7 @@ from src.python.calculator.statistics import \
 from src.python.coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl
 from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import load_em_motl
+from src.python.filereaders.em import read_em
 from src.python.peak_toolbox.utils import \
     extract_motl_coordinates_and_score_values
 from src.python.filewriters.csv import unique_coordinates_motl_writer
@@ -42,7 +42,7 @@ x_shift = args.x_shift
 figures_dir = join(output_dir, "figures")
 makedirs(name=figures_dir, exist_ok=True)
 
-_, motl_true = load_em_motl(path_to_emfile=path_to_motl_clean)
+_, motl_true = read_em(path_to_emfile=path_to_motl_clean)
 motl_clean_coords = extract_coordinates_from_em_motl(motl_true)
 
 motl_predicted = read_motl_from_csv(path_to_csv_motl)

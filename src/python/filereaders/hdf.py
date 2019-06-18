@@ -3,7 +3,7 @@ import numpy as np
 from src.python.naming import h5_internal_paths
 
 
-def _load_hdf_dataset(hdf_file_path: str) -> list:
+def _load_hdf_dataset(hdf_file_path: str) -> np.array:
     """
     Example:
         path_to_file: 'eman2/ribo3/image.txt'

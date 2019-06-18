@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
 
 #file-specifics:
-#FILES="/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180426_004.sh"
-FILES="/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180426_005.sh
+FILES="/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181119_002.sh
+/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181119_030.sh
+/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181126_002.sh
+/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181126_012.sh
+/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181126_025.sh
+/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/190301_005.sh
 "
-#/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180426_024.sh
-#/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180426_021.sh
-#/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180711_003.sh
-#/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180711_004.sh
-#/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180711_005.sh
-#/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180711_018.sh"
-#/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180713_027.sh"
 
 
 export output_dir="/scratch/trueba/3d-cnn/training_data/dice-multi-class"
@@ -33,7 +30,7 @@ do
 	export mask_0=$class_0_mask
 	export mask_1=$class_1_mask
 	export mask_2=$class_2_mask
-	sbatch /g/scb2/zaugg/trueba/3d-cnn/submission_scripts/mixed_training_set/multiple_partitions_multi_label/parameters_file_read.sh -parameters_file $parameters_file -output_dir $output_dir -raw $eman2_filtered_file -mask_0 $mask_0 -mask_1 $mask_1 -mask_2 $mask_2 -partition_dir_name $partition_dir_name -label_name $label_name -split $split -box_side $box_side -number_iter $number_iter -overlap $overlap
+	bash /g/scb2/zaugg/trueba/3d-cnn/submission_scripts/mixed_training_set/multiple_partitions_multi_label/parameters_file_read.sh -parameters_file $parameters_file -output_dir $output_dir -raw $eman2_filtered_file -mask_0 $mask_0 -mask_1 $mask_1 -mask_2 $mask_2 -partition_dir_name $partition_dir_name -label_name $label_name -split $split -box_side $box_side -number_iter $number_iter -overlap $overlap
 done
 
 # ... Finally:

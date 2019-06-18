@@ -7,7 +7,7 @@ import torch
 import numpy as np
 
 from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import load_em_motl
+from src.python.filereaders.em import read_em
 from src.python.filereaders.shrec import read_shrec_motl
 from src.python.coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl, extract_coordinates_from_txt_shrec
@@ -422,7 +422,6 @@ def segment_and_write(data_path: str, model: UNet, label_name: str):
                     h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS])
             print("Predictions list", predictions)
             if label_name in predictions:
-                print("The segmentation", label_name, " exists already.")
                 flag = 'segmentation_exists'
             else:
                 flag = 'segmentation_nonexistent'
@@ -449,7 +448,7 @@ def segment_and_write(data_path: str, model: UNet, label_name: str):
                                               label_name=label_name,
                                               subtomo_name=subtomo_name)
         else:
-            print(flag)
+            print("The segmentation", label_name, " exists already.")
     return
 
 
@@ -508,7 +507,7 @@ def write_hdf_particles_from_motl(path_to_motl: str,
                 score_values = np.ones(len(motive_list))
                 print("The map will be binary.")
         else:
-            _, motive_list = load_em_motl(path_to_emfile=path_to_motl)
+            _, motive_list = read_em(path_to_emfile=path_to_motl)
             if isinstance(number_of_particles, int):
                 motive_list = motive_list[:number_of_particles]
                 print("Only", str(number_of_particles),

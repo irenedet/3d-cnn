@@ -1,5 +1,5 @@
-# from os.path import join
 from os import makedirs
+from os.path import join
 
 from src.python.datasets.random_transformations import \
     transform_data_from_h5_dice_multi_class
@@ -38,13 +38,13 @@ parser.add_argument("-split", "--split",
 parser.add_argument("-overlap", "--overlap",
                     type=int)
 
-
 args = parser.parse_args()
 path_to_raw = args.path_to_raw
 print(path_to_raw)
+
 # segmentation_names = args.segmentation_names
 output_dir = args.output_dir
-# labels_dataset_list = args.labels_dataset_list
+print("output_dir", output_dir)
 shape_x = args.output_shape_x
 shape_y = args.output_shape_y
 shape_z = args.output_shape_z
@@ -56,8 +56,6 @@ path_to_label_0 = args.label_0
 path_to_label_1 = args.label_1
 path_to_label_2 = args.label_2
 
-from os.path import join
-
 labels_dataset_list = [
     path_to_label_0,
     path_to_label_1,
@@ -66,7 +64,7 @@ labels_dataset_list = [
 
 print("labels_dataset_list = ")
 print(labels_dataset_list)
-
+# todo change this: pass by user
 segmentation_names = ["ribo", "fas", "memb"]
 
 output_shape = (shape_z, shape_y, shape_x)
@@ -93,26 +91,26 @@ partition_raw_and_labels_tomograms_dice_multiclass(
     subtomo_shape=subtomogram_shape,
     overlap=overlap)
 
-print("The training data path is ", output_h5_file_path)
-
-print("Splitting training and testing data into two different files...")
-split_and_write_h5_partition_dice_multi_class(
-    h5_partition_data_path=output_h5_file_path,
-    h5_train_patition_path=h5_train_partition_path,
-    h5_test_patition_path=h5_test_partition_path,
-    segmentation_names=segmentation_names,
-    split=split,
-    shuffle=True)
-print("The training set has been written in ", h5_train_partition_path)
-print("The testing set has been written in ", h5_test_partition_path)
-
-print("The data augmentation is starting...")
-transform_data_from_h5_dice_multi_class(
-    training_data_path=h5_train_partition_path,
-    segmentation_names=segmentation_names,
-    number_iter=number_iter,
-    output_data_path=output_data_path)
-print("The training data with data augmentation has been writen in ",
-      output_data_path)
-
-print("The script has finished!")
+# print("The training data path is ", output_h5_file_path)
+#
+# # print("Splitting training and testing data into two different files...")
+# # split_and_write_h5_partition_dice_multi_class(
+# #     h5_partition_data_path=output_h5_file_path,
+# #     h5_train_patition_path=h5_train_partition_path,
+# #     h5_test_patition_path=h5_test_partition_path,
+# #     segmentation_names=segmentation_names,
+# #     split=split,
+# #     shuffle=True)
+# # print("The training set has been written in ", h5_train_partition_path)
+# # print("The testing set has been written in ", h5_test_partition_path)
+# #
+# # print("The data augmentation is starting...")
+# # transform_data_from_h5_dice_multi_class(
+# #     training_data_path=h5_train_partition_path,
+# #     segmentation_names=segmentation_names,
+# #     number_iter=number_iter,
+# #     output_data_path=output_data_path)
+# # print("The training data with data augmentation has been writen in ",
+# #       output_data_path)
+#
+# print("The script has finished!")

@@ -1,7 +1,22 @@
 import numpy as np
 
 
-def load_em_motl(path_to_emfile: str) -> tuple:
+def read_em(path_to_emfile: str) -> tuple:
+    """
+    Function that reads an .em dataset (in the tom format).
+    :param path_to_emfile: str, pointing to the .em file
+    :return: tuple header, value
+    where header is a dictionary specifying
+    'Machine_Coding'
+    'version'
+    'old_param'
+    'data_type_code'
+    'image_dimensions'
+    'the_rest'
+
+    And value is the array.
+    For more information check tom_emread.
+    """
     # Function that reads a em file
     with open(path_to_emfile, 'r') as f:
         header = dict()
@@ -30,21 +45,9 @@ def load_em_motl(path_to_emfile: str) -> tuple:
         header['image_dimensions'] = np.array(new_image_dim)
         value = np.fromfile(f, dtype=dtype)
         value = np.reshape(value, header['image_dimensions'])
+        if value.shape[0] == 1 and len(value.shape) == 3:
+            value = value[0, :, :]
     return header, value
-
-
-#todo: this doesnt work!
-def load_em_dataset(path_to_emfile: str, output_shape_xyz: tuple) -> tuple:
-    # Function that reads a em file
-    with open(path_to_emfile, 'r') as f:
-        header = dict()
-        # header['NumCol'] = np.fromfile(f, dtype=np.byte?)
-        header['non_read'] = np.fromfile(f, dtype=np.byte, count=1024)
-        header['image_dimensions'] = output_shape_xyz
-        dtype = np.int16
-        value = np.fromfile(f, dtype=dtype)
-        value = np.reshape(value, header['image_dimensions'])
-    return value
 
 
 def _extract_coordinate_and_values(motl):
@@ -55,5 +58,5 @@ def _extract_coordinate_and_values(motl):
 
 
 def load_coordinate_and_score_values(path_to_emfile) -> tuple:
-    motl = load_em_motl(path_to_emfile)
+    motl = read_em(path_to_emfile)
     return _extract_coordinate_and_values(motl)

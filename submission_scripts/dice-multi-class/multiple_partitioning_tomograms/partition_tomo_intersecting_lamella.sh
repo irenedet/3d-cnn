@@ -68,11 +68,9 @@ echo outh5 = $outh5
 
 module load Anaconda3
 echo 'starting virtual environment'
-source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
-
-export PYTHONPATH=/g/scb2/zaugg/trueba/3d-cnn
+source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 
 export outh5=$output_dir"/tomo_partition.h5"
 echo 'starting python script'
-python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/dice_multi-class/particle_picking_pipeline/partition_tomogram_in_intersection_with_lamella.py -raw $path_to_raw -hdf_lamella_file $hdf_lamella_file -outh5 $outh5 -output $output_dir -box $box_side -overlap $overlap
+python3 ./pipelines/dice_multi-class/particle_picking_pipeline/partition_tomogram_in_intersection_with_lamella.py -raw $path_to_raw -hdf_lamella_file $hdf_lamella_file -outh5 $outh5 -output $output_dir -box $box_side -overlap $overlap
 echo 'done'

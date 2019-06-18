@@ -9,8 +9,8 @@ from src.python.peak_toolbox.subtomos import select_coordinates_in_subtomos, \
 from src.python.calculator.statistics import pr_auc_score, \
     F1_score_calculator, precision_recall_calculator_and_detected
 from src.python.peak_toolbox.utils import read_motl_coordinates_and_values
-from src.python.filewriters.csv import motl_writer, \
-    unique_coordinates_motl_writer
+from src.python.filewriters.csv import motl_writer
+# unique_coordinates_motl_writer
 
 import argparse
 
@@ -51,7 +51,7 @@ parser.add_argument("-overlap", "--overlap",
                     default=12,
                     type=int)
 parser.add_argument("-threshold", "--score_threshold",
-                    default=0,
+                    default=-10,
                     type=float)
 
 args = parser.parse_args()
@@ -139,8 +139,8 @@ optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
 auPRC = pr_auc_score(precision=precision, recall=recall)
 print("auPRC = ", auPRC, "and max_F1 = ", max_F1)
 
-path_to_detected_predicted = join(output_dir, "detetected")
-path_to_undetected_predicted = join(output_dir, "undetetected")
+path_to_detected_predicted = join(output_dir, "detected")
+path_to_undetected_predicted = join(output_dir, "undetected")
 makedirs(name=path_to_detected_predicted, exist_ok=True)
 makedirs(name=path_to_undetected_predicted, exist_ok=True)
 
@@ -175,29 +175,34 @@ motl_writer(path_to_output_folder=path_to_undetected_predicted,
 #                                motl_name="motl_undetetected.csv",
 #                                uniquify_by_score=True)
 
+if threshold == -10:
+    threshold = np.min(predicted_values_test)
+else:
+    print("peak threshold set to ", threshold)
+
 thresholded_predicted_indices = \
-    np.where(np.array(predicted_values_test) > threshold)[0]
+    np.where(np.array(predicted_values_test) >= threshold)[0]
 thresholded_predicted_values = [predicted_values_test[index] for
                                 index in thresholded_predicted_indices]
 
 thresholded_detected_predicted_indices = \
-    np.where(np.array(value_detected_predicted) > threshold)[0]
+    np.where(np.array(value_detected_predicted) >= threshold)[0]
 value_detected_predicted_range = [value_detected_predicted[index] for index in
                                   thresholded_detected_predicted_indices]
 
 thresholded_undetected_predicted_indices = \
-    np.where(np.array(value_undetected_predicted) > threshold)[0]
+    np.where(np.array(value_undetected_predicted) >= threshold)[0]
 value_undetected_predicted_range = [value_undetected_predicted[index] for index
                                     in thresholded_undetected_predicted_indices]
 
 tight_thresholded_detected_predicted_indices = \
-    np.where(np.array(value_detected_predicted) > tight_threshold)[0]
+    np.where(np.array(value_detected_predicted) >= tight_threshold)[0]
 
 value_detected_predicted_tight = [value_detected_predicted[index] for index in
                                   tight_thresholded_detected_predicted_indices]
 
 tight_thresholded_undetected_predicted_indices = \
-    np.where(np.array(value_undetected_predicted) > tight_threshold)[0]
+    np.where(np.array(value_undetected_predicted) >= tight_threshold)[0]
 
 value_undetected_predicted_tight = [
     value_undetected_predicted[index] for index in

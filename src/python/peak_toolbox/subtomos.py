@@ -121,10 +121,11 @@ def get_peaks_per_subtomo_with_overlap(h5file: h5py.File, subtomo_name: str,
     subtomo_h5_internal_path = join(subtomos_internal_path,
                                     subtomo_name)
 
-    data_subtomo = _extract_data_subtomo(h5file=h5file,
-                                         subtomo_h5_internal_path=subtomo_h5_internal_path,
-                                         subtomo_side_lengths=subtomo_side_lengths,
-                                         overlap=0)  # ToDo check!
+    data_subtomo = _extract_data_subtomo(
+        h5file=h5file,
+        subtomo_h5_internal_path=subtomo_h5_internal_path,
+        subtomo_side_lengths=subtomo_side_lengths,
+        overlap=0)  # ToDo check!
     shape_minus_overlap = tuple([dim - pad[0] - pad[1] for pad, dim in
                                  zip(zero_padding, data_subtomo.shape)])
     mask_out_overlap = np.ones(shape_minus_overlap)

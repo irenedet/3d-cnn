@@ -1,4 +1,4 @@
-from os.path import join
+import os
 from os import makedirs
 from src.python.filewriters.h5 import write_hdf_particles_from_motl
 import argparse
@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-motl", "--path_to_motl",
                     help="path to motive list in .em or .csv format",
                     type=str)
-parser.add_argument("-output", "--output_dir",
+parser.add_argument("-hdf_output_path", "--hdf_output_path",
                     help="directory where the outputs will be stored",
                     type=str)
 parser.add_argument("-radius", "--sphere_radius",
@@ -26,17 +26,18 @@ parser.add_argument("-shape_z", "--output_shape_z",
 
 args = parser.parse_args()
 path_to_motl = args.path_to_motl
-output_dir = args.output_dir
 shape_x = args.output_shape_x
 shape_y = args.output_shape_y
 shape_z = args.output_shape_z
 z_shift = args.output_z_shift
 coords_in_tom_format = args.coords_in_tom_format
 radius = args.sphere_radius
-print("coords_in_tom_format = ", coords_in_tom_format)
+hdf_output_path = args.hdf_output_path
 
+print("coords_in_tom_format = ", coords_in_tom_format)
+output_dir = os.path.dirname(hdf_output_path)
 makedirs(name=output_dir, exist_ok=True)
-hdf_output_path = join(output_dir, "particles_mask.hdf")
+
 # z_shift = -330  # shift between original tomogram and subtomogram of analysis
 output_shape = (shape_z, shape_y, shape_x)
 

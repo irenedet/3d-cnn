@@ -6,23 +6,45 @@ from os.path import join
 
 import h5py
 import numpy as np
+import pandas as pd
 
 from src.python.coordinates_toolbox.utils import \
-    filtering_duplicate_coords_with_values, rearrange_hdf_coordinates
+    filtering_duplicate_coords_with_values, to_tom_coordinate_system
 from src.python.naming import h5_internal_paths
 from src.python.peak_toolbox.subtomos import \
     get_peaks_per_subtomo_with_overlap, \
     get_peaks_per_subtomo_with_overlap_multiclass, \
     get_subtomo_corner_and_side_lengths, shift_coordinates_by_vector
-
+from src.python.coordinates_toolbox.utils import \
+    arrange_coordinates_list_by_score
 from src.python.peak_toolbox.utils import union_of_motls
 
 
 def motl_writer(path_to_output_folder: str, list_of_peak_scores: list,
                 list_of_peak_coords: list, in_tom_format=False,
-                order_by_score=True, motl_name=None):
+                order_by_score=True, list_of_angles=False, motl_name=None):
     """
     Already modified to match em_motl format
+    Format of MOTL:
+       The following parameters are stored in the matrix MOTIVELIST of dimension
+       (20, NPARTICLES)<= ToDo This! (currently storing (NPARTICLES, 20)):
+       column
+          1         : Score Coefficient from localisation algorithm
+          2         : x-coordinate in full tomogram
+          3         : y-coordinate in full tomogram
+          4         : peak number
+          5         : running index of tilt series (optional)
+          8         : x-coordinate in full tomogram
+          9         : y-coordinate in full tomogram
+          10        : z-coordinate in full tomogram
+          14        : x-shift in subvolume (AFTER rotation of reference)
+          15        : y-shift in subvolume
+          16        : z-shift in subvolume
+          17        : Phi
+          18        : Psi
+          19        : Theta
+          20        : class number
+    For more information check tom package documentation (e.g. tom_chooser.m).
     """
     numb_peaks = len(list_of_peak_scores)
     joint_list = list(zip(list_of_peak_scores, list_of_peak_coords))
@@ -41,20 +63,147 @@ def motl_writer(path_to_output_folder: str, list_of_peak_scores: list,
     with open(motl_file_name, 'w', newline='') as csvfile:
         motlwriter = csv.writer(csvfile, delimiter=' ', quotechar='|',
                                 quoting=csv.QUOTE_MINIMAL)
-        for indx, tuple_val_point in enumerate(joint_list):
+        for index, tuple_val_point in enumerate(joint_list):
             val, point = tuple_val_point
             if in_tom_format:
                 x, y, z = point
             else:
-                x, y, z = rearrange_hdf_coordinates(point)
+                x, y, z = to_tom_coordinate_system(point)
             coordinate_in_tom_format = str(x) + ',' + str(y) + ',' + str(z)
-            angles = ',0,0,0,'
-            blank_columns = ',0,0,'
-            tail = ',0,0,0,0,0,0,0,0,0,1'
-            row = str(val) + blank_columns + str(
-                indx) + angles + coordinate_in_tom_format + tail
+            if not list_of_angles:
+                angle_str = '0,0,0'
+            else:
+                phi, psi, theta = list_of_angles[index]
+                angle_str = str(phi) + ',' + str(psi) + ',' + str(theta)
+            xy_columns = ',' + str(x) + ',' + str(y) + ','
+            class_str = '1'  # by default, maybe useful to list in arguments
+            tail = ',0,0,0,0,0,0,' + angle_str + ',' + class_str
+
+            row = str(val) + xy_columns + str(
+                index) + ',0,0,0,' + coordinate_in_tom_format + tail
             motlwriter.writerow([row])
     print("The motive list has been writen in", motl_file_name)
+    return motl_file_name
+
+
+def build_tom_motive_list(list_of_peak_coordinates: list,
+                          list_of_peak_scores=None,
+                          list_of_angles_in_degrees=None,
+                          list_of_classes=None) -> pd.DataFrame:
+    """
+    This function builds a motive list of particles, according to the tom format
+    standards:
+        The following parameters are stored in the data frame motive_list of
+    dimension (NPARTICLES, 20):
+       column
+          1         : Score Coefficient from localisation algorithm
+          2         : x-coordinate in full tomogram
+          3         : y-coordinate in full tomogram
+          4         : peak number
+          5         : running index of tilt series (optional)
+          8         : x-coordinate in full tomogram
+          9         : y-coordinate in full tomogram
+          10        : z-coordinate in full tomogram
+          14        : x-shift in subvolume (AFTER rotation of reference)
+          15        : y-shift in subvolume
+          16        : z-shift in subvolume
+          17        : Phi
+          18        : Psi
+          19        : Theta
+          20        : class number
+    For more information check tom package documentation (e.g. tom_chooser.m).
+
+    :param list_of_peak_coordinates: list of points in a dataset where a
+    particle has been identified. The points in this list hold the format
+    np.array([px, py, pz]) where px, py, pz are the indices of the dataset in
+    the tom coordinate system.
+    :param list_of_peak_scores: list of scores (e.g. cross correlation)
+    associated to each point in list_of_peak_coordinates.
+    :param list_of_angles_in_degrees: list of Euler angles in degrees,
+    np.array([phi, psi, theta]), according to the convention in the
+    tom_rotatec.h function: where the rotation is the composition
+    rot_z(psi)*rot_x(theta)*rot_z(phi) (again, where xyz are the tom coordinate
+    system). For more information on the Euler convention see help from
+    src.python.datasets.transformations.rotate_ref.
+    :param list_of_classes: list of integers of length n_particles representing
+    the particle class associated to each particle coordinate.
+    :return:
+    """
+    empty_cell_value = 0  # float('nan')
+    xs, ys, zs = list(np.array(list_of_peak_coordinates, int).transpose())
+    n_particles = len(list_of_peak_coordinates)
+    tom_indices = list(range(1, 1 + n_particles))
+    create_const_list = lambda x: [x for _ in range(n_particles)]
+
+    if list_of_peak_scores is None:
+        list_of_peak_scores = create_const_list(empty_cell_value)
+    if list_of_angles_in_degrees is None:
+        phis, psis, thetas = create_const_list(empty_cell_value), \
+                             create_const_list(empty_cell_value), \
+                             create_const_list(empty_cell_value)
+    else:
+        phis, psis, thetas = list_of_angles_in_degrees
+
+    if list_of_classes is None:
+        list_of_classes = create_const_list(1)
+    motive_list_df = pd.DataFrame({})
+    motive_list_df['score'] = list_of_peak_scores
+    motive_list_df['x_'] = xs
+    motive_list_df['y_'] = ys
+    motive_list_df['peak'] = tom_indices
+    motive_list_df['tilt_x'] = empty_cell_value
+    motive_list_df['tilt_y'] = empty_cell_value
+    motive_list_df['tilt_z'] = empty_cell_value
+    motive_list_df['x'] = xs
+    motive_list_df['y'] = ys
+    motive_list_df['z'] = zs
+    motive_list_df['empty_1'] = empty_cell_value
+    motive_list_df['empty_2'] = empty_cell_value
+    motive_list_df['empty_3'] = empty_cell_value
+    motive_list_df['x-shift'] = empty_cell_value
+    motive_list_df['y-shift'] = empty_cell_value
+    motive_list_df['z-shift'] = empty_cell_value
+    motive_list_df['phi'] = phis
+    motive_list_df['psi'] = psis
+    motive_list_df['theta'] = thetas
+    motive_list_df['class'] = list_of_classes
+    return motive_list_df
+
+
+def new_motl_writer(path_to_output_folder: str, list_of_peak_coordinates: list,
+                    list_of_peak_scores=None, list_of_angles_in_degrees=None,
+                    list_of_classes=1, in_tom_format=False, order_by_score=True,
+                    motl_name=None) -> str:
+    n_particles = len(list_of_peak_coordinates)
+    if order_by_score:
+        assert list_of_peak_scores is not None
+        print("saving coordinates ordered by decreasing score value")
+        list_of_peak_scores, list_of_peak_coordinates = \
+            arrange_coordinates_list_by_score(list_of_peak_scores,
+                                              list_of_peak_coordinates)
+    else:
+        print("Building the motive list without sorting by score.")
+
+    if not in_tom_format:
+        list_of_peak_coordinates = list(
+            map(to_tom_coordinate_system, list_of_peak_coordinates))
+    else:
+        print("Coordinates already in tom format.")
+
+    if motl_name is None:
+        motl_file_name = join(path_to_output_folder,
+                              'motl_' + str(n_particles) + '.csv')
+    else:
+        motl_file_name = join(path_to_output_folder, motl_name)
+
+    motive_list_df = build_tom_motive_list(
+        list_of_peak_coordinates=list_of_peak_coordinates,
+        list_of_peak_scores=list_of_peak_scores,
+        list_of_angles_in_degrees=list_of_angles_in_degrees,
+        list_of_classes=list_of_classes)
+
+    motive_list_df.to_csv(motl_file_name, index=False, header=False)
+    print("Motive list saved in", motl_file_name)
     return motl_file_name
 
 
@@ -250,6 +399,7 @@ def unique_coordinates_motl_writer(path_to_output_folder: str,
     values = []
     coordinates = []
     # To arrange by score:
+    # Todo read angles from motl to copy them into new motl
     for val, zyx_coord in sorted(
             list(zip(list_of_peak_scores, list_of_peak_coords)),
             key=lambda x: x[0], reverse=1):
@@ -272,10 +422,12 @@ def unique_coordinates_motl_writer(path_to_output_folder: str,
     else:
         print("motif list name given as ", motl_name)
 
-    motl_file_name = motl_writer(
+    motl_file_name = new_motl_writer(
         path_to_output_folder=path_to_output_folder,
+        list_of_peak_coordinates=coordinates,
         list_of_peak_scores=values,
-        list_of_peak_coords=coordinates,
+        list_of_angles_in_degrees=None,
+        list_of_classes=1,
         in_tom_format=in_tom_format,
         order_by_score=False,
         motl_name=motl_name)

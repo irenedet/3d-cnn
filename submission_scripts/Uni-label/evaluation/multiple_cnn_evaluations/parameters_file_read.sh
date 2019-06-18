@@ -12,7 +12,7 @@
 
 module load Anaconda3
 echo "activating virtual environment"
-source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
+source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 echo "... done"
 
 export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn

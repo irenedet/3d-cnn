@@ -18,6 +18,6 @@ echo 'starting virtual environment'
 source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
 
 export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
-
+# This actually works for cross entropy
 python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/dice_multi-class/generate_training_masks/generate_multiclass_label_mask.py
 

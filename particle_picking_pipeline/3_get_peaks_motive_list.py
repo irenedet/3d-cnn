@@ -44,6 +44,13 @@ parser.add_argument("-z_shift", "--z_shift_original",
                     help="name of category to be segmented",
                     type=int,
                     default=0)
+parser.add_argument("-maximum_number_peaks_motl", "--maximum_number_peaks_motl",
+                    help="Maximum number of peaks in the motl",
+                    type=int,
+                    default=7000)
+parser.add_argument("-subtomo_peaks_number", "--subtomo_peaks_number",
+                    help="by default (box_side // (2 * min_peak_distance))**3",
+                    type=int)
 
 args = parser.parse_args()
 output_dir = args.output_dir
@@ -56,13 +63,18 @@ output_zdim = args.output_zdim
 overlap = args.overlap
 min_peak_distance = args.min_peak_distance
 z_shift = args.z_shift_original
+number_peaks_uniquify = args.maximum_number_peaks_motl
+subtomo_peaks_number = args.subtomo_peaks_number
 
 subtomo_shape = tuple(box_side * np.array([1, 1, 1]))
 output_shape = (output_zdim, output_ydim, output_xdim)
 makedirs(name=output_dir, exist_ok=True)
 # Future local parameters:
-subtomo_peaks_number = int(box_side ** 3 / (2 * min_peak_distance) ** 3)
-number_peaks_uniquify = 7000
+if isinstance(subtomo_peaks_number, int):
+    print("subtomo_peaks_number = ", subtomo_peaks_number)
+else:
+    subtomo_peaks_number = (box_side // (2 * min_peak_distance)) ** 3
+    print("subtomo_peaks_number = ", subtomo_peaks_number)
 
 motl_file_name = write_global_motl_from_overlapping_subtomograms(
     subtomograms_path=subtomo_path,

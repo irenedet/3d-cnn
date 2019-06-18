@@ -136,7 +136,7 @@ class DiceCoefficientLoss_multilabel(nn.Module):
         self.eps = eps
         self.weights = weights
 
-        # the dice coefficient of two sets represented as vectors a, b ca be
+        # the dice coefficient of two sets represented as vectors a, b can be
         # computed as (2 *|a b| / (a^2 + b^2))
 
     def forward(self, prediction, target):

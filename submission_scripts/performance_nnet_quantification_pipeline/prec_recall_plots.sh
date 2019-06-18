@@ -13,20 +13,19 @@
 
 module load Anaconda3
 export QT_QPA_PLATFORM='offscreen'
-export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
 
 # To be modified by user
 echo 'starting virtual environment'
-#source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
+source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 
-export output_dir="/home/papalotl/Desktop/test"
+tomo="190301_005"
+
+export output_dir="/struct/mahamid/Irene/yeast/ED/"$tomo"/motl/RR_all_but_003/"
 #export path_to_motl_predicted="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/D2_IF8_NA/180426_004/class_0/in_lamella/motl_2608.csv"
-export path_to_motl_predicted="/home/papalotl/Desktop/TEST1.csv"
-export path_to_motl_true="/home/papalotl/Desktop/TEST2.csv"
-#export path_to_motl_true="/scratch/trueba/3d-cnn/clean/180426_004/motl_clean_fas_4b_iniavg.em"
-#export path_to_motl_true="/scratch/trueba/3d-cnn/clean/180426_004/motl_clean_4b.em"
+export path_to_motl_true=$(ls "/struct/mahamid/Irene/yeast/ED/"$tomo"/motl/motl_ED_FAS_4b.csv")
+export path_to_motl_predicted=$(ls "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/"$tomo"/class_0/in_lamella/motl_"*)
 export testing_set_data_path="None" #set the partition produced by particle picking pipeline
-export radius=3
+export radius=8
 export z_shift=0 # z_shift between original tomogram and subtomogram of partition
 export x_shift=0 # -16 for 004, 16 for 005 (if dataset is square)
 export shape_x=0

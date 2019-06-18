@@ -4,7 +4,7 @@ from src.python.calculator.statistics import precision_recall_calculator, \
 from src.python.coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl
 from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import load_em_motl
+from src.python.filereaders.em import read_em
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -18,7 +18,7 @@ path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/gaussian_au
 path_to_motl_clean = '/home/papalotl/Sara_Goetz/180426/004/motl_clean_4b.em'
 
 motl_predicted = read_motl_from_csv(path_to_csv_motl)
-Header, motl_true = load_em_motl(path_to_emfile=path_to_motl_clean)
+Header, motl_true = read_em(path_to_emfile=path_to_motl_clean)
 
 true_coordinates = extract_coordinates_from_em_motl(motl_true)
 print("len(true_coordinates) = ", len(true_coordinates))

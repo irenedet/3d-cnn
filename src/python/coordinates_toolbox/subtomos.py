@@ -1,4 +1,6 @@
 import re
+from typing import List
+
 import numpy as np
 import h5py
 from src.python.naming import h5_internal_paths
@@ -57,3 +59,25 @@ def get_particle_coordinates_grid(dataset_shape, shape_to_crop_zyx):
 def read_subtomo_names(subtomo_file_path):
     with h5py.File(subtomo_file_path, 'r') as f:
         return list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
+
+
+def get_subtomo_corners_within_dataset(dataset_shape: tuple or List[int],
+                                       subtomo_shape: tuple or List[int],
+                                       center: tuple or List[
+                                           int]) -> tuple:
+    subtomo_l1radius = subtomo_shape[0] // 2, subtomo_shape[1] // 2, \
+                       subtomo_shape[2] // 2
+    start_corners = [center_dim - subtomo_dim for center_dim, subtomo_dim
+                     in zip(center, subtomo_l1radius)]
+    end_corners = [center_dim + subtomo_dim for center_dim, subtomo_dim
+                   in zip(center, subtomo_l1radius)]
+    end_corners = [np.min((end_point, tomo_dim)) for end_point, tomo_dim
+                   in zip(end_corners,
+                          dataset_shape)]
+
+    start_corners = [np.max([corner, 0]) for corner in start_corners]
+    end_corners = [np.min([corner, data_sh]) for corner, data_sh in
+                   zip(end_corners, dataset_shape)]
+    side_lengths = [end - start for start, end in
+                    zip(start_corners, end_corners)]
+    return start_corners, end_corners, side_lengths

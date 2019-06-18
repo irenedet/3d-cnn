@@ -1,38 +1,28 @@
 #!/usr/bin/env bash
 
-#file-specifics:
-FILES="/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180426_004.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180426_005.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180426_021.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180426_024.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180711_003.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180711_004.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180711_005.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180711_018.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/9_VPP_TOMOS/180713_027.sh"
+
+FILES="/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181119_030.sh
+/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181126_002.sh
+/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181126_012.sh
+/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181126_025.sh
+/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/190301_005.sh"
 
 
-
-path_to_model="/g/scb2/zaugg/trueba/3d-cnn/models/dice_multi_label/retrained/Retrain_retrained_except_180711_003ribo_fas_memb_D_2_IF_8.pkl"
+# Global parameters for the segmentation to be reconstructed
+numb_classes=3
 label_name="Retrain_retrained_D4_IF8_NA_except_180711_003"
-depth=2
-init_feat=8
-output_classes=3
-class_number=1 # 0=ribo, 1=fas, 2=memb
-box_side=128
-new_loader='True'
-minimum_peak_distance=16
-border_xy=20
-lamella_extension=40
-same_peak_distance=16
-output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/for_sara/"$label_name
+segmentation_names="ribo,fas,memb"
+output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/"$label_name
 
-mkdir $output_dir
+# Partitioning parameters:
+box_side=128
+overlap_thickness=12
 
 for param_file in $FILES
 do
 	echo "Reading file $param_file"
-	sbatch /g/scb2/zaugg/trueba/3d-cnn/submission_scripts/dice-multi-class/multiple_cnn_evaluations/parameters_file_read.sh -output_dir $output_dir -parameters_file $param_file -path_to_model $path_to_model -label_name $label_name -depth $depth -init_feat $init_feat -output_classes $output_classes -class_number $class_number -box_side $box_side -new_loader $new_loader -minimum_peak_distance $minimum_peak_distance -border_xy $border_xy -lamella_extension $lamella_extension -same_peak_distance $same_peak_distance
+	sbatch ./submission_scripts/dice-multi-class/multiple_subtomos2dataset/parameters_file_read.sh -parameters_file $param_file -output_dir $output_dir -box_side $box_side -overlap $overlap_thickness -output_classes $numb_classes -label_name $label_name -segmentation_names $segmentation_names
+	echo "job submitted"
 done
 
 # ... Finally:

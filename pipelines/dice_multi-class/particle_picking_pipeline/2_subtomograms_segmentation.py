@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import argparse
+from distutils.util import strtobool
 
 from src.python.pytorch_cnn.classes.unet import UNet
 from src.python.pytorch_cnn.io import get_device
@@ -38,7 +39,7 @@ data_path = args.data_path
 init_feat = args.initial_features
 depth = args.unet_depth
 output_classes = args.output_classes
-new_loader = args.new_loader
+new_loader = strtobool(args.new_loader)
 
 conf = {'final_activation': nn.ELU(), 'depth': depth,
         'initial_features': init_feat, 'out_channels': output_classes}

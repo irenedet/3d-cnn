@@ -12,7 +12,7 @@
 
 module load Anaconda3
 echo "activating virtual environment"
-source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
+source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 echo "... done"
 
 export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
@@ -73,6 +73,9 @@ while [ "$1" != "" ]; do
         -same_peak_distance | --same_peak_distance )   shift
                                 same_peak_distance=$1
                                 ;;
+        -threshold | --threshold )   shift
+                                threshold=$1
+                                ;;
         -h | --help )           usage
                                 exit
                                 ;;
@@ -89,6 +92,7 @@ echo same_peak_distance = $same_peak_distance
 echo class_number = $class_number
 echo output_classes = $output_classes
 
+export threshold=$threshold
 export path_to_model=$path_to_model
 export label_name=$label_name
 export depth=$depth
@@ -138,6 +142,7 @@ else
     echo "class_number non-supported for now"
 fi
 
+
 echo path_to_motl_clean = $path_to_motl_clean
 export box_overlap=12
 
@@ -151,16 +156,21 @@ echo "... done with particle picking pipeline."
 # 2. Mask coordinate points with lamella mask
 export path_to_csv_motl=$(ls $output_dir/motl*)
 
-echo "Now filtering points in lamella mask"
-python3 ./pipelines/performance_nnet_quantification/filter_with_lamella_mask.py -csv_motl $path_to_csv_motl -lamella_file $hdf_lamella_file -output_dir $output_dir -border_xy $border_xy -lamella_extension $lamella_extension -x_dim $input_xdim -y_dim $input_ydim -z_dim $input_zdim -z_shift $z_shift
-echo "...done filtering points in lamella mask."
 
+if [ $hdf_lamella_file == "None" ]; then
+    echo "No lamella mask available"
+    export lamella_output_dir=$output_dir
+else
+    echo "Lamella mask available"
+    export lamella_output_dir=$output_dir"/in_lamella"
+    echo "Now filtering points in lamella mask"
+    python3 ./pipelines/performance_nnet_quantification/filter_with_lamella_mask.py -csv_motl $path_to_csv_motl -lamella_file $hdf_lamella_file -output_dir $output_dir -border_xy $border_xy -lamella_extension $lamella_extension -x_dim $input_xdim -y_dim $input_ydim -z_dim $input_zdim -z_shift $z_shift
+    echo "...done filtering points in lamella mask."
+fi
 
 # 3. Precision-Recall analysis
-export lamella_output_dir=$output_dir"/in_lamella"
 export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir/motl*)
-
 echo "Starting to generate precision recall plots"
-python3 ./pipelines/performance_nnet_quantification/precision_recall_plots.py -motl $path_to_csv_motl_in_lamella -clean $path_to_motl_clean -output $lamella_output_dir -test_file $test_partition -radius $same_peak_distance -shape_x $input_xdim -shape_y $input_ydim -shape_z $input_zdim -x_shift $x_shift -z_shift $z_shift -box $box_side >> $summary_file
+python3 ./pipelines/performance_nnet_quantification/precision_recall_plots.py -motl $path_to_csv_motl_in_lamella -clean $path_to_motl_clean -output $lamella_output_dir -test_file $test_partition -radius $same_peak_distance -shape_x $input_xdim -shape_y $input_ydim -shape_z $input_zdim -x_shift $x_shift -z_shift $z_shift -box $box_side -threshold $threshold >> $summary_file
 echo "...done with precision recall plots."
 
