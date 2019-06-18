@@ -29,7 +29,7 @@ parser.add_argument("-out_classes", "--output_classes",
                     type=int)
 parser.add_argument("-new_loader", "--new_loader",
                     help="Boolena indicating if loader is updated",
-                    type=bool,
+                    type=str,
                     default=False)
 
 args = parser.parse_args()
