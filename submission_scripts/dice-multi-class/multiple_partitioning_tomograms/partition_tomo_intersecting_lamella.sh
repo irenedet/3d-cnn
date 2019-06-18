@@ -5,8 +5,8 @@
 #SBATCH --ntasks 1
 #SBATCH --mem 32G
 #SBATCH --time 0-05:00
-#SBATCH -o slurm.%N.%j.out
-#SBAtCH -e slurm.%N.%j.err
+#SBATCH -o slurm_outputs/partition_tomo_slurm.%N.%j.out
+#SBAtCH -e slurm_outputs/partition_tomo_slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=irene.de.teresa@embl.de
 

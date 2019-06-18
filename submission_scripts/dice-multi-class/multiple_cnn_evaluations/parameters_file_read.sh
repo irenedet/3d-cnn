@@ -15,7 +15,6 @@ echo "activating virtual environment"
 source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 echo "... done"
 
-export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
 export QT_QPA_PLATFORM='offscreen'
 usage()
 
