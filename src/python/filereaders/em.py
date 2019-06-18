@@ -52,8 +52,8 @@ def read_em(path_to_emfile: str) -> tuple:
 
 def _extract_coordinate_and_values(motl):
     header, value = motl
-    coordinates = value[0, :, 7:10]  # TODO comment meaning of 7:10
-    score_value = value[0, :, 1]  # TODO comment meaning of 7:10
+    coordinates = value[:, 7:10]  # TODO comment meaning of 7:10
+    score_value = value[:, 1]  # TODO comment meaning of 7:10
     return coordinates, score_value
 
 

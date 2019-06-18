@@ -89,12 +89,12 @@ def _store_as_txt(folder_path: str, img: np.array, coord_indx: int,
 
 
 def extract_coordinates_from_em_motl(motl: np.array) -> np.array:
-    return np.array(motl[0, :, 7:10])
+    return np.array(motl[:, 7:10])
 
 
 def extract_coordinates_and_values_from_em_motl(motl: np.array) -> np.array:
-    values = np.array(motl[0, :, 0])
-    coordinates = np.array(motl[0, :, 7:10])
+    values = np.array(motl[:, 0])
+    coordinates = np.array(motl[:, 7:10])
     return values, coordinates
 
 

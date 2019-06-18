@@ -55,7 +55,7 @@ _, motl_extension = os.path.splitext(path_to_motl_clean)
 assert motl_extension == ".em" or motl_extension == ".csv"
 if motl_extension == ".em":
     print("motl clean in .em format")
-    Header, motl_true = read_em(path_to_emfile=path_to_motl_clean)
+    header, motl_true = read_em(path_to_emfile=path_to_motl_clean)
     motl_clean_coords = extract_coordinates_from_em_motl(motl_true)
 else:
     print("motl clean in .csv format")

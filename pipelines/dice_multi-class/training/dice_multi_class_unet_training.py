@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as du
-
+from distutils.util import strtobool
 from src.python.datasets.actions import split_dataset
 from src.python.filereaders import h5
 from src.python.image.filters import preprocess_data
@@ -79,7 +79,7 @@ model_initial_name = args.model_initial_name
 model_path = args.model_path
 output_classes = args.output_classes
 n_epochs = args.number_of_epochs
-retrain = args.retrain
+retrain = strtobool(args.retrain)
 path_to_old_model = args.path_to_old_model
 depth = args.depth
 initial_features = args.initial_features
@@ -87,12 +87,6 @@ weight = args.weights_per_class
 weight = list(map(float, weight.split(',')))
 segmentation_names = args.segmentation_names
 segmentation_names = list(map(str, segmentation_names.split(',')))
-# segmentation_names = ["ribo", "fas", "memb"]
-
-if retrain == "True":
-    retrain = True
-else:
-    retrain = False
 
 makedirs(name=log_dir, exist_ok=True)
 makedirs(name=model_path, exist_ok=True)

@@ -3,7 +3,7 @@
 tomo_name='181126_002'
 origin_file="/struct/mahamid/Sara_Goetz/Data/Titan/Processing/181126/002/etomo/bin4/002_sq_df_sorted.rec"
 eman2_filtered_file="/struct/mahamid/Irene/yeast/ED/181126_002/eman_filt_eman_filt_002_sq_df_sorted.hdf"
-test_partition="/scratch/trueba/3d-cnn/training_data/dice-multi-class/181126_002/NA/train_and_test_partitions/full_partition.h5"
+train_partition="/scratch/trueba/3d-cnn/training_data/dice-multi-class/181126_002/NA/train_and_test_partitions/full_partition.h5"
 class_0_mask="/struct/mahamid/Irene/yeast/ED/181126_002/clean_masks/class_0/spherical_mask.hdf"
 class_1_mask="/struct/mahamid/Irene/yeast/ED/181126_002/clean_masks/class_1/spherical_mask.hdf"
 class_2_mask="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/181126_002/thr_binary_memb.hdf"

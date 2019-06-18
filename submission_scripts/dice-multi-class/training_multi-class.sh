@@ -40,7 +40,7 @@ export n_epochs=40
 export depth=2
 export initial_features=8
 export output_classes=3
-mkdir $model_path
+
 # Data for old models for resuming training:
 export retrain="True"
 export path_to_old_model="/g/scb2/zaugg/trueba/3d-cnn/models/dice_multi_label/retrained/Retrain_retrained_except_180711_003ribo_fas_memb_D_2_IF_8.pkl"
@@ -51,4 +51,4 @@ python3 ./pipelines/dice_multi-class/training/dice_multi_class_unet_training.py 
 
 echo "Save a copy of this script for future reference"
 SCRIPT=`realpath $0`
-cp $SCRIPT "/g/scb2/zaugg/trueba/3d-cnn/models/dice_multi_label/retrained/SCRIPT_"$model_initial_name".txt"
+cp $SCRIPT $model_path"/SCRIPT_"$model_initial_name".txt"

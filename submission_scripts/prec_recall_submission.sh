@@ -13,14 +13,14 @@
 
 export QT_QPA_PLATFORM='offscreen'
 
-export path_to_motl="/home/papalotl/Desktop/TEST2.csv"
-export output_dir='/home/papalotl/Desktop/test_unite_motls2'
-export path_to_clean="/home/papalotl/Desktop/TEST1.csv"
+export path_to_motl="/struct/mahamid/Irene/yeast/ED/190301_005/motl/RR_all_but_003/undetected/motl_2561.csv"
+export output_dir='/scratch/trueba/test_pr'
+export path_to_clean="/struct/mahamid/twalther/Processing/190301/005/TM/motl_clean_4b.em"
 
 echo path_to_motl_predicted=$path_to_motl
 echo path_to_motl_true=$path_to_clean
 export label_name='ribosomes'
-export radius=2
+export radius=8
 export x_shift=0
 
 

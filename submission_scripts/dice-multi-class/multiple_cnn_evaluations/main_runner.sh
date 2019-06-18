@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
 
 #file-specifics:
-FILES="/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181119_002.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181119_030.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181126_002.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181126_012.sh"
-
+FILES="/g/scb2/zaugg/trueba/3d-cnn/submission_data/SPOMBE/ED_DEFOCUS/190301_005.sh"
 
 # CNN parameters:
 path_to_model="/struct/mahamid/Processing/3d-cnn/models/multiclass/Retrain_retrained_except_180711_003ribo_fas_memb_D_2_IF_8.pkl"

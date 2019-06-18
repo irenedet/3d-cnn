@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 
-FILES="/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181119_002.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181119_030.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181126_002.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181126_012.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/181126_025.sh
-/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/190301_005.sh"
+FILES="/g/scb2/zaugg/trueba/3d-cnn/submission_data/SPOMBE/ED_DEFOCUS/190301_005.sh"
 
 
-export global_output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/ED"
+export global_output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/ED_DEFOCUS"
 
 # Partition parameters
 export box_side=128
