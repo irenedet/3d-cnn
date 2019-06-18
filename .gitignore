@@ -1,7 +1,7 @@
+slurm_outputs/*
 src/python/template_matching/__pycache__/
 slurm-*
 runners/ElasticTansform3D_test.py
-slurm_outputs/cnn_*
 submission_scripts/dice-multi-class/multiple_cnn_evaluations/main_runner.sh.save
 src/python/utils/__pycache__/
 submission_data/unilabel/*
