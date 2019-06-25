@@ -158,7 +158,10 @@ def get_peaks_per_subtomo_with_overlap_multiclass(
 
     subtomo_h5_internal_path = join(subtomos_internal_path,
                                     subtomo_name)
-
+    print("subtomo_corner, subtomo_side_lengths, zero_padding")
+    print(subtomo_corner, subtomo_side_lengths, zero_padding)
+    print("subtomo_side_lengths", subtomo_side_lengths)
+    assert np.min(subtomo_side_lengths) > 0
     data_subtomo = _extract_data_subtomo(
         h5file=h5file,
         subtomo_h5_internal_path=subtomo_h5_internal_path,

@@ -17,12 +17,7 @@ echo "... done"
 export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
 
 
-TOMO_NAMES=( "181119_002"
-             "181119_030"
-             "181126_002"
-             "181126_012"
-             "181126_025"
-             "190301_005" )
+TOMO_NAMES=( "190301_005" )
 
 
 export coords_in_tom_format='True'
@@ -30,8 +25,8 @@ export class_number=0
 
 for tomo in ${TOMO_NAMES[@]}; do
     echo tomo=$tomo
-    export hdf_output_path="/struct/mahamid/Irene/yeast/ED/"$tomo"/clean_masks/class_$class_number/spherical_mask.hdf"
-    export parameters_file="/g/scb2/zaugg/trueba/3d-cnn/submission_data/dice_multilabel/ED_TOMOS/"$tomo".sh"
+    export hdf_output_path="/struct/mahamid/Irene/yeast/ED/"$tomo"/clean_masks/class_$class_number/from_tobias_spherical_mask.hdf"
+    export parameters_file="/g/scb2/zaugg/trueba/3d-cnn/submission_data/SPOMBE/ED_DEFOCUS/"$tomo".sh"
     source $parameters_file
 
     if [ $class_number == 0 ]; then

@@ -14,7 +14,7 @@ input_ydim=927
 input_zdim=500
 z_shift=0
 x_shift=0
-hdf_lamella_file="/struct/mahamid/Irene/yeast/ED/181119_002/002_lamellamask.hdf"
+hdf_lamella_file="/struct/mahamid/Irene/yeast/ED/181119/002/lamellamask.hdf"
 path_to_motl_clean_1="/struct/mahamid/Irene/yeast/ED/181119_002/motl/motl_ED_FAS_4b.csv"
 path_to_motl_clean_0="/struct/mahamid/Irene/yeast/ED/181119_002/motl/RR_all_but_003/undetected/motl_1305.csv"
 

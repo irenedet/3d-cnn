@@ -14,14 +14,15 @@ def get_subtomo_corners(output_shape: tuple, subtomo_shape: tuple,
                         subtomo_center: tuple) -> tuple:
     subtomo_l1radius = subtomo_shape[0] // 2, subtomo_shape[1] // 2, \
                        subtomo_shape[2] // 2
-    start_corners = [center_dim - subtomo_dim for center_dim, subtomo_dim
+    start_corners = [int(center_dim) - int(subtomo_dim) for
+                     center_dim, subtomo_dim
                      in zip(subtomo_center, subtomo_l1radius)]
     end_corners = [center_dim + subtomo_dim for center_dim, subtomo_dim
                    in zip(subtomo_center, subtomo_l1radius)]
-    end_corners = [np.min((end_point, tomo_dim)) for end_point, tomo_dim
+    end_corners = [int(np.min((end_point, tomo_dim))) for end_point, tomo_dim
                    in zip(end_corners,
                           output_shape)]
-    side_lengths = [end - start for end, start in
+    side_lengths = [int(end - start) for end, start in
                     zip(end_corners, start_corners)]
     return start_corners, end_corners, side_lengths
 

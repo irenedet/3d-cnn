@@ -3,7 +3,7 @@ import datetime
 import re
 import time
 from os.path import join
-
+from os import makedirs
 import h5py
 import numpy as np
 import pandas as pd
@@ -17,12 +17,13 @@ from src.python.peak_toolbox.subtomos import \
     get_subtomo_corner_and_side_lengths, shift_coordinates_by_vector
 from src.python.coordinates_toolbox.utils import \
     arrange_coordinates_list_by_score
-from src.python.peak_toolbox.utils import union_of_motls
+from src.python.peak_toolbox.utils import read_motl_data
 
 
 def motl_writer(path_to_output_folder: str, list_of_peak_scores: list,
                 list_of_peak_coords: list, in_tom_format=False,
-                order_by_score=True, list_of_angles=False, motl_name=None):
+                order_by_score=True, list_of_angles: list or bool = False,
+                motl_name: None or str = None):
     """
     Already modified to match em_motl format
     Format of MOTL:
@@ -434,23 +435,42 @@ def unique_coordinates_motl_writer(path_to_output_folder: str,
     return motl_file_name
 
 
-# FIXME this does not work properly:
-def write_union_of_motls(path_to_motl_1: str, path_to_motl_2: str,
-                         path_to_output_folder: str,
-                         min_peak_distance: int,
-                         in_tom_format=False,
-                         motl_name=None,
-                         ) -> str:
-    values, coordinates = union_of_motls(path_to_motl_1=path_to_motl_1,
-                                         path_to_motl_2=path_to_motl_2)
-    number_peaks_uniquify = len(values)
-    motl_file_name = unique_coordinates_motl_writer(
-        path_to_output_folder=path_to_output_folder,
-        list_of_peak_scores=values,
-        list_of_peak_coords=coordinates,
-        number_peaks_to_uniquify=number_peaks_uniquify,
-        minimum_peaks_distance=min_peak_distance,
-        in_tom_format=in_tom_format,
-        motl_name=motl_name,
-        uniquify_by_score=False)
-    return motl_file_name
+def filter_duplicate_values_by_score(list_of_peak_scores: list,
+                                     list_of_peak_coords: list,
+                                     number_peaks_to_uniquify: int,
+                                     minimum_peaks_distance: int,
+                                     uniquify_by_score=False):
+    values = []
+    coordinates = []
+    for val, zyx_coord in sorted(
+            list(zip(list_of_peak_scores, list_of_peak_coords)),
+            key=lambda x: x[0], reverse=1):
+        values += [val]
+        coordinates += [zyx_coord]
+
+    start = time.time()
+    values, coordinates = filtering_duplicate_coords_with_values(
+        motl_coords=coordinates[:number_peaks_to_uniquify],
+        motl_values=values[:number_peaks_to_uniquify],
+        min_peak_distance=minimum_peaks_distance,
+        preference_by_score=uniquify_by_score)
+    end = time.time()
+    print("elapsed time for filtering coordinates", end - start, "sec")
+    return values, coordinates
+
+
+def unite_motls(path_to_motl1: str, path_to_motl2: str,
+                path_to_output_motl_dir: str,
+                output_motl_name: str):
+    makedirs(name=path_to_output_motl_dir, exist_ok=True)
+    values1, coordinates1, angles1 = read_motl_data(path_to_motl=path_to_motl1)
+    values2, coordinates2, angles2 = read_motl_data(path_to_motl=path_to_motl2)
+    values = list(values1) + list(values2)
+    coordinates = list(coordinates1) + list(coordinates2)
+    angles = list(angles1) + list(angles2)
+    motl_writer(path_to_output_folder=path_to_output_motl_dir,
+                list_of_peak_coords=coordinates,
+                list_of_peak_scores=values,
+                list_of_angles=angles,
+                in_tom_format=True,
+                motl_name=output_motl_name)

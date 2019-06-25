@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import time
 from os import makedirs
 from os.path import join
@@ -15,6 +16,21 @@ from src.python.filewriters.csv import motl_writer
 import argparse
 
 parser = argparse.ArgumentParser()
+parser.add_argument("-dataset_table", "--dataset_table",
+                    help="path to dataset_table",
+                    type=str)
+parser.add_argument("-class_name", "--class_name",
+                    help="name of class, i.e. ribo or fas",
+                    type=str)
+parser.add_argument("-statistics_file", "--statistics_file",
+                    help="file where auPRC will be recorded.",
+                    type=str)
+parser.add_argument("-label_name", "--label_name",
+                    help="name of class, i.e. ribo or fas",
+                    type=str)
+parser.add_argument("-tomo_name", "--tomo_name",
+                    help="tomo to be analyzed",
+                    type=str)
 parser.add_argument("-motl", "--path_to_motl_predicted",
                     help="path to motive list in .em or .csv format",
                     type=str)
@@ -55,25 +71,35 @@ parser.add_argument("-threshold", "--score_threshold",
                     type=float)
 
 args = parser.parse_args()
+dataset_table = args.dataset_table
+tomo_name = args.tomo_name
 path_to_motl_predicted = args.path_to_motl_predicted
-path_to_motl_true = args.path_to_motl_true
 output_dir = args.output_dir
 radius = args.sphere_radius
-testing_set_data_path = args.testing_set_data_path
-shape_x = args.output_shape_x
-shape_y = args.output_shape_y
-shape_z = args.output_shape_z
-z_shift = args.output_z_shift
-y_shift = args.output_y_shift
-x_shift = args.output_x_shift
 box = args.subtomo_box_length
 overlap = args.overlap
 threshold = args.score_threshold
 tight_threshold = 0.1
+class_name = args.class_name
+statistics_file = args.statistics_file
+label_name = args.label_name
+
+df = pd.read_csv(dataset_table)
+tomo_df = df[df['tomo_name'] == tomo_name]
+z_shift = int(tomo_df.iloc[0]['z_shift'])
+y_shift = int(tomo_df.iloc[0]['y_shift'])
+x_shift = int(tomo_df.iloc[0]['x_shift'])
+x_dim = int(tomo_df.iloc[0]['x_dim'])
+y_dim = int(tomo_df.iloc[0]['y_dim'])
+z_dim = int(tomo_df.iloc[0]['z_dim'])
+test_partition = tomo_df.iloc[0]['test_partition']
+clean_motive_list_name = 'path_to_motl_clean_' + class_name
+path_to_motl_true = tomo_df.iloc[0][clean_motive_list_name]
 
 print("")
+print("path_to_motl_true = ", path_to_motl_true)
 print("output_dir = ", output_dir)
-dataset_shape = (shape_z, shape_y, shape_x)
+dataset_shape = (z_dim, y_dim, x_dim)
 subtomo_shape = (box - overlap, box - overlap, box - overlap)
 
 figures_dir = join(output_dir, "figures")
@@ -86,7 +112,7 @@ true_values, true_coordinates = read_motl_coordinates_and_values(
     path_to_motl=path_to_motl_true)
 unique_peaks_number = len(predicted_values)
 
-if testing_set_data_path == "None":
+if test_partition == "None":
     print("all particles will be considered for testing...")
     true_coordinates_test = true_coordinates
     predicted_coordinates_test = predicted_coordinates
@@ -98,7 +124,7 @@ else:
     true_coordinates_test, _ = \
         select_coordinates_in_subtomos(
             coordinates=true_coordinates,
-            subtomo_file_path=testing_set_data_path,
+            subtomo_file_path=test_partition,
             split=0,
             data_order="same",
             dataset_shape=dataset_shape,
@@ -112,7 +138,7 @@ else:
         select_coordinates_and_values_in_subtomos(
             coordinates=predicted_coordinates,
             values=predicted_values,
-            subtomo_file_path=testing_set_data_path,
+            subtomo_file_path=test_partition,
             split=0,
             data_order="same",
             dataset_shape=dataset_shape,
@@ -319,3 +345,7 @@ plt.savefig(fname=fig_name,
             format="png")
 
 print("All plots saved in ", figures_dir)
+
+stats_df = pd.read_csv(statistics_file)
+stats_df.loc[stats_df['tomo_name'] == tomo_name, label_name] = auPRC
+stats_df.to_csv(path_or_buf=statistics_file, index=False)

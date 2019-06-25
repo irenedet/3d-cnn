@@ -507,7 +507,7 @@ def write_hdf_particles_from_motl(path_to_motl: str,
                 score_values = np.ones(len(motive_list))
                 print("The map will be binary.")
         else:
-            _, motive_list = read_em(path_to_emfile=path_to_motl)
+            header, motive_list = read_em(path_to_emfile=path_to_motl)
             if isinstance(number_of_particles, int):
                 motive_list = motive_list[:number_of_particles]
                 print("Only", str(number_of_particles),

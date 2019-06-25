@@ -6,38 +6,47 @@ from os import makedirs
 import numpy as np
 
 data_files = [
-    "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/181119_002/memb.hdf",
-    "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/181119_030/memb.hdf",
-    "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/181126_002/memb.hdf",
-    "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/181126_012/memb.hdf",
-    "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/181126_025/memb.hdf",
-    "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/190301_005/memb.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181119/002/memb/tomosegresult.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181119/030/memb/tomosegresult.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181126/002/memb/tomosegresult.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181126/012/memb/tomosegresult.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181126/025/memb/tomosegresult.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/190301/005/memb/tomosegresult.hdf",
+    "/struct/mahamid/Irene/yeast/ED/190301/031/memb/tomosegresult.hdf",
+    "/struct/mahamid/Irene/yeast/ED/190301/033/memb/tomosegresult.hdf",
 ]
 output_paths = [
-    "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/181119_002/thr_binary_memb.hdf",
-    "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/181119_030/thr_binary_memb.hdf",
-    "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/181126_002/thr_binary_memb.hdf",
-    "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/181126_012/thr_binary_memb.hdf",
-    "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/181126_025/thr_binary_memb.hdf",
-    "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/Retrain_retrained_D4_IF8_NA_except_180711_003/double_eman_filt/190301_005/thr_binary_memb.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181119/002/memb/binary_tomosegresult.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181119/030/memb/binary_tomosegresult.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181126/002/memb/binary_tomosegresult.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181126/012/memb/binary_tomosegresult.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181126/025/memb/binary_tomosegresult.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/190301/005/memb/binary_tomosegresult.hdf",
+    "/struct/mahamid/Irene/yeast/ED/190301/031/memb/binary_tomosegresult.hdf",
+    "/struct/mahamid/Irene/yeast/ED/190301/033/memb/binary_tomosegresult.hdf",
 ]
 
+#to define:
 thresholds = [
     0,
     0,
-    0,
-    0,
-    0,
-    0,
+    # 0,
+    # 0,
+    # 0,
+    # 0,
+    # 0,
+    # 0,
 ]
 
 lamellas = [
-    "/struct/mahamid/Irene/yeast/ED/181119_002/002_lamellamask.hdf",
-    "/struct/mahamid/Irene/yeast/ED/181119_030/030_lamellamask.hdf",
-    "/struct/mahamid/Irene/yeast/ED/181126_002/002_lamellamask.hdf",
-    "/struct/mahamid/Irene/yeast/ED/181126_012/012_lamellamask.hdf",
-    "/struct/mahamid/Irene/yeast/ED/181126_025/025_lamellamask.hdf",
-    "/struct/mahamid/Irene/yeast/ED/190301_005/005_lamellamask.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181119/002/lamellamask.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181119/030/lamellamask.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181126/002/lamellamask.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181126/012/lamellamask.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/181126/025/lamellamask.hdf",
+    # "/struct/mahamid/Irene/yeast/ED/190301/005/lamellamask.hdf",
+    "/struct/mahamid/twalther/Processing/190301/031/TM/031_lamellamask.em",
+    "/struct/mahamid/twalther/Processing/190301/033/TM/033_lamellamask.em",
 ]
 
 print(len(data_files), len(thresholds))
@@ -53,7 +62,7 @@ for hdf_file_path, output_file_path, threshold, lamella_mask in zip(data_files,
     print("Binarizing ", hdf_file_path, " at threshold", threshold)
     tomo_data = load_dataset(path_to_dataset=hdf_file_path)
     thresholded_dataset = value * (tomo_data > threshold)
-    lamella_dataset = _load_hdf_dataset(lamella_mask)
+    lamella_dataset = load_dataset(path_to_dataset=lamella_mask)
     min_shape = [np.min([sh1, sh2]) for sh1, sh2 in
                  zip(lamella_dataset.shape, thresholded_dataset.shape)]
     dimz, dimy, dimx = min_shape

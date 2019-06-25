@@ -30,7 +30,7 @@ do
 	sbatch ./submission_scripts/dice-multi-class/multiple_cnn_evaluations/parameters_file_read.sh -output_dir $global_output_dir -parameters_file $param_file -path_to_model $path_to_model -label_name $label_name -depth $depth -init_feat $init_feat -output_classes $output_classes -class_number $class_number -box_side $box_side -new_loader $new_loader -minimum_peak_distance $minimum_peak_distance -border_xy $border_xy -lamella_extension $lamella_extension -same_peak_distance $same_peak_distance -threshold $score_threshold
 done
 
-... Finally:
-echo "Save a copy of this script for future reference"
-SCRIPT=`realpath $0`
-cp $SCRIPT $output_dir"/SCRIPT.txt"
+# ... Finally:
+#echo "Save a copy of this script for future reference"
+#SCRIPT=`realpath $0`
+#cp $SCRIPT $output_dir"/SCRIPT.txt"

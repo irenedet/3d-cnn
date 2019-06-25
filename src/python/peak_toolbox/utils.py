@@ -7,6 +7,7 @@ from src.python.coordinates_toolbox.utils import \
     extract_coordinates_and_values_from_em_motl
 from src.python.filereaders.csv import read_motl_from_csv
 from src.python.filereaders.em import read_em
+from src.python.filereaders.datasets import load_dataset
 from src.python.osactions.filesystem import create_dir
 
 
@@ -202,6 +203,15 @@ def read_motl_coordinates_and_values(path_to_motl: str):
         return motl_values, np.array(motl_coords)
     else:
         print("motl clean should be in a valid format .em or .csv")
+
+
+def read_motl_data(path_to_motl: str):
+    motl = load_dataset(path_to_dataset=path_to_motl)
+    motl_values, motl_coords = read_motl_coordinates_and_values(
+        path_to_motl)
+    motl_coords = np.array(motl_coords)
+    angles = motl[:, 16:19]
+    return motl_values, motl_coords, angles
 
 
 def union_of_motls(path_to_motl_1: str, path_to_motl_2: str):

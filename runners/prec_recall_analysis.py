@@ -64,7 +64,6 @@ else:
         motl_true)
     motl_clean_coords = np.array(motl_clean_coords)
 
-
 motl_predicted = read_motl_from_csv(path_to_csv_motl)
 motl_values, motl_coordinates = extract_motl_coordinates_and_score_values(
     motl_predicted)
@@ -77,8 +76,10 @@ print("motl_clean_coords.shape", motl_clean_coords.shape)
 motl_coordinates = [[row[0] + x_shift, row[1], row[2]] for row in
                     motl_coordinates]
 
-precision, recall, detected_true, detected_predicted, undetected_predicted, \
-value_detected_predicted, value_undetected_predicted = \
+precision, recall, detected_true, detected_predicted, \
+undetected_predicted, value_detected_predicted, \
+value_undetected_predicted, redundantly_detected_predicted, \
+value_redudndantly_detected_predicted = \
     precision_recall_calculator_and_detected(
         motl_coordinates,
         motl_values,
@@ -89,9 +90,32 @@ detected_predicted = [np.array(point) for point in detected_predicted]
 
 path_to_detected_predicted = join(output_dir, "detected")
 path_to_undetected_predicted = join(output_dir, "undetected")
+path_to_redundantly_detected = join(output_dir, "redundant")
 makedirs(name=path_to_detected_predicted, exist_ok=True)
 makedirs(name=path_to_undetected_predicted, exist_ok=True)
+makedirs(name=path_to_redundantly_detected, exist_ok=True)
 
+from src.python.filewriters.csv import filter_duplicate_values_by_score
+# ToDo: add as a parameter for filtering:
+max_peaks_distance = 8
+
+value_detected_predicted, detected_predicted = filter_duplicate_values_by_score(
+    list_of_peak_coords=detected_predicted,
+    list_of_peak_scores=value_detected_predicted,
+    number_peaks_to_uniquify=len(detected_predicted),
+    minimum_peaks_distance=max_peaks_distance,
+    uniquify_by_score=True)
+value_undetected_predicted, undetected_predicted = filter_duplicate_values_by_score(
+    list_of_peak_coords=undetected_predicted,
+    list_of_peak_scores=value_undetected_predicted,
+    number_peaks_to_uniquify=len(undetected_predicted),
+    minimum_peaks_distance=max_peaks_distance,
+    uniquify_by_score=True)
+
+motl_writer(path_to_output_folder=path_to_redundantly_detected,
+            list_of_peak_coords=redundantly_detected_predicted,
+            list_of_peak_scores=value_redudndantly_detected_predicted,
+            in_tom_format=True)
 motl_writer(path_to_output_folder=path_to_detected_predicted,
             list_of_peak_coords=detected_predicted,
             list_of_peak_scores=value_detected_predicted,
@@ -100,7 +124,6 @@ motl_writer(path_to_output_folder=path_to_undetected_predicted,
             list_of_peak_coords=undetected_predicted,
             list_of_peak_scores=value_undetected_predicted,
             in_tom_format=True)
-
 
 matplotlib.use('Agg')
 plt.ioff()

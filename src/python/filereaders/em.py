@@ -1,9 +1,8 @@
 import numpy as np
 
-
 def read_em(path_to_emfile: str) -> tuple:
     """
-    Function that reads an .em dataset (in the tom format).
+    Function that reads a .em dataset (in the tom format).
     :param path_to_emfile: str, pointing to the .em file
     :return: tuple header, value
     where header is a dictionary specifying

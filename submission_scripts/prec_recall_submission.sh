@@ -13,8 +13,8 @@
 
 export QT_QPA_PLATFORM='offscreen'
 
-export path_to_motl="/struct/mahamid/Irene/yeast/ED/190301_005/motl/RR_all_but_003/undetected/motl_2561.csv"
-export output_dir='/scratch/trueba/test_pr'
+export path_to_motl="/scratch/trueba/test_pr/3emanf/30_pix_far/redundant/PR/redundant/motl_1958.csv"
+export output_dir='/scratch/trueba/test_pr/3emanf/30_pix_far/redundant/PR/redundant'
 export path_to_clean="/struct/mahamid/twalther/Processing/190301/005/TM/motl_clean_4b.em"
 
 echo path_to_motl_predicted=$path_to_motl
