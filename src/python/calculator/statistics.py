@@ -1,31 +1,73 @@
 import numpy as np
 
 
-def precision_recall_calculator(motl_coords: np.array,
-                                motl_clean_coords: np.array, radius: float):
-    nclean = motl_clean_coords.shape[0]
-    detected_clean = set()
-    prec = []
-    recall = []
-    n = 0
-    for motl_point in motl_coords:
-        n = n + 1
-        flag = 'undetected'
-        for clean_point in motl_clean_coords:
-            if flag == 'undetected':
-                dist_vect = motl_point - clean_point
-                dist = np.sqrt(np.sum(dist_vect ** 2))
-                if ((dist <= radius) and (
-                            tuple(clean_point) not in detected_clean)):
-                    detected_clean = detected_clean | {tuple(clean_point)}
-                    flag = 'detected'
-        tp = len(detected_clean)
-        prec += [tp / n]
-        recall += [tp / nclean]
-    return prec, recall, detected_clean
+def get_clean_points_close2point(point, clean, radius):
+    close_to_point = list()
+    for clean_p in clean:
+        dist = np.linalg.norm(clean_p - point)
+        if dist <= radius:
+            close_to_point.append(clean_p)
+    return close_to_point
 
 
-def precision_recall_calculator_and_detected(predicted_coordinates: np.array,
+def precision_recall_calculator_and_detected(
+        predicted_coordinates: np.array or list,
+        value_predicted: list,
+        true_coordinates: np.array or list,
+        radius: float):
+    true_coordinates = list(true_coordinates)
+    predicted_coordinates = list(predicted_coordinates)
+    detected_true = list()
+    predicted_true_positives = list()
+    predicted_false_positives = list()
+    predicted_redundant = list()
+    value_predicted_true_positives = list()
+    value_predicted_false_positives = list()
+    value_predicted_redundant = list()
+    precision = list()
+    recall = list()
+    total_true_points = len(true_coordinates)
+    for value, point in zip(value_predicted, predicted_coordinates):
+        close_to_point = get_clean_points_close2point(point, true_coordinates,
+                                                      radius)
+        if len(close_to_point) > 0:
+            flag = "true_positive_candidate"
+            flag_tmp = "not_redundant_yet"
+            for clean_p in close_to_point:
+                if flag == "true_positive_candidate":
+                    if tuple(clean_p) not in detected_true:
+                        detected_true.append(tuple(clean_p))
+                        flag = "true_positive"
+                    else:
+                        flag_tmp = "redundant_candidate"
+                else:
+                    print(point, "is already flagged as true positive")
+            if flag == "true_positive":
+                predicted_true_positives.append(tuple(point))
+                value_predicted_true_positives.append(value)
+            elif flag == "true_positive_candidate" and \
+                            flag_tmp == "redundant_candidate":
+                predicted_redundant.append(tuple(point))
+                value_predicted_redundant.append(value)
+            else:
+                print("This should never happen!")
+        else:
+            print("len(close_to_point) = ", len(close_to_point))
+            predicted_false_positives.append(tuple(point))
+            value_predicted_false_positives.append(value)
+        true_positives_total = len(predicted_true_positives)
+        false_positives_total = len(predicted_false_positives)
+        total_current_predicted_points = true_positives_total + \
+                                         false_positives_total
+        precision += [true_positives_total / total_current_predicted_points]
+        recall += [true_positives_total / total_true_points]
+    return precision, recall, detected_true, predicted_true_positives, \
+           predicted_false_positives, value_predicted_true_positives, \
+           value_predicted_false_positives, predicted_redundant, \
+           value_predicted_redundant
+
+
+def precision_recall_calculator_and_detected_old(predicted_coordinates: np.array,
                                              predicted_values: list,
                                              true_coordinates: np.array,
                                              radius: float):
@@ -74,7 +116,7 @@ def precision_recall_calculator_and_detected(predicted_coordinates: np.array,
            value_redudndantly_detected_predicted
 
 
-def precision_recall_calculator_and_detected_new(
+def precision_recall_calculator_and_detected_new_old(
         predicted_coordinates: np.array,
         predicted_values: list,
         true_coordinates: np.array,

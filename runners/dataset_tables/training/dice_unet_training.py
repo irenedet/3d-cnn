@@ -3,6 +3,7 @@
 from os.path import join
 from os import makedirs
 
+import pandas as pd
 import numpy as np
 import torch
 import torch.nn as nn
@@ -14,9 +15,6 @@ from src.python.filereaders import h5
 from src.python.image.filters import preprocess_data
 from src.python.pytorch_cnn.classes.unet import UNet
 from src.python.pytorch_cnn.utils import save_unet_model, load_unet_model
-# from src.python.pytorch_cnn.utils import \
-#     get_testing_and_training_sets_from_partition
-
 from src.python.pytorch_cnn.classes.visualizers import TensorBoard_multiclass
 from src.python.pytorch_cnn.classes.routines import train, validate
 from src.python.pytorch_cnn.classes.loss import DiceCoefficientLoss_multilabel
@@ -26,8 +24,8 @@ from src.python.filewriters.txt import write_model_description
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-label", "--label_name",
-                    help="label name of segmentation class",
+parser.add_argument("-dataset_table", "--dataset_table",
+                    help="path to db (dataset_table) in .csv format",
                     type=str)
 parser.add_argument("-log_dir", "--log_dir",
                     help="logs directory where training losses will be stored",
@@ -63,16 +61,14 @@ parser.add_argument("-depth", "--depth",
                     type=int)
 parser.add_argument("-initial_features", "--initial_features",
                     type=int)
-parser.add_argument("-training_paths_list", "--training_paths_list",
+parser.add_argument("-tomo_training_list", "--tomo_training_list",
                     type=str)
-parser.add_argument("-skip", "--skip",
-                    type=int)
 
 args = parser.parse_args()
-training_paths_list = args.training_paths_list
-training_paths_list = training_paths_list.split('\n')
-skip_training = args.skip
-label_name = args.label_name
+dataset_table = args.dataset_table
+tomo_training_list = args.tomo_training_list
+tomo_training_list = tomo_training_list.split('\n')
+
 split = args.split
 log_dir = args.log_dir
 model_initial_name = args.model_initial_name
@@ -87,6 +83,9 @@ weight = args.weights_per_class
 weight = list(map(float, weight.split(',')))
 segmentation_names = args.segmentation_names
 segmentation_names = list(map(str, segmentation_names.split(',')))
+label_name = ""
+for semantic_class in segmentation_names:
+    label_name += semantic_class + "_"
 
 makedirs(name=log_dir, exist_ok=True)
 makedirs(name=model_path, exist_ok=True)
@@ -99,68 +98,74 @@ net_confs = [
      "out_channels": output_classes},
 ]
 
+df = pd.read_csv(dataset_table)
+
+training_partition_paths = list()
+for tomo_name in tomo_training_list:
+    tomo_df = df[df['tomo_name'] == tomo_name]
+    training_partition_paths += [tomo_df.iloc[0]['train_partition']]
+
+print("training_partition_paths", training_partition_paths)
+
 print("*************************************")
 print("The cnn_training.py script is running")
 print("*************************************")
 
-print(training_paths_list)
+print(tomo_training_list)
 
 # check if we have  a gpu
 device = get_device()
 
-for n, training_data_path in enumerate(training_paths_list):
+for n, training_data_path in enumerate(training_partition_paths):
     print("\n")
-    if skip_training == n:
-        print("Skipping ", training_data_path)
+    print("Loading training set from ", training_data_path)
+    if 'train_data' not in locals():
+        raw_data, labels = h5.read_training_data_dice_multi_class(
+            training_data_path=training_data_path,
+            segmentation_names=segmentation_names,
+            split=-1)
+        print(training_data_path)
+        print("labels.shape = ", labels.shape)
+        print("raw_data.shape = ", raw_data.shape)
+        print("Initial unique labels", np.unique(labels))
+
+        # Normalize data
+        preprocessed_data = preprocess_data(raw_data)
+        preprocessed_data = np.array(preprocessed_data)[:, None]
+        labels = np.array(labels, dtype=np.long)
+
+        train_data, train_labels, val_data, val_labels, _ = \
+            split_dataset(preprocessed_data, labels, split)
+
+        print("train_data.shape", train_data.shape)
+        print("train_labels.shape", train_labels.shape)
+
     else:
-        print("Loading training set from ", training_data_path)
-        if 'train_data' not in locals():
-            raw_data, labels = h5.read_training_data_dice_multi_class(
-                training_data_path=training_data_path,
-                segmentation_names=segmentation_names,
-                split=-1)
-            print(training_data_path)
-            print("labels.shape = ", labels.shape)
-            print("raw_data.shape = ", raw_data.shape)
-            print("Initial unique labels", np.unique(labels))
+        raw_data, labels = h5.read_training_data_dice_multi_class(
+            training_data_path=training_data_path,
+            segmentation_names=segmentation_names,
+            split=-1)
+        print(training_data_path)
+        print("labels.shape = ", labels.shape)
+        print("raw_data.shape = ", raw_data.shape)
+        print("Initial unique labels", np.unique(labels))
 
-            # Normalize data
-            preprocessed_data = preprocess_data(raw_data)
-            preprocessed_data = np.array(preprocessed_data)[:, None]
-            labels = np.array(labels, dtype=np.long)
+        # Normalize data
+        preprocessed_data = preprocess_data(raw_data)
+        preprocessed_data = np.array(preprocessed_data)[:, None]
+        labels = np.array(labels, dtype=np.long)
 
-            train_data, train_labels, val_data, val_labels, _ = \
-                split_dataset(preprocessed_data, labels, split)
+        train_data_tmp, train_labels_tmp, val_data_tmp, val_labels_tmp, _ = \
+            split_dataset(preprocessed_data, labels, split)
 
-            print("train_data.shape", train_data.shape)
-            print("train_labels.shape", train_labels.shape)
+        print("train_data.shape", train_data.shape)
+        print("train_labels.shape", train_labels.shape)
 
-        else:
-            raw_data, labels = h5.read_training_data_dice_multi_class(
-                training_data_path=training_data_path,
-                segmentation_names=segmentation_names,
-                split=-1)
-            print(training_data_path)
-            print("labels.shape = ", labels.shape)
-            print("raw_data.shape = ", raw_data.shape)
-            print("Initial unique labels", np.unique(labels))
-
-            # Normalize data
-            preprocessed_data = preprocess_data(raw_data)
-            preprocessed_data = np.array(preprocessed_data)[:, None]
-            labels = np.array(labels, dtype=np.long)
-
-            train_data_tmp, train_labels_tmp, val_data_tmp, val_labels_tmp, _ = \
-                split_dataset(preprocessed_data, labels, split)
-
-            print("train_data.shape", train_data.shape)
-            print("train_labels.shape", train_labels.shape)
-
-            train_data = np.concatenate((train_data, train_data_tmp), axis=0)
-            train_labels = np.concatenate((train_labels, train_labels_tmp),
-                                          axis=0)
-            val_data = np.concatenate((val_data, val_data_tmp), axis=0)
-            val_labels = np.concatenate((val_labels, val_labels_tmp), axis=0)
+        train_data = np.concatenate((train_data, train_data_tmp), axis=0)
+        train_labels = np.concatenate((train_labels, train_labels_tmp),
+                                      axis=0)
+        val_data = np.concatenate((val_data, val_data_tmp), axis=0)
+        val_labels = np.concatenate((val_labels, val_labels_tmp), axis=0)
 
 train_set = du.TensorDataset(torch.from_numpy(train_data),
                              torch.from_numpy(train_labels))
@@ -198,10 +203,9 @@ for conf in net_confs:
     model_name_txt = model_name + ".txt"
     data_txt_path = join(model_path, model_name_txt)
     write_model_description(file_path=data_txt_path,
-                            training_data_path=str(training_paths_list),
+                            training_data_path=str(training_partition_paths),
                             label_name=label_name, split=split,
-                            model_name_pkl=model_path_pkl, conf=conf,
-                            skip_training_set=skip_training)
+                            model_name_pkl=model_path_pkl, conf=conf)
     log_model = join(log_dir, model_name)
     logger = TensorBoard_multiclass(log_dir=log_model, log_image_interval=1)
     print("The neural network training is now starting")
@@ -216,7 +220,7 @@ for conf in net_confs:
         current_validation_loss = validate(net, val_loader, loss, metric,
                                            device=device, step=step,
                                            tb_logger=logger)
-        if epoch == 0:
+        if 'validation_loss' not in locals():
             validation_loss = current_validation_loss
             best_epoch = 0
         else:

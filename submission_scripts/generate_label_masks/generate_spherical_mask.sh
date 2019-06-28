@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 64G
-#SBATCH --time 0-00:40
+#SBATCH --time 0-00:10
 #SBATCH -o slurm.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -19,13 +19,13 @@ export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
 export coords_in_tom_format='True'
 export class_number=0
 
-export hdf_output_path="/scratch/trueba/test_pr/50_pix_far/redundant/motl_1529_mask.hdf"
-export path_to_motl="/scratch/trueba/test_pr/50_pix_far/redundant/motl_1529.csv"
+export hdf_output_path="/struct/mahamid/Irene/yeast/healthy/180426/004/ribos/motl/extra_motl_verified_mask.hdf"
+export path_to_motl="/struct/mahamid/Irene/yeast/healthy/180426/004/ribos/motl/extra_motl_verified.csv"
 export radius=8
 export z_shift=0
-export shape_x=928
-export shape_y=928
-export shape_z=500
+export shape_x=927
+export shape_y=927
+export shape_z=1000
 
 echo "starting to generate hdf of particles in the motl"
 python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/generate_label_masks/generate_hdf_from_motl.py -motl $path_to_motl -hdf_output_path $hdf_output_path -shape_x $shape_x -shape_y $shape_y -shape_z $shape_z -radius $radius -z_shift $z_shift -coords_in_tom_format $coords_in_tom_format
