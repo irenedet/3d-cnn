@@ -23,12 +23,12 @@ from src.python.filereaders import h5
 from src.python.image.filters import preprocess_data
 from src.python.image.viewers import view_images_h5
 # from pytorch_cnn.classes.cnnets import UNet_4, UNet_6, UNet_7, UNet, UNet_deep
-from src.python.pytorch_cnn.classes.unet import UNet
-from src.python.pytorch_cnn.classes.loss import BCELoss, DiceCoefficient, \
+from networks.unet import UNet
+from networks.loss import DiceCoefficient, \
     DiceCoefficientLoss
-from src.python.pytorch_cnn.classes.visualizers import TensorBoard
-from src.python.pytorch_cnn.classes.routines import train_float, validate_float
-from src.python.pytorch_cnn.io import get_device
+from networks.visualizers import TensorBoard
+from networks.routines import train_float, validate_float
+from networks.io import get_device
 
 print("*************************************")
 print("The cnn_training.py script is running")

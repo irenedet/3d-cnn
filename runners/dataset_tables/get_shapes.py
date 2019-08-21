@@ -2,7 +2,7 @@ from src.python.filereaders.datasets import load_dataset
 # import numpy as np
 import pandas as pd
 
-path_to_dataset_table = "/struct/mahamid/Irene/yeast/yeast_table.csv"
+path_to_dataset_table = "/struct/mahamid/Irene/liang_data/liang_data.csv"
 #     "190301/018",
 #     "190301/019",
 TOMOS = [
@@ -31,30 +31,69 @@ TOMOS = [
     # "190301/014",
     # "190301/015",
     # "190301/017",
-    "190301/020",
-    "190301/021",
-    "190301/026",
-    "190301/029",
-    "190301/030",
-    "190329/001",
-    "190329/004",
-    "190329/005",
-    "190329/007",
-    "190329/010",
-    "190329/012",
-    "190329/013",
-    "190329/015",
-    "190329/017",
-    "190329/021",
-    "190329/022",
-    "190329/023",
-    "190329/025",
-    "190329/028",
-    "190329/032",
-    "190329/036",
-]
+    # "190301/020",
+    # "190301/021",
+    # "190301/026",
+    # "190301/029",
+    # "190301/030",
+    # "190329/001",
+    # "190329/004",
+    # "190329/005",
+    # "190329/007",
+    # "190329/010",
+    # "190329/012",
+    # "190329/013",
+    # "190329/015",
+    # "190329/017",
+    # "190329/021",
+    # "190329/022",
+    # "190329/023",
+    # "190329/025",
+    # "190329/028",
+    # "190329/032",
+    # "190329/036",
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    190,
+    191,
+    192,
+    193,
+    194,
+    195,
+    196,
+    198,
+    199,
+    200,
+    201,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208,
+    240,
+    241,
+    242,
+    243,
+    244,
+    245,
+    246,
+    247,
+    248,
+    249,
+    250,
+    251,
+ ]
 
 for tomo_name in TOMOS:
+    print("Tomo", tomo_name)
     df = pd.read_csv(path_to_dataset_table)
     tomo_df = df.loc[df['tomo_name'] == tomo_name].iloc[0]
     path_to_raw = tomo_df['eman2_filetered_tomo']
@@ -63,6 +102,7 @@ for tomo_name in TOMOS:
     df.loc[df['tomo_name'] == tomo_name, 'y_dim'] = y_dim
     df.loc[df['tomo_name'] == tomo_name, 'z_dim'] = z_dim
     df.to_csv(path_or_buf=path_to_dataset_table, index=False)
+
 
 #
 # tomos_df = df.loc[df['tomo_name'].isin(TOMOS)]

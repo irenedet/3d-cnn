@@ -10,6 +10,10 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=irene.de.teresa@embl.de
 
+#SBAtCH -p gpu
+#SBAtCH -C gpu=1080Ti
+#SBAtCH --gres=gpu:1
+
 module load Anaconda3
 echo "activating virtual environment"
 source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
@@ -114,7 +118,7 @@ export output_classes=$output_classes
 export tomo_name=$tomo_name
 export output_dir=$output_dir
 
-export summary_file=$output_dir"/summary_analysis_class"$class_number".txt"
+export summary_file=$output_dir"/summary_statistics_class"$class_number".csv"
 touch $summary_file
 export output_dir=$output_dir"/"$tomo_name"/class_"$class_number
 
@@ -160,6 +164,6 @@ echo "...done filtering points in lamella mask."
 # 3. Precision-Recall analysis
 export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir/motl*)
 echo "Starting to generate precision recall plots"
-python3 ./runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_name $class_name >> $summary_file
+python3 ./runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_name $class_name -summary_file $summary_file
 echo "...done with precision recall plots."
 

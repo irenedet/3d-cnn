@@ -16,45 +16,90 @@ echo 'activating virtual environment'
 source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 echo '... done.'
 
+export PYTHONPATH=/g/scb2/zaugg/trueba/3d-cnn
+TOMOS="181119/002
+181119/030
+181126/002
+181126/012
+181126/025"
 
-TOMOS="190301/001
-190301/002
-190301/004
-190301/006
-190301/007
-190301/010
-190301/011
-190301/013
-190301/014
-190301/015
-190301/017
-190301/020
-190301/021
-190301/026
-190301/029
-190301/030
-190329/001
-190329/004
-190329/005
-190329/007
-190329/010
-190329/012
-190329/013
-190329/015
-190329/017
-190329/021
-190329/022
-190329/023
-190329/025
-190329/028
-190329/032
-190329/036"
+#190301/001
+#190301/002
+#190301/004
+#190301/006
+#190301/007
+#190301/010
+#190301/011
+#190301/013
+#190301/014
+#190301/015
+#190301/017
+#190301/020
+#190301/021
+#190301/026
+#190301/029
+#190301/030
+#190329/001
+#190329/004
+#190329/005
+#190329/007
+#190329/010
+#190329/012
+#190329/013
+#190329/015
+#190329/017
+#190329/021
+#190329/022
+#190329/023
+#190329/025
+#190329/028
+#190329/032
+#190329/036"
 
-export path_to_dataset_table="/struct/mahamid/Irene/yeast/yeast_table_ribo_single_class.csv"
-export global_output_dir="/scratch/trueba/3d-cnn/training_data/dice-multi-class/ribo"
+#TOMOS="172
+#173
+#174
+#175
+#176
+#177
+#178
+#179
+#180
+#190
+#191
+#192
+#193
+#194
+#195
+#196
+#198
+#199
+#200
+#201
+#203
+#204
+#205
+#206
+#207
+#208
+#240
+#241
+#242
+#243
+#244
+#245
+#246
+#247
+#248
+#249
+#250
+#251"
+
+export path_to_dataset_table="/struct/mahamid/Irene/yeast/yeast_table.csv"
+export global_output_dir="/struct/mahamid/Irene/yeast/ED"
 export write_on_table='True'
 # Training set parameters:
-export segmentation_names='ribo' #,fas,memb'
+export segmentation_names='ribo,fas,memb'
 export split=0.7
 export box_length=128
 export number_iterations_data_aug=6

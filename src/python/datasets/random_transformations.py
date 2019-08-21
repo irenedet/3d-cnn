@@ -3,7 +3,7 @@ import scipy
 import h5py
 from os.path import join
 
-from scipy.ndimage import zoom
+from scipy.ndimage import zoom, interpolation
 from scipy.ndimage.filters import gaussian_filter
 from scipy.ndimage.interpolation import map_coordinates
 
@@ -21,16 +21,18 @@ https://github.com/inferno-pytorch/
 
 class Transform(object):
     """
-    Base class for a Transform. The argument `apply_to` (list) specifies the indices of
-    the tensors this transform will be applied to.
+    Base class for a Transform. The argument `apply_to` (list) specifies the
+    indices of the tensors this transform will be applied to.
     The following methods are recognized (in order of descending priority):
         - `batch_function`: Applies to all tensors in a batch simultaneously
         - `tensor_function`: Applies to just __one__ tensor at a time.
-        - `volume_function`: For 3D volumes, applies to just __one__ volume at a time.
-        - `image_function`: For 2D or 3D volumes, applies to just __one__ image at a time.
-    For example, if both `volume_function` and `image_function` are defined, this means that
-    only the former will be called. If the inputs are therefore not 5D batch-tensors of 3D
-    volumes, a `NotImplementedError` is raised.
+        - `volume_function`: For 3D volumes, applies to just __one__ volume at
+        a time.
+        - `image_function`: For 2D or 3D volumes, applies to just __one__ image
+        at a time.
+    For example, if both `volume_function` and `image_function` are defined,
+    this means that only the former will be called. If the inputs are therefore
+    not 5D batch-tensors of 3D volumes, a `NotImplementedError` is raised.
     """
 
     def __init__(self, apply_to=None):
@@ -65,16 +67,17 @@ class Transform(object):
         self._random_variables.update({key: value})
 
     def __call__(self, *tensors, **transform_function_kwargs):
-        print(type(tensors[0]))
-        print(tensors[0].shape)
+        print("len(tensors)", len(tensors))
+        print("tensors[0].shape", tensors[0].shape)
         # FIXME here this should be taken:
         tensors = tensors[0]
-        tensors = pyu.to_iterable(tensors) #this sets tensors = [tensors]
+        tensors = pyu.to_iterable(tensors)  # this sets tensors = [tensors]
         print("len(tensors)", len(tensors))
         # Get the list of the indices of the tensors to which we're going to
         # apply the transform
         apply_to = list(
             range(len(tensors))) if self._apply_to is None else self._apply_to
+        print(apply_to)
         # Flush random variables and assume they're built by image_function
         self.clear_random_variables()
         if hasattr(self, 'batch_function'):
@@ -89,14 +92,13 @@ class Transform(object):
             return pyu.from_iterable(transformed)
         elif hasattr(self, 'volume_function'):
             # Loop over all tensors
-            # print("tensors shape", tensors[0].shape)
-            # print("holaaaa")
-            # print("apply_to = ", apply_to)
+            print("tensors shape", tensors[0].shape)
             transformed = [
                 self._apply_volume_function(tensor, **transform_function_kwargs)
                 if tensor_index in apply_to else tensor
                 for tensor_index, tensor in
-                enumerate(tensors)]  #changbyIrene,orig:enumerate(tensors)]
+                enumerate(tensors)]
+            transformed = np.array(transformed)
             return pyu.from_iterable(transformed)
         elif hasattr(self, 'image_function'):
             # Loop over all tensors
@@ -144,6 +146,7 @@ class Transform(object):
             # tensor is bczyx
             # volume function is applied to zyx, i.e. loop over b and c
             # FIXME This loops one time too many
+            print("we are in case tensor.ndim == 5")
             return np.array([np.array([np.array([self.volume_function(volume,
                                                                       **transform_function_kwargs)
                                                  for volume in channel_volume])
@@ -183,58 +186,20 @@ class RandomFlip3D(Transform):
 
 
 class RandomRot3D(Transform):
-    def __init__(self, rot_range=30, p=0.5, only_xy=False, **super_kwargs):
+    def __init__(self, rot_range=30, p=0.5, **super_kwargs):
         super(RandomRot3D, self).__init__(**super_kwargs)
         self.rot_range = rot_range
         self.p = p
-        self.only_xy = only_xy
 
     def build_random_variables(self, **kwargs):
         np.random.seed()
-
-        if self.only_xy:
-            self.set_random_variable('do_x', np.random.uniform() < self.p)
-        else:
-            self.set_random_variable('do_z', np.random.uniform() < self.p)
-            self.set_random_variable('do_y', np.random.uniform() < self.p)
-            self.set_random_variable('do_x', np.random.uniform() < self.p)
-
         self.set_random_variable('angle_z', np.random.uniform(-self.rot_range,
-                                                              self.rot_range))
-        self.set_random_variable('angle_y', np.random.uniform(-self.rot_range,
-                                                              self.rot_range))
-        self.set_random_variable('angle_x', np.random.uniform(-self.rot_range,
                                                               self.rot_range))
 
     def volume_function(self, volume):
         angle_z = self.get_random_variable('angle_z')
-        angle_y = self.get_random_variable('angle_y')
-        angle_x = self.get_random_variable('angle_x')
-
-        # rotate along z-axis
-        if self.get_random_variable('do_z'):
-            volume = scipy.ndimage.interpolation.rotate(volume, angle_z,
-                                                        order=0,
-                                                        # mode='nearest',
-                                                        mode='reflect',
-                                                        axes=(0, 1),
-                                                        reshape=False)
-        # rotate along y-axis
-        if self.get_random_variable('do_y'):
-            volume = scipy.ndimage.interpolation.rotate(volume, angle_y,
-                                                        order=0,
-                                                        # mode='nearest',
-                                                        mode='reflect',
-                                                        axes=(0, 2),
-                                                        reshape=False)
-        # rotate along x-axis
-        if self.get_random_variable('do_x'):
-            volume = scipy.ndimage.interpolation.rotate(volume, angle_x,
-                                                        order=0,
-                                                        # mode='nearest',
-                                                        mode='reflect',
-                                                        axes=(1, 2),
-                                                        reshape=False)
+        volume = interpolation.rotate(volume, angle_z, order=0, mode='reflect',
+                                      axes=(1, 2), reshape=False)
         return volume
 
 
@@ -437,7 +402,7 @@ class SinusoidalElasticTransform3D(Transform):
         # Make meshgrid
         x, y, z = np.meshgrid(np.arange(imshape[2]), np.arange(imshape[1]),
                               np.arange(imshape[0]))
-        print(x.shape)
+        # print(x.shape)
         # Distort meshgrid indices (invert if required)
         flow_z, flow_y, flow_x = (z + sdz), (y + sdy), (x + sdx)
         # Set random states
@@ -478,13 +443,19 @@ class AdditiveGaussianNoise(Transform):
 
     def build_random_variables(self, **kwargs):
         np.random.seed()
+        noise_level = np.random.uniform(0, self.sigma, 1)[0]
         self.set_random_variable('noise',
-                                 np.random.normal(loc=0, scale=self.sigma,
+                                 np.random.normal(loc=0, scale=noise_level,
                                                   size=kwargs.get('imshape')))
 
     def image_function(self, image):
         image = image + self.get_random_variable('noise', imshape=image.shape)
         return image
+
+    def volume_function(self, volume):
+        volume = volume + self.get_random_variable('noise',
+                                                   imshape=volume.shape)
+        return volume
 
 
 def transform_data_from_h5(training_data_path: str, label_name: str,

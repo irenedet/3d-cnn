@@ -1,25 +1,23 @@
 #! /home/trueba/.conda/envs/mlcourse/bin/python3
 
-from os.path import join
+import argparse
 from os import makedirs
+from os.path import join
 
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as du
+from src.python.networks.classes.unet import UNet
+from src.python.networks.classes.visualizers import TensorBoard_multiclass
 
+from networks.io import get_device
+from networks.routines import train, validate
 from src.python.datasets.actions import split_dataset
 from src.python.filereaders import h5
-from src.python.image.filters import preprocess_data
-from src.python.pytorch_cnn.classes.unet import UNet
-
-from src.python.pytorch_cnn.classes.visualizers import TensorBoard_multiclass
-from src.python.pytorch_cnn.classes.routines import train, validate
-from src.python.pytorch_cnn.io import get_device
 from src.python.filewriters.txt import write_model_description
-
-import argparse
+from src.python.image.filters import preprocess_data
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-data_path", "--training_data_path",

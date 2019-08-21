@@ -79,6 +79,38 @@ def read_training_data_dice_multi_class(training_data_path: str,
     print("Loaded labels of shape", labels.shape)
     return data, labels
 
+# Todo: remove after testing transformations
+def dummy_read_training_data_dice_multi_class(training_data_path: str,
+                                              segmentation_names: list,
+                                              split=-1,
+                                              N=100) -> tuple:
+    data = []
+    labels = []
+    with h5py.File(training_data_path, 'r') as f:
+        raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])[:N]
+        raw_subtomo_names += list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])[
+                             int(2 * N):int(3 * N)]
+        for subtomo_name in raw_subtomo_names[:split]:
+            raw_subtomo_h5_internal_path = join(
+                h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
+            data += [f[raw_subtomo_h5_internal_path][:]]
+            labels_current_subtomo = []
+            for label_name in segmentation_names:
+                labels_subtomo_h5_internal_path = join(
+                    h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
+                labels_subtomo_h5_internal_path = join(
+                    labels_subtomo_h5_internal_path,
+                    subtomo_name)
+                labels_current_subtomo += [
+                    f[labels_subtomo_h5_internal_path][:]]
+            labels += [np.array(labels_current_subtomo)]
+
+    data = np.array(data)
+    labels = np.array(labels)
+    print("Loaded data of shape", data.shape)
+    print("Loaded labels of shape", labels.shape)
+    return data, labels
+
 
 def read_raw_data_from_h5(data_path: str) -> np.array:
     data = []

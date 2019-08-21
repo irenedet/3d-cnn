@@ -1,10 +1,11 @@
 from os.path import join
-import numpy as np
+
 import h5py
+import numpy as np
 import torch
-from src.python.pytorch_cnn.classes.cnnets import UNet_6
 import torch.nn as nn
-import matplotlib.pyplot as plt
+
+from src.python.networks.cnnets import UNet_6
 
 
 def read_data_from_h5(data_path: str) -> np.array:

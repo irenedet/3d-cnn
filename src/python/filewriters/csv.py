@@ -1,5 +1,4 @@
 import csv
-import datetime
 import re
 import time
 from os.path import join
@@ -7,6 +6,8 @@ from os import makedirs
 import h5py
 import numpy as np
 import pandas as pd
+import datetime
+from functools import reduce
 
 from src.python.coordinates_toolbox.utils import \
     filtering_duplicate_coords_with_values, to_tom_coordinate_system
@@ -474,3 +475,45 @@ def unite_motls(path_to_motl1: str, path_to_motl2: str,
                 list_of_angles=angles,
                 in_tom_format=True,
                 motl_name=output_motl_name)
+
+
+def write_on_models_notebook(model_name: str, model_path: str,
+                             log_dir: str, depth: int,
+                             initial_features: int, n_epochs: int,
+                             training_paths_list: list,
+                             split: float, output_classes: int,
+                             segmentation_names: list,
+                             retrain: str or bool,
+                             path_to_old_model: str, models_notebook_path: str,
+                             dropout: str or float = "None"):
+    """
+
+    :type model_path: pkl file that stores model parameters.
+    """
+    training_paths = reduce(lambda x, y: x + ", " + y, training_paths_list)
+    segmentation_names = reduce(lambda x, y: x + ", " + y, segmentation_names)
+    print(training_paths, segmentation_names)
+
+    now = datetime.datetime.now()
+    date = str(now.day) + "/" + str(now.month) + "/" + str(now.year)
+    mini_notebook_df = pd.DataFrame({'model_name': model_name}, index=[0])
+    mini_notebook_df['model_name'] = model_name
+    mini_notebook_df['model_path'] = model_path
+    mini_notebook_df['log_path'] = log_dir
+    mini_notebook_df['depth'] = depth
+    mini_notebook_df['if'] = initial_features
+    mini_notebook_df['dropout'] = dropout
+    mini_notebook_df['n_epochs'] = n_epochs
+    mini_notebook_df['training_set'] = training_paths
+    mini_notebook_df['train_split'] = split
+    mini_notebook_df['output_classes'] = output_classes
+    mini_notebook_df['segmentation_names'] = segmentation_names
+    mini_notebook_df['retrain'] = str(retrain)
+    mini_notebook_df['old_model'] = path_to_old_model
+    mini_notebook_df['date'] = date
+    models_notebook_df = pd.read_csv(models_notebook_path)
+
+    pd.merge(models_notebook_df, mini_notebook_df, how='inner')
+
+    models_notebook_df.to_csv(path_or_buf=models_notebook_path, index=False)
+    return

@@ -1,6 +1,7 @@
 import torch
-from src.python.pytorch_cnn.classes.unet import UNet
-from src.python.pytorch_cnn.io import get_device
+
+from src.python.networks.io import get_device
+from src.python.networks.unet import UNet
 from src.python.filewriters.h5 import segment_and_write
 
 # data to provide by user:

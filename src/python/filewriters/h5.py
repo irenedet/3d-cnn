@@ -1,23 +1,22 @@
-import h5py
-from os.path import join
 import os
-
 import random
-import torch
-import numpy as np
+from os.path import join
 
-from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import read_em
-from src.python.filereaders.shrec import read_shrec_motl
+import h5py
+import numpy as np
+import torch
+
+from src.python.networks.unet import UNet
+from src.python.coordinates_toolbox import subtomos
 from src.python.coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl, extract_coordinates_from_txt_shrec
-from src.python.peak_toolbox.utils import paste_sphere_in_dataset
-
-from src.python.naming import h5_internal_paths
-from src.python.coordinates_toolbox import subtomos
-from src.python.tensors.actions import crop_window_around_point
-from src.python.pytorch_cnn.classes.unet import UNet
+from src.python.filereaders.csv import read_motl_from_csv
+from src.python.filereaders.em import read_em
 from src.python.filereaders.shrec import particle_dict
+from src.python.filereaders.shrec import read_shrec_motl
+from src.python.naming import h5_internal_paths
+from src.python.peak_toolbox.utils import paste_sphere_in_dataset
+from src.python.tensors.actions import crop_window_around_point
 
 
 def write_dataset_hdf(output_path: str, tomo_data: np.array):

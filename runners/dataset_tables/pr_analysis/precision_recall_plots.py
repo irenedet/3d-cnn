@@ -69,6 +69,8 @@ parser.add_argument("-overlap", "--overlap",
 parser.add_argument("-threshold", "--score_threshold",
                     default=-10,
                     type=float)
+parser.add_argument("-summary_file", "--summary_file",
+                    type=str)
 
 args = parser.parse_args()
 dataset_table = args.dataset_table
@@ -83,8 +85,10 @@ tight_threshold = 0.1
 class_name = args.class_name
 statistics_file = args.statistics_file
 label_name = args.label_name
+summary_file = args.summary_file
 
 df = pd.read_csv(dataset_table)
+df['tomo_name'] = df['tomo_name'].astype(str)
 tomo_df = df[df['tomo_name'] == tomo_name]
 z_shift = int(tomo_df.iloc[0]['z_shift'])
 y_shift = int(tomo_df.iloc[0]['y_shift'])
@@ -347,5 +351,7 @@ plt.savefig(fname=fig_name,
 print("All plots saved in ", figures_dir)
 
 stats_df = pd.read_csv(statistics_file)
+stats_df['tomo_name'] = stats_df['tomo_name'].astype(str)
 stats_df.loc[stats_df['tomo_name'] == tomo_name, label_name] = auPRC
 stats_df.to_csv(path_or_buf=statistics_file, index=False)
+

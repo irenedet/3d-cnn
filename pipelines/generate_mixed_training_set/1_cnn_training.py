@@ -2,7 +2,8 @@
 
 import sys
 from os.path import join
-from src.python.pytorch_cnn.utils import save_unet_model
+
+from src.python.networks.utils import save_unet_model
 
 # import os
 # import re
@@ -18,14 +19,14 @@ import torch
 import torch.optim as optim
 import torch.utils.data as du
 
-from src.python.pytorch_cnn.utils import \
+from networks.utils import \
     get_testing_and_training_sets_from_partition
-from src.python.pytorch_cnn.classes.unet import UNet
-from src.python.pytorch_cnn.classes.loss import BCELoss, DiceCoefficient, \
+from networks.unet import UNet
+from networks.loss import DiceCoefficient, \
     DiceCoefficientLoss
-from src.python.pytorch_cnn.classes.visualizers import TensorBoard
-from src.python.pytorch_cnn.classes.routines import train_float, validate_float
-from src.python.pytorch_cnn.io import get_device
+from networks.visualizers import TensorBoard
+from networks.routines import train_float, validate_float
+from networks.io import get_device
 
 print("*************************************")
 print("The cnn_training.py script is running")

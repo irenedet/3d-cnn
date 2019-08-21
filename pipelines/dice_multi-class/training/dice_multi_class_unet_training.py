@@ -1,29 +1,27 @@
 #! /home/trueba/.conda/envs/mlcourse/bin/python3
 
-from os.path import join
+import argparse
+from distutils.util import strtobool
 from os import makedirs
+from os.path import join
 
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as du
-from distutils.util import strtobool
+from src.python.networks.routines import train, validate
+from src.python.networks.unet import UNet
+from src.python.networks.visualizers import TensorBoard_multiclass
+
+from src.python.filewriters.csv import write_on_models_notebook
+from src.python.networks.io import get_device
+from src.python.networks.loss import DiceCoefficientLoss
 from src.python.datasets.actions import split_dataset
 from src.python.filereaders import h5
-from src.python.image.filters import preprocess_data
-from src.python.pytorch_cnn.classes.unet import UNet
-from src.python.pytorch_cnn.utils import save_unet_model, load_unet_model
-# from src.python.pytorch_cnn.utils import \
-#     get_testing_and_training_sets_from_partition
-
-from src.python.pytorch_cnn.classes.visualizers import TensorBoard_multiclass
-from src.python.pytorch_cnn.classes.routines import train, validate
-from src.python.pytorch_cnn.classes.loss import DiceCoefficientLoss_multilabel
-from src.python.pytorch_cnn.io import get_device
 from src.python.filewriters.txt import write_model_description
-
-import argparse
+from src.python.image.filters import preprocess_data
+from src.python.networks.utils import save_unet_model, load_unet_model
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-label", "--label_name",
@@ -65,6 +63,9 @@ parser.add_argument("-initial_features", "--initial_features",
                     type=int)
 parser.add_argument("-training_paths_list", "--training_paths_list",
                     type=str)
+parser.add_argument("-models_notebook", "--models_notebook",
+                    default="None",
+                    type=str)
 parser.add_argument("-skip", "--skip",
                     type=int)
 
@@ -79,6 +80,7 @@ model_initial_name = args.model_initial_name
 model_path = args.model_path
 output_classes = args.output_classes
 n_epochs = args.number_of_epochs
+models_notebook_path = args.models_notebook
 retrain = strtobool(args.retrain)
 path_to_old_model = args.path_to_old_model
 depth = args.depth
@@ -182,13 +184,11 @@ for conf in net_confs:
     else:
         net = UNet(**conf)
         net = net.to(device)
-        weight_tensor = torch.tensor(weight).to(device)
-        loss = DiceCoefficientLoss_multilabel(weights=weight_tensor)
+        loss = DiceCoefficientLoss()
         loss = loss.to(device)
         optimizer = optim.Adam(net.parameters())
         old_epoch = 0
 
-    weight_tensor = torch.tensor(weight).to(device)
     metric = loss
     model_name = model_initial_name + label_name + "_D_" + \
                  str(conf['depth']) + "_IF_" + \
@@ -205,6 +205,12 @@ for conf in net_confs:
     log_model = join(log_dir, model_name)
     logger = TensorBoard_multiclass(log_dir=log_model, log_image_interval=1)
     print("The neural network training is now starting")
+
+    write_on_models_notebook(model_name, model_path_pkl, log_model, depth,
+                             initial_features, n_epochs, training_paths_list,
+                             split, output_classes, segmentation_names, retrain,
+                             path_to_old_model, models_notebook_path)
+
     for epoch in range(n_epochs):
         # apply training for one epoch
         new_epoch = epoch + old_epoch
@@ -230,4 +236,3 @@ for conf in net_confs:
 
 print("We have finished the training!")
 print("The best validation loss was", validation_loss)
-print("The best epoch was ", best_epoch)

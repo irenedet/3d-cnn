@@ -11,6 +11,8 @@ from src.python.filewriters.h5 import \
 
 import argparse
 
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-segmentation_names", "--segmentation_names",
                     help="segmentation_names",
@@ -38,16 +40,32 @@ args = parser.parse_args()
 tomo_name = args.tomo_name
 dataset_table = args.dataset_table
 output_dir = args.output_dir
-print("output_dir", output_dir)
+
 box_side = args.box_side
 number_iter = args.number_iter
 split = args.split
 segmentation_names = args.segmentation_names
-segmentation_names = list(map(str, segmentation_names.split(',')))
-overlap = 12
 write_on_table = strtobool(args.write_on_table)
 
+# dataset_table = "/struct/mahamid/Irene/liang_data/liang_data.csv"
+# global_output_dir = "/scratch/trueba/liang_data"
+# write_on_table = 'True'
+# segmentation_names = 'ribo'  # ,fas,memb'
+# split = 0.7
+# box_side = 128
+# number_iter = 1
+# tomo_name = "172"
+# output_dir = global_output_dir + "/" + tomo_name
+# segmentation_names = "ribo"
+
+segmentation_names = list(map(str, segmentation_names.split(',')))
+print(segmentation_names)
+overlap = 12
+print("output_dir", output_dir)
+
+
 df = pd.read_csv(dataset_table)
+df['tomo_name'] = df['tomo_name'].astype(str)
 tomo_df = df[df['tomo_name'] == tomo_name]
 x_dim = int(tomo_df.iloc[0]['x_dim'])
 y_dim = int(tomo_df.iloc[0]['y_dim'])
@@ -58,7 +76,7 @@ labels_dataset_list = list()
 for semantic_class in segmentation_names:
     mask_name = semantic_class + '_mask'
     path_to_mask = tomo_df.iloc[0][mask_name]
-    labels_dataset_list += [path_to_mask]
+    labels_dataset_list.append(path_to_mask)
 
 print("labels_dataset_list = ")
 print(labels_dataset_list)
@@ -87,28 +105,28 @@ partition_raw_and_labels_tomograms_dice_multiclass(
     subtomo_shape=subtomogram_shape,
     overlap=overlap)
 
-# print("The training data path is ", output_h5_file_path)
+print("The training data path is ", output_h5_file_path)
 #
-# # print("Splitting training and testing data into two different files...")
-# # split_and_write_h5_partition_dice_multi_class(
-# #     h5_partition_data_path=output_h5_file_path,
-# #     h5_train_patition_path=h5_train_partition_path,
-# #     h5_test_patition_path=h5_test_partition_path,
-# #     segmentation_names=segmentation_names,
-# #     split=split,
-# #     shuffle=True)
-# # print("The training set has been written in ", h5_train_partition_path)
-# # print("The testing set has been written in ", h5_test_partition_path)
-# #
-# # print("The data augmentation is starting...")
-# # transform_data_from_h5_dice_multi_class(
-# #     training_data_path=h5_train_partition_path,
-# #     segmentation_names=segmentation_names,
-# #     number_iter=number_iter,
-# #     output_data_path=output_data_path)
-# # print("The training data with data augmentation has been writen in ",
-# #       output_data_path)
-#
+# print("Splitting training and testing data into two different files...")
+# split_and_write_h5_partition_dice_multi_class(
+#     h5_partition_data_path=output_h5_file_path,
+#     h5_train_patition_path=h5_train_partition_path,
+#     h5_test_patition_path=h5_test_partition_path,
+#     segmentation_names=segmentation_names,
+#     split=split,
+#     shuffle=True)
+# print("The training set has been written in ", h5_train_partition_path)
+# print("The testing set has been written in ", h5_test_partition_path)
+
+# print("The data augmentation is starting...")
+# transform_data_from_h5_dice_multi_class(
+#     training_data_path=h5_train_partition_path,
+#     segmentation_names=segmentation_names,
+#     number_iter=number_iter,
+#     output_data_path=output_data_path)
+# print("The training data with data augmentation has been writen in ",
+#       output_data_path)
+
 # print("The script has finished!")
 
 if write_on_table:

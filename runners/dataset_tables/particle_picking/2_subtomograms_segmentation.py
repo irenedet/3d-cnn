@@ -1,11 +1,12 @@
-import torch
-import torch.nn as nn
 import argparse
-import pandas as pd
 from distutils.util import strtobool
 
-from src.python.pytorch_cnn.classes.unet import UNet
-from src.python.pytorch_cnn.io import get_device
+import pandas as pd
+import torch
+import torch.nn as nn
+
+from src.python.networks.io import get_device
+from src.python.networks.unet import UNet
 from src.python.filewriters.h5 import segment_and_write
 
 parser = argparse.ArgumentParser()
@@ -48,6 +49,7 @@ new_loader = strtobool(args.new_loader)
 
 
 df = pd.read_csv(dataset_table)
+df['tomo_name'] = df['tomo_name'].astype(str)
 tomo_df = df[df['tomo_name'] == tomo_name]
 data_path = tomo_df.iloc[0]['test_partition']
 

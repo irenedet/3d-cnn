@@ -1,7 +1,8 @@
 import numpy as np
 import random
 
-from src.python.filereaders.hdf import _load_hdf_dataset
+# from src.python.filereaders.hdf import _load_hdf_dataset
+from src.python.filereaders.datasets import load_dataset
 from src.python.filewriters.h5 import write_raw_subtomograms_intersecting_mask
 from src.python.coordinates_toolbox.subtomos import \
     get_particle_coordinates_grid_with_overlap
@@ -142,7 +143,7 @@ def partition_raw_and_labels_tomograms_dice_multiclass(
         subtomo_shape: tuple,
         overlap: int
 ):
-    raw_dataset = _load_hdf_dataset(hdf_file_path=path_to_raw)
+    raw_dataset = load_dataset(path_to_raw)
     padded_raw_dataset = pad_dataset(raw_dataset, subtomo_shape, overlap)
     padded_particles_coordinates = get_particle_coordinates_grid_with_overlap(
         padded_raw_dataset.shape,
@@ -150,7 +151,7 @@ def partition_raw_and_labels_tomograms_dice_multiclass(
         overlap)
     padded_labels_dataset_list = []
     for path_to_labeled in labels_dataset_list:
-        labels_dataset = _load_hdf_dataset(hdf_file_path=path_to_labeled)
+        labels_dataset = load_dataset(path_to_labeled)
         labels_dataset = np.array(labels_dataset)
         print(path_to_labeled, "shape", labels_dataset.shape)
         padded_labels_dataset = pad_dataset(labels_dataset, subtomo_shape,

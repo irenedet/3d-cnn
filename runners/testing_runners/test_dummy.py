@@ -1,17 +1,35 @@
-from os.path import join
-from src.python.filewriters.h5 import write_hdf_particles_from_motl
+import numpy as np
+# from src.python.filereaders.datasets import load_dataset
+from src.python.filewriters.h5 import write_dataset_hdf
+
+# lamella_file = "/struct/mahamid/Irene/liang_data/lamella.hdf"
+# lamella = np.ones((450, 928, 928))
+# write_dataset_hdf(lamella_file, lamella)
+#
+# TOMOS = ["173", "172", "174", "175", "176", "177", "178", "179", "180", "190",
+#          "191", "192", "193", "194", "195", "196", "198", "199", "200", "201",
+#          ]
 
 
-# ToDo check correctness of the code here!
-data_dir = "/scratch/trueba/3d-cnn/TEST/"
-data_file = "004_from_motl_4444.hdf"
-hdf_output_path = join(data_dir, data_file)
-output_shape = (221, 928, 928)
-path_to_csv_motl = "/scratch/trueba/3d-cnn/TEST/motl_unique/motl_4444.csv"
 
-write_hdf_particles_from_motl(path_to_motl=path_to_csv_motl,
-                              hdf_output_path=hdf_output_path,
-                              output_shape=output_shape,
-                              sphere_radius=8,
-                              values_in_motl=True,
-                              number_of_particles=1000)
+
+
+
+model_name = "fjdgbjsdbame"
+model_path_pkl = "msahfdh"
+log_model = "log_model"
+depth = 33
+initial_features = 2
+n_epochs = 30
+training_paths_list = ["a", "b"]
+split = 0.7
+output_classes = 3
+segmentation_names = ["a1", "2w"]
+retrain = True
+path_to_old_model = "path_to_old_model"
+models_notebook = "/home/papalotl/Downloads/dummy.csv"
+from src.python.filewriters.csv import write_on_models_notebook
+write_on_models_notebook(model_name, model_path_pkl, log_model, depth,
+                         initial_features, n_epochs, training_paths_list,
+                         split, output_classes, segmentation_names, retrain,
+                         path_to_old_model, models_notebook)

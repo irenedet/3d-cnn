@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 200G
-#SBATCH --time 0-7:00
+#SBATCH --mem 260G
+#SBATCH --time 0-5:00
 #SBATCH -o slurm.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -36,7 +36,7 @@ export split=0.7
 
 # Data for the new model
 export log_dir="/g/scb2/zaugg/trueba/3d-cnn/log_dice_multi_label"
-export model_initial_name="R_ED_191119_002_030_191126_002_012_025__R_all_but_003_"
+export model_initial_name="2_corrected_memb"
 export model_path="/g/scb2/zaugg/trueba/3d-cnn/models/dice_multi_label/retrained/ED"
 export n_epochs=40
 export depth=2
@@ -44,7 +44,7 @@ export initial_features=8
 export output_classes=3
 
 # Data for old models for resuming training:
-export retrain="True"
+export retrain="False"
 export path_to_old_model="/g/scb2/zaugg/trueba/3d-cnn/models/dice_multi_label/retrained/Retrain_D2_IF8_NA_except_180711_003ribo_fas_memb_D_2_IF_8.pkl"
 
 

@@ -115,40 +115,56 @@ class DiceCoefficient(nn.Module):
         return 2 * intersection / denominator.clamp(min=self.eps)
 
 
+# class DiceCoefficientLoss(nn.Module):
+#     def __init__(self, eps=1e-6):
+#         super().__init__()
+#         self.eps = eps
+#
+#     # the dice coefficient of two sets represented as vectors a, b ca be
+#     # computed as (2 *|a b| / (a^2 + b^2))
+#     def forward(self, prediction, target):
+#         prediction.float()
+#         target.float()
+#         intersection = (prediction * target).sum()
+#         denominator = (prediction * prediction).sum() + (target * target).sum()
+#         return 1 - (2 * intersection / denominator.clamp(min=self.eps))
+
+
 class DiceCoefficientLoss(nn.Module):
     def __init__(self, eps=1e-6):
         super().__init__()
         self.eps = eps
-
-    # the dice coefficient of two sets represented as vectors a, b ca be
-    # computed as (2 *|a b| / (a^2 + b^2))
-    def forward(self, prediction, target):
-        prediction.float()
-        target.float()
-        intersection = (prediction * target).sum()
-        denominator = (prediction * prediction).sum() + (target * target).sum()
-        return 1 - (2 * intersection / denominator.clamp(min=self.eps))
-
-
-class DiceCoefficientLoss_multilabel(nn.Module):
-    def __init__(self, weights, eps=1e-6):
-        super().__init__()
-        self.eps = eps
-        self.weights = weights
-
         # the dice coefficient of two sets represented as vectors a, b can be
         # computed as (2 *|a b| / (a^2 + b^2))
 
-    def forward(self, prediction, target):
-        prediction.float()
+    def forward(self, input, target):
+        input.float()
         target.float()
         dice_loss = 0
-        for channel, weight in enumerate(self.weights):
-            channel_prediction = prediction[:, channel, :, :, :].float()
-            channel_target = target[:, channel, :, :, :].float()
+        channels = input.shape[1]
+        print(input.shape)
+        for channel in range(channels):
+            channel_prediction = input[:, channel, ...].float()
+            channel_target = target[:, channel, ...].float()
             intersection = (channel_prediction * channel_target).sum()
-            denominator = (channel_prediction * channel_prediction).sum() \
-                          + (channel_target * channel_target).sum()
-            dice_loss += weight * (1 - 2 * intersection / denominator.clamp(
+            denominator = (channel_prediction * channel_prediction).sum() + (
+                channel_target * channel_target).sum()
+            dice_loss += (1 - 2 * intersection / denominator.clamp(
                 min=self.eps))
         return dice_loss
+
+
+class MSELoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, input, target):
+        return torch.mean((input.float() - target.float()) ** 2)
+
+
+class L2Loss(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, input, target):
+        return torch.sum((input - target) ** 2) / torch.sum(target ** 2)

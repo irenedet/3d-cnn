@@ -12,7 +12,7 @@ class UNet(nn.Module):
       final_activation: activation applied to the network output
     """
 
-    # _conv_block and _upsampler are just helper functions to
+    # conv_block and _upsampler are just helper functions to
     # construct the model.
     # encapsulating them like so also makes it easy to re-use
     # the model implementation with different architecture elements
@@ -129,7 +129,7 @@ class UNet_deep(UNet):
       final_activation: activation applied to the network output
     """
 
-    # _conv_block and _upsampler are just helper functions to
+    # conv_block and _upsampler are just helper functions to
     # construct the model.
     # encapsulating them like so also makes it easy to re-use
     # the model implementation with different architecture elements
@@ -340,7 +340,7 @@ class UNet_6(UNet):
                                       self._conv_block(32, 64),
                                       self._conv_block(64, 128)])
 
-        # self.base = self._conv_block(512, 512)
+        # self.base = self.conv_block(512, 512)
         self.base = self._conv_block(128, 128)
         # modules of the decoder path
         self.decoder = nn.ModuleList([self._conv_block(128, 64),

@@ -1,3 +1,9 @@
+*.pdf
+new_DA_logs
+data_aug_slurm.*
+encoder_decoder3D_logs
+runners/ynet_logs
+ynet3D_logs/
 slurm_outputs/*
 src/python/template_matching/__pycache__/
 slurm-*

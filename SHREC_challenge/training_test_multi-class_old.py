@@ -36,11 +36,11 @@ from datasets.actions import split_dataset
 from filereaders import h5
 from image.filters import preprocess_data
 from image.viewers import view_images_h5
-from pytorch_cnn.classes.unet import UNet
+from networks.unet import UNet
 
-from pytorch_cnn.classes.visualizers import TensorBoard, TensorBoard_multiclass
-from pytorch_cnn.classes.routines import train, validate
-from pytorch_cnn.io import get_device
+from networks.visualizers import TensorBoard_multiclass
+from networks.routines import train, validate
+from networks.io import get_device
 
 print("*************************************")
 print("The cnn_training.py script is running")

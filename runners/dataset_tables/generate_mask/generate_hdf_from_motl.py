@@ -44,6 +44,7 @@ values_in_motl = strtobool(args.values_in_motl)
 write_on_dataset_table = strtobool(args.write_on_dataset_table)
 
 df = pd.read_csv(dataset_table)
+df['tomo_name'] = df['tomo_name'].astype(str)
 tomo_df = df[df['tomo_name'] == tomo_name]
 z_shift = int(tomo_df.iloc[0]['z_shift'])
 x_dim = int(tomo_df.iloc[0]['x_dim'])

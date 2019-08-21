@@ -37,6 +37,7 @@ lamella_extension = args.lamella_extension
 output_dir = args.output_dir
 
 df = pd.read_csv(dataset_table)
+df['tomo_name'] = df['tomo_name'].astype(str)
 tomo_df = df[df['tomo_name'] == tomo_name]
 z_shift = int(tomo_df.iloc[0]['z_shift'])
 x_dim = int(tomo_df.iloc[0]['x_dim'])

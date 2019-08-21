@@ -37,12 +37,12 @@ from filereaders import h5
 from image.filters import preprocess_data
 from image.viewers import view_images_h5
 # from pytorch_cnn.classes.cnnets import UNet_4, UNet_6, UNet_7, UNet, UNet_deep
-from pytorch_cnn.classes.unet import UNet
-from pytorch_cnn.classes.loss import BCELoss, DiceCoefficient, \
+from networks.unet import UNet
+from networks.loss import DiceCoefficient, \
     DiceCoefficientLoss
-from pytorch_cnn.classes.visualizers import TensorBoard
-from pytorch_cnn.classes.routines import train_float, validate_float
-from pytorch_cnn.io import get_device
+from networks.visualizers import TensorBoard
+from networks.routines import train_float, validate_float
+from networks.io import get_device
 
 print("*************************************")
 print("The cnn_training.py script is running")
@@ -52,8 +52,8 @@ print("*************************************")
 device = get_device()
 
 training_data_path = \
-"/scratch/trueba/3d-cnn/training_data/TEST/data_aug.h5"
-    # '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
+    "/scratch/trueba/3d-cnn/training_data/TEST/data_aug.h5"
+# '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
 # '/scratch/trueba/3d-cnn/training_data/training_data_side128_49examples.h5'
 # '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
 # '/scratch/trueba/3d-cnn/training_data/ribosomes/ribo_training_grid.h5'
@@ -110,8 +110,9 @@ for test_index in range(1):
     #              final_activation=nn.LogSoftmax(dim=1))
 
 
-    net_confs = [{'depth': 5, 'initial_features': 4, 'final_activation': nn.Sigmoid()},
-                 ]
+    net_confs = [
+        {'depth': 2, 'initial_features': 8, 'final_activation': nn.Sigmoid()},
+        ]
     is_best = True
     validation_loss = 10
     for conf in net_confs:
@@ -142,13 +143,16 @@ for test_index in range(1):
         n_epochs = 30
         for epoch in range(n_epochs):
             # apply training for one epoch
-            train_float(net, train_loader, optimizer=optimizer, loss_function=loss,
-                  epoch=epoch, device=device, log_interval=1, tb_logger=logger)
+            train_float(net, train_loader, optimizer=optimizer,
+                        loss_function=loss,
+                        epoch=epoch, device=device, log_interval=1,
+                        tb_logger=logger)
             step = epoch * len(train_loader.dataset)
             # run validation after training epoch
-            current_validation_loss = validate_float(net, val_loader, loss, metric,
-                                               device=device, step=step,
-                                               tb_logger=logger)
+            current_validation_loss = validate_float(net, val_loader, loss,
+                                                     metric,
+                                                     device=device, step=step,
+                                                     tb_logger=logger)
 
             if current_validation_loss < validation_loss:
                 torch.save(net.state_dict(), model_path)

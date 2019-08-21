@@ -28,7 +28,6 @@ sys.path.append(runners_path)
 
 import numpy as np
 import torch
-import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as du
 
@@ -37,12 +36,12 @@ from filereaders import h5
 from image.filters import preprocess_data
 from image.viewers import view_images_h5
 # from pytorch_cnn.classes.cnnets import UNet_4, UNet_6, UNet_7, UNet, UNet_deep
-from pytorch_cnn.classes.unet import UNet
-from pytorch_cnn.classes.loss import BCELoss, DiceCoefficient, \
+from networks.unet import UNet
+from networks.loss import DiceCoefficient, \
     DiceCoefficientLoss
-from pytorch_cnn.classes.visualizers import TensorBoard
-from pytorch_cnn.classes.routines import train_float, validate_float
-from pytorch_cnn.io import get_device
+from networks.visualizers import TensorBoard
+from networks.routines import train_float, validate_float
+from networks.io import get_device
 
 print("*************************************")
 print("The cnn_training.py script is running")
