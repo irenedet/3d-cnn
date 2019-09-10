@@ -35,16 +35,17 @@
 #243
 #244
 #245
-TOMOS="246
-247
-248
-249
-250
-251"
+TOMOS="246"
+#247
+#248
+#249
+#250
+#251"
 
 # Tomograms data
 export path_to_dataset_table="/struct/mahamid/Irene/liang_data/liang_data.csv"
 export class_number=0 # 0=ribo, 1=fas, 2=memb
+export semantic_classes="ribo"
 
 if [ $class_number == 0 ]; then
     echo "class_number is 0"
@@ -58,6 +59,7 @@ fi
 path_to_model="/g/scb2/zaugg/trueba/3d-cnn/models/lang_unets/NO_DA_ribo_D_2_IF_8.pkl"
 label_name="NO_DA_ribo_D_2_IF_8"
 
+BN=True
 depth=2
 init_feat=8
 output_classes=1
@@ -68,16 +70,16 @@ new_loader='True'
 particle_picking_radius=30 #for particle picking
 border_xy=10
 lamella_extension=0
-same_peak_radius_pr_analysis=60
+same_peak_radius_pr_analysis=20
 score_threshold=-1
-global_output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/liang_dataset/"$label_name
+global_output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/liang_dataset/"$label_name"_pr_radius_"$same_peak_radius_pr_analysis
 
 mkdir -p $global_output_dir
 
 for tomo_name in $TOMOS
 do
 	echo "Submitting job for tomo $tomo_name"
-	sbatch  ./submission_scripts/dataset_tables/evaluations_from_dataset_table/parameters_file_read.sh -statistics_file $statistics_file -output_dir $global_output_dir -dataset_table $path_to_dataset_table -tomo_name $tomo_name -path_to_model $path_to_model -label_name $label_name -depth $depth -init_feat $init_feat -output_classes $output_classes -class_number $class_number -box_side $box_side -new_loader $new_loader -minimum_peak_distance $particle_picking_radius -border_xy $border_xy -lamella_extension $lamella_extension -same_peak_distance $same_peak_radius_pr_analysis -threshold $score_threshold
+	sbatch  ./submission_scripts/dataset_tables/evaluations_from_dataset_table/parameters_file_read.sh -statistics_file $statistics_file -output_dir $global_output_dir -dataset_table $path_to_dataset_table -tomo_name $tomo_name -path_to_model $path_to_model -label_name $label_name -depth $depth -init_feat $init_feat -output_classes $output_classes -class_number $class_number -box_side $box_side -new_loader $new_loader -minimum_peak_distance $particle_picking_radius -border_xy $border_xy -lamella_extension $lamella_extension -same_peak_distance $same_peak_radius_pr_analysis -threshold $score_threshold -BN $BN -semantic_classes $semantic_classes
 done
 
 # ... Finally:

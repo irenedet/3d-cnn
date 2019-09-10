@@ -52,10 +52,7 @@ TOMOS="180426/004"
 # Tomograms data
 export corrected=True # True or False
 export class_number=0 # 0=ribo, 1=fas, 2=memb
-
-
-
-
+export semantic_classes="ribo,fas,memb"
 
 
 # CNN parameters:
@@ -104,7 +101,7 @@ mkdir $global_output_dir
 for tomo_name in $TOMOS
 do
 	echo "Submitting job for tomo $tomo_name"
-	bash  ./submission_scripts/dataset_tables/evaluations_from_dataset_table/parameters_file_read_compare_motls.sh -statistics_file $statistics_file -output_dir $global_output_dir -dataset_table $path_to_dataset_table -tomo_name $tomo_name -label_name $label_name -depth $depth -init_feat $init_feat -output_classes $output_classes -class_number $class_number -box_side $box_side -new_loader $new_loader -minimum_peak_distance $particle_picking_radius -border_xy $border_xy -lamella_extension $lamella_extension -same_peak_distance $same_peak_radius_pr_analysis -threshold $score_threshold
+	bash  ./submission_scripts/dataset_tables/evaluations_from_dataset_table/parameters_file_read_compare_motls.sh -statistics_file $statistics_file -output_dir $global_output_dir -dataset_table $path_to_dataset_table -tomo_name $tomo_name -label_name $label_name -depth $depth -init_feat $init_feat -output_classes $output_classes -class_number $class_number -box_side $box_side -new_loader $new_loader -minimum_peak_distance $particle_picking_radius -border_xy $border_xy -lamella_extension $lamella_extension -same_peak_distance $same_peak_radius_pr_analysis -threshold $score_threshold -semantic_classes $semantic_classes
 done
 
 # ... Finally:

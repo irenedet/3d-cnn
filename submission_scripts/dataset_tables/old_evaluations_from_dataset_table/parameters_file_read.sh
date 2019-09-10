@@ -3,12 +3,16 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 16G
-#SBATCH --time 0-00:10
+#SBATCH --mem 128G
+#SBATCH --time 0-2:50
 #SBATCH -o slurm_outputs/cnn_evaluation.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/cnn_evaluation.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=irene.de.teresa@embl.de
+
+#SBAtCH -p gpu
+#SBAtCH -C gpu=1080Ti
+#SBAtCH --gres=gpu:1
 
 module load Anaconda3
 echo "activating virtual environment"
@@ -20,7 +24,7 @@ usage()
 
 {
     echo "usage: [[ [-output output_dir][-test_partition test_partition ]
-                   [-label label_name]
+                  [-model path_to_model] [-label label_name]
                   [-out_h5 output_h5_file_path] [-conf conf]] | [-h]]"
 }
 
@@ -29,6 +33,9 @@ while [ "$1" != "" ]; do
     case $1 in
         -statistics_file | --statistics_file )   shift
                                 statistics_file=$1
+                                ;;
+        -semantic_classes | --semantic_classes )   shift
+                                semantic_classes=$1
                                 ;;
         -dataset_table | --dataset_table )   shift
                                 dataset_table=$1
@@ -44,6 +51,9 @@ while [ "$1" != "" ]; do
                                 ;;
         -output_classes | --output_classes )   shift
                                 output_classes=$1
+                                ;;
+        -path_to_model | --path_to_model )   shift
+                                path_to_model=$1
                                 ;;
         -label_name | --label_name )   shift
                                 label_name=$1
@@ -78,6 +88,9 @@ while [ "$1" != "" ]; do
         -threshold | --threshold )   shift
                                 threshold=$1
                                 ;;
+        -BN | --Batch_Normalization )   shift
+                                Batch_Normalization=$1
+                                ;;
         -h | --help )           usage
                                 exit
                                 ;;
@@ -93,9 +106,12 @@ echo lamella_extension = $lamella_extension
 echo same_peak_distance = $same_peak_distance
 echo class_number = $class_number
 echo output_classes = $output_classes
+echo BN = $Batch_Normalization
+echo semantic_classes = $semantic_classes
 
 export dataset_table=$dataset_table
 export threshold=$threshold
+export path_to_model=$path_to_model
 export label_name=$label_name
 export depth=$depth
 export init_feat=$init_feat
@@ -109,8 +125,11 @@ export class_number=$class_number
 export output_classes=$output_classes
 export tomo_name=$tomo_name
 export output_dir=$output_dir
+export BN=$Batch_Normalization
+export semantic_classes=$semantic_classes
 
-export summary_file=$output_dir"/summary_analysis_class"$class_number".txt"
+
+export summary_file=$output_dir"/summary_statistics_class"$class_number".csv"
 touch $summary_file
 export output_dir=$output_dir"/"$tomo_name"/class_"$class_number
 
@@ -118,27 +137,33 @@ echo tomo_name = $tomo_name
 echo output_dir = $output_dir
 
 
-if [ $class_number == 0 ]; then
-    echo "class_number is 0"
-    export class_name="ribo"
-elif [ $class_number == 1 ]; then
-    echo "class_number is 1"
-    export class_name="fas"
-else
-    echo "class_number non-supported for now"
-fi
-
-
-
+echo "class_number is " $class_number
 export box_overlap=12
 
+
+# 1. Segmenting test_partition:
+echo 'running python3 scripts: Segmenting raw subtomograms'
+python3 ./runners/dataset_tables/particle_picking/2_subtomograms_segmentation.py -model $path_to_model -label $label_name -dataset_table $dataset_table -tomo_name $tomo_name -init_feat $init_feat -depth $depth -out_classes $output_classes -new_loader $new_loader -BN $BN
+echo '... done.'
+
+# 2. Peak calling and motl writing
+echo 'running python3 scripts: getting particles motive list'
+python3 ./runners/dataset_tables/particle_picking/3_get_peaks_motive_list.py -dataset_table $dataset_table -tomo_name $tomo_name -output $output_dir -label $label_name -box $box_side -class_number $class_number -min_peak_distance $minimum_peak_distance -overlap $box_overlap
+echo 'finished peak calling script'
+
+
 # 3. Filter coordinate points with lamella mask
+export path_to_csv_motl=$(ls $output_dir/motl*)
 export lamella_output_dir=$output_dir"/in_lamella"
+
+echo "Now filtering points in lamella mask"
+python3 ./runners/dataset_tables/pr_analysis/filter_with_lamella_mask.py -dataset_table $dataset_table -tomo_name $tomo_name -csv_motl $path_to_csv_motl -output_dir $output_dir -border_xy $border_xy -lamella_extension $lamella_extension
+echo "...done filtering points in lamella mask."
+
 
 # 3. Precision-Recall analysis
 export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir/motl*)
 echo "Starting to generate precision recall plots"
-python3 ./runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_name $class_name >> $summary_file
+python3 ./runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_number $class_number -summary_file $summary_file -semantic_classes $semantic_classes
 echo "...done with precision recall plots."
 
-#!/usr/bin/env bash

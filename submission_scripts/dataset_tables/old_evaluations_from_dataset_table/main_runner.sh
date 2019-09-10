@@ -52,6 +52,7 @@ TOMOS="180426/004
 # Tomograms data
 export path_to_dataset_table="/struct/mahamid/Irene/yeast/yeast_table.csv"
 export class_number=0 # 0=ribo, 1=fas, 2=memb
+export semantic_classes="ribo,fas,memb"
 
 if [ $class_number == 0 ]; then
     echo "class_number is 0"
@@ -103,7 +104,7 @@ mkdir -p $global_output_dir
 for tomo_name in $TOMOS
 do
 	echo "Submitting job for tomo $tomo_name"
-	sbatch  ./submission_scripts/dataset_tables/evaluations_from_dataset_table/parameters_file_read.sh -statistics_file $statistics_file -output_dir $global_output_dir -dataset_table $path_to_dataset_table -tomo_name $tomo_name -path_to_model $path_to_model -label_name $label_name -depth $depth -init_feat $init_feat -output_classes $output_classes -class_number $class_number -box_side $box_side -new_loader $new_loader -minimum_peak_distance $particle_picking_radius -border_xy $border_xy -lamella_extension $lamella_extension -same_peak_distance $same_peak_radius_pr_analysis -threshold $score_threshold
+	sbatch  ./submission_scripts/dataset_tables/evaluations_from_dataset_table/parameters_file_read.sh -statistics_file $statistics_file -output_dir $global_output_dir -dataset_table $path_to_dataset_table -tomo_name $tomo_name -path_to_model $path_to_model -label_name $label_name -depth $depth -init_feat $init_feat -output_classes $output_classes -class_number $class_number -box_side $box_side -new_loader $new_loader -minimum_peak_distance $particle_picking_radius -border_xy $border_xy -lamella_extension $lamella_extension -same_peak_distance $same_peak_radius_pr_analysis -threshold $score_threshold -semantic_classes $semantic_classes
 done
 
 # ... Finally:
