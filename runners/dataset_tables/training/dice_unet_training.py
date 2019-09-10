@@ -67,7 +67,7 @@ parser.add_argument("-tomo_training_list", "--tomo_training_list",
 args = parser.parse_args()
 dataset_table = args.dataset_table
 tomo_training_list = args.tomo_training_list
-tomo_training_list = tomo_training_list.split('\n')
+tomo_training_list = tomo_training_list.split(',')
 
 split = args.split
 log_dir = args.log_dir

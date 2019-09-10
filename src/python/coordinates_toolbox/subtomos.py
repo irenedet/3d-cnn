@@ -82,3 +82,32 @@ def get_subtomo_corners_within_dataset(dataset_shape: tuple or List[int],
     side_lengths = [end - start for start, end in
                     zip(start_corners, end_corners)]
     return start_corners, end_corners, side_lengths
+
+
+def get_subtomo_corner_and_side_lengths(subtomo_name: str,
+                                        subtomo_shape: tuple,
+                                        output_shape: tuple) -> tuple:
+    subtomo_center = get_coord_from_name(subtomo_name)
+    init_points, _, subtomo_side_lengths = \
+        get_subtomo_corners(output_shape, subtomo_shape, subtomo_center)
+    return init_points, subtomo_side_lengths
+
+
+def get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name: str,
+                                                     subtomo_shape: tuple,
+                                                     output_shape: tuple,
+                                                     overlap: int) -> tuple:
+    subtomo_center = get_coord_from_name(subtomo_name)
+    init_points, end_points, subtomo_side_lengths = \
+        get_subtomo_corners(output_shape, subtomo_shape, subtomo_center)
+    zero_padding = 3 * [[overlap, overlap]]
+    for i_point, e_point, c_point, dim, pad in zip(init_points, end_points,
+                                                   subtomo_center,
+                                                   subtomo_shape, zero_padding):
+        if np.abs(i_point - c_point) < dim // 2:
+            subtomo_cut = dim // 2 - np.abs(i_point - c_point)
+            pad[0] = np.max((0, overlap - subtomo_cut))
+        if np.abs(e_point - c_point) < dim // 2:
+            subtomo_cut = dim // 2 - np.abs(e_point - c_point)
+            pad[1] = np.max((0, overlap - subtomo_cut))
+    return init_points, subtomo_side_lengths, zero_padding

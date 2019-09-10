@@ -79,7 +79,7 @@ def precision_recall_calculator_and_detected_old(predicted_coordinates: np.array
     value_undetected_predicted = []
     redundantly_detected_true = set()
     redundantly_detected_predicted = set()
-    value_redudndantly_detected_predicted = []
+    value_redundantly_detected_predicted = []
     precision = []
     recall = []
     total_current_predicted_points = 0
@@ -100,7 +100,7 @@ def precision_recall_calculator_and_detected_old(predicted_coordinates: np.array
                             tuple(true_point) in detected_true)):
                     redundantly_detected_true |= {tuple(true_point)}
                     redundantly_detected_predicted |= {tuple(predicted_point)}
-                    value_redudndantly_detected_predicted += [score_value]
+                    value_redundantly_detected_predicted += [score_value]
                     flag = 'redundantly_detected'
         if flag == "undetected":
             undetected_predicted |= {tuple(predicted_point)}
@@ -113,7 +113,7 @@ def precision_recall_calculator_and_detected_old(predicted_coordinates: np.array
     return precision, recall, detected_true, detected_predicted, \
            undetected_predicted, value_detected_predicted, \
            value_undetected_predicted, redundantly_detected_predicted, \
-           value_redudndantly_detected_predicted
+           value_redundantly_detected_predicted
 
 
 def precision_recall_calculator_and_detected_new_old(

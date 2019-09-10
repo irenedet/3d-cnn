@@ -1,26 +1,26 @@
-import numpy as np
-import h5py
+import functools
 from os.path import join
-from functools import reduce
-from src.python.coordinates_toolbox import subtomos
+
+import h5py
+import numpy as np
+
+import torch
+import torch.nn as nn
+
+from src.python.coordinates_toolbox.subtomos import \
+    get_subtomo_corner_side_lengths_and_zero_padding
+from src.python.coordinates_toolbox.subtomos import get_coord_from_name, \
+    get_subtomo_corners, read_subtomo_names, get_subtomo_corner_and_side_lengths
+from src.python.coordinates_toolbox.utils import shift_coordinates_by_vector
 from src.python.naming import h5_internal_paths
 from src.python.peak_toolbox.utils import extract_peaks
-from src.python.coordinates_toolbox.subtomos import read_subtomo_names
-from src.python.coordinates_toolbox.subtomos import get_coord_from_name, \
-    get_subtomo_corners
 
 
 def _get_numb_peaks(subtomo_shape: tuple, min_peak_distance: int) -> int:
     numb_peaks = [shape / 2 / min_peak_distance for shape in
                   subtomo_shape]
-    numb_peaks = reduce(lambda x, y: x * y, numb_peaks)
+    numb_peaks = functools.reduce(lambda x, y: x * y, numb_peaks)
     return int(numb_peaks)
-
-
-def shift_coordinates_by_vector(coordinates: list,
-                                shift_vector: np.array) -> list:
-    return [np.array(coord) + np.array(shift_vector) for coord in
-            np.array(coordinates)]
 
 
 def _extract_data_subtomo(h5file: h5py.File,  # before h5py._hl.files.File
@@ -32,37 +32,6 @@ def _extract_data_subtomo(h5file: h5py.File,  # before h5py._hl.files.File
            overlap:subtomo_side_lengths[0] + overlap,
            overlap:subtomo_side_lengths[1] + overlap,
            overlap:subtomo_side_lengths[2] + overlap]
-
-
-def get_subtomo_corner_and_side_lengths(subtomo_name: str,
-                                        subtomo_shape: tuple,
-                                        output_shape: tuple) -> tuple:
-    subtomo_center = subtomos.get_coord_from_name(subtomo_name)
-    init_points, _, subtomo_side_lengths = \
-        subtomos.get_subtomo_corners(output_shape, subtomo_shape,
-                                     subtomo_center)
-    return init_points, subtomo_side_lengths
-
-
-def _get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name: str,
-                                                      subtomo_shape: tuple,
-                                                      output_shape: tuple,
-                                                      overlap: int) -> tuple:
-    subtomo_center = subtomos.get_coord_from_name(subtomo_name)
-    init_points, end_points, subtomo_side_lengths = \
-        subtomos.get_subtomo_corners(output_shape, subtomo_shape,
-                                     subtomo_center)
-    zero_padding = 3 * [[overlap, overlap]]
-    for i_point, e_point, c_point, dim, pad in zip(init_points, end_points,
-                                                   subtomo_center,
-                                                   subtomo_shape, zero_padding):
-        if np.abs(i_point - c_point) < dim // 2:
-            subtomo_cut = dim // 2 - np.abs(i_point - c_point)
-            pad[0] = np.max((0, overlap - subtomo_cut))
-        if np.abs(e_point - c_point) < dim // 2:
-            subtomo_cut = dim // 2 - np.abs(e_point - c_point)
-            pad[1] = np.max((0, overlap - subtomo_cut))
-    return init_points, subtomo_side_lengths, zero_padding
 
 
 def _get_peaks_per_subtomo(h5file: h5py.File, subtomo_name: str,
@@ -113,10 +82,10 @@ def get_peaks_per_subtomo_with_overlap(h5file: h5py.File, subtomo_name: str,
                                        min_peak_distance: int,
                                        overlap: int) -> tuple:
     subtomo_corner, subtomo_side_lengths, zero_padding = \
-        _get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name,
-                                                          subtomo_shape,
-                                                          output_shape,
-                                                          overlap // 2)
+        get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name,
+                                                         subtomo_shape,
+                                                         output_shape,
+                                                         overlap // 2)
 
     subtomo_h5_internal_path = join(subtomos_internal_path,
                                     subtomo_name)
@@ -125,7 +94,7 @@ def get_peaks_per_subtomo_with_overlap(h5file: h5py.File, subtomo_name: str,
         h5file=h5file,
         subtomo_h5_internal_path=subtomo_h5_internal_path,
         subtomo_side_lengths=subtomo_side_lengths,
-        overlap=0)  # ToDo check!
+        overlap=0)
     shape_minus_overlap = tuple([dim - pad[0] - pad[1] for pad, dim in
                                  zip(zero_padding, data_subtomo.shape)])
     mask_out_overlap = np.ones(shape_minus_overlap)
@@ -149,18 +118,17 @@ def get_peaks_per_subtomo_with_overlap_multiclass(
         numb_peaks: int,
         class_number: int,
         min_peak_distance: int,
-        overlap: int) -> tuple:
+        overlap: int,
+        final_activation: nn.Module = None) -> tuple:
     subtomo_corner, subtomo_side_lengths, zero_padding = \
-        _get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name,
-                                                          subtomo_shape,
-                                                          output_shape,
-                                                          overlap // 2)
+        get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name,
+                                                         subtomo_shape,
+                                                         output_shape,
+                                                         overlap // 2)
 
     subtomo_h5_internal_path = join(subtomos_internal_path,
                                     subtomo_name)
-    print("subtomo_corner, subtomo_side_lengths, zero_padding")
     print(subtomo_corner, subtomo_side_lengths, zero_padding)
-    print("subtomo_side_lengths", subtomo_side_lengths)
     assert np.min(subtomo_side_lengths) > 0
     data_subtomo = _extract_data_subtomo(
         h5file=h5file,
@@ -168,6 +136,12 @@ def get_peaks_per_subtomo_with_overlap_multiclass(
         subtomo_side_lengths=subtomo_side_lengths,
         overlap=0,
         class_number=class_number)
+    if final_activation is None:
+        print("No final activation for peak extraction.")
+    else:
+        data_subtomo = np.array(
+            final_activation(torch.from_numpy(data_subtomo).double()))
+
     shape_minus_overlap = tuple([dim - pad[0] - pad[1] for pad, dim in
                                  zip(zero_padding, data_subtomo.shape)])
     mask_out_overlap = np.ones(shape_minus_overlap)

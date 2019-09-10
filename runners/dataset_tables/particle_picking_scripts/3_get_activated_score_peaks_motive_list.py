@@ -50,7 +50,7 @@ min_peak_distance = args.min_peak_distance
 final_activation = args.final_activation
 
 if final_activation == "elu":
-    final_activation == nn.ReLU()
+    final_activation = nn.ELU()
 else:
     final_activation = None
 

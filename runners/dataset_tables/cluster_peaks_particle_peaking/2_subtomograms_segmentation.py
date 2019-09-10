@@ -56,7 +56,7 @@ df = pd.read_csv(dataset_table)
 df['tomo_name'] = df['tomo_name'].astype(str)
 tomo_df = df[df['tomo_name'] == tomo_name]
 data_path = tomo_df.iloc[0]['test_partition']
-conf = {'final_activation': nn.Sigmoid(), 'depth': depth,
+conf = {'final_activation': None, 'depth': depth,
         'initial_features': init_feat, 'out_channels': output_classes}
 if not BN:
     model = UNet(**conf)

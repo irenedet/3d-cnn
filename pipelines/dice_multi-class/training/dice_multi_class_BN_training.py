@@ -206,10 +206,17 @@ for conf in net_confs:
     logger = TensorBoard_multiclass(log_dir=log_model, log_image_interval=1)
     print("The neural network training is now starting")
 
-    write_on_models_notebook(model_name, model_path_pkl, log_model, depth,
-                             initial_features, n_epochs, training_paths_list,
-                             split, output_classes, segmentation_names, retrain,
-                             path_to_old_model, models_notebook_path)
+    write_on_models_notebook(model_name=model_name, model_path=model_path_pkl,
+                             log_dir=log_model, depth=depth,
+                             initial_features=initial_features,
+                             n_epochs=n_epochs,
+                             training_paths_list=training_paths_list,
+                             split=split, output_classes=output_classes,
+                             segmentation_names=segmentation_names,
+                             retrain=retrain,
+                             path_to_old_model=path_to_old_model,
+                             models_notebook_path=models_notebook_path,
+                             BN=True, dropout=np.nan)
 
     for epoch in range(n_epochs):
         # apply training for one epoch

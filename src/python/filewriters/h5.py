@@ -5,6 +5,7 @@ from os.path import join
 import h5py
 import numpy as np
 import torch
+import torch.nn as nn
 
 from src.python.networks.unet import UNet
 from src.python.coordinates_toolbox import subtomos
@@ -97,7 +98,8 @@ def write_dataset_from_subtomos_with_overlap_multiclass(
         subtomo_shape: tuple,
         subtomos_internal_path: str,
         class_number: int,
-        overlap: int):
+        overlap: int,
+        final_activation: None or nn.Module = None):
     output_shape_with_overlap = output_shape  # [dim + overlap_thickness for
     # dim in
     # output_shape]
@@ -129,6 +131,11 @@ def write_dataset_from_subtomos_with_overlap_multiclass(
                                    overlap:lengths[0] + overlap,
                                    overlap:lengths[1] + overlap,
                                    overlap:lengths[2] + overlap]
+                    if final_activation is not None:
+                        channel_data = np.array(final_activation(
+                            torch.from_numpy(channel_data).double()))
+                    else:
+                        print("No final activation.")
                     print("channel ", n, ", min, max = ", np.min(channel_data),
                           np.max(channel_data))
                     internal_subtomo_data += channel_data
@@ -137,11 +144,85 @@ def write_dataset_from_subtomos_with_overlap_multiclass(
                                         overlap:lengths[0] + overlap,
                                         overlap:lengths[1] + overlap,
                                         overlap:lengths[2] + overlap]
+                if final_activation is not None:
+                    internal_subtomo_data = np.array(final_activation(
+                        torch.from_numpy(internal_subtomo_data).double()))
+                else:
+                    print("No final activation.")
             tomo_data[start_corner[0]: end_corner[0],
             start_corner[1]: end_corner[1],
             start_corner[2]: end_corner[2]] = internal_subtomo_data
             print("internal_subtomo_data = ",
                   internal_subtomo_data.shape)
+    write_dataset_hdf(output_path, tomo_data)
+    print("right before deleting the maximum is", np.max(tomo_data))
+    del tomo_data
+
+
+def write_clustering_labels_subtomos(
+        output_path: str,
+        subtomo_path: str,
+        output_shape: tuple,
+        subtomo_shape: tuple,
+        subtomos_internal_path: str,
+        label_name: str,
+        class_number: int,
+        overlap: int):
+    output_shape_with_overlap = output_shape  # [dim + overlap_thickness for
+    # dim in
+    # output_shape]
+    print("The output shape is", output_shape_with_overlap)
+    tomo_data = np.zeros(output_shape_with_overlap)
+
+    internal_subtomo_shape = tuple([subtomo_dim - 2 * overlap for
+                                    subtomo_dim in subtomo_shape])
+
+    label_subtomos_internal_path = join(subtomos_internal_path, label_name)
+
+    print("To reconstruct: ", label_subtomos_internal_path)
+    with h5py.File(subtomo_path, 'r') as f:
+        subtomos_set = f[label_subtomos_internal_path]
+        print(list(subtomos_set))
+        for subtomo_name in list(subtomos_set):
+            subtomo_center = subtomos.get_coord_from_name(subtomo_name)
+            start_corner, end_corner, lengths = subtomos.get_subtomo_corners(
+                output_shape,
+                internal_subtomo_shape,
+                subtomo_center)
+            overlap_shift = overlap * np.array([1, 1, 1])
+            start_corner -= overlap_shift
+            end_corner -= overlap_shift
+            if len(subtomos_set[subtomo_name].shape) > 3:
+                channels = subtomos_set[subtomo_name].shape[0]
+                internal_subtomo_data = np.zeros(lengths)
+                if channels > 1:
+                    assert class_number < channels
+                    # ToDo: define if we want this to plot only one class
+                    # at a time TODO  (o.w. delete for loop).
+                    for n in range(1):  # leave out the background class
+                        channel_data = subtomos_set[subtomo_name][
+                                       n + class_number,
+                                       overlap:lengths[0] + overlap,
+                                       overlap:lengths[1] + overlap,
+                                       overlap:lengths[2] + overlap]
+                        print("channel ", n, ", min, max = ",
+                              np.min(channel_data),
+                              np.max(channel_data))
+                        internal_subtomo_data += channel_data
+            else:
+                print("subtomos_set[subtomo_name].shape = ",
+                      subtomos_set[subtomo_name].shape)
+
+                internal_subtomo_data = subtomos_set[subtomo_name][
+                                        overlap:lengths[0] + overlap,
+                                        overlap:lengths[1] + overlap,
+                                        overlap:lengths[2] + overlap]
+            tomo_data[start_corner[0]: end_corner[0],
+            start_corner[1]: end_corner[1],
+            start_corner[2]: end_corner[2]] = internal_subtomo_data
+            print("internal_subtomo_data = ",
+                  internal_subtomo_data.shape)
+
     write_dataset_hdf(output_path, tomo_data)
     print("right before deleting the maximum is", np.max(tomo_data))
     del tomo_data
@@ -322,6 +403,26 @@ def write_joint_raw_and_labels_subtomograms(output_path: str,
     return
 
 
+def write_classification_dataset(output_path: str,
+                                 padded_raw_dataset: np.array,
+                                 label_name: str,
+                                 window_centers: list,
+                                 crop_shape: tuple):
+    label_internal_path = join(h5_internal_paths.LABELED_SUBTOMOGRAMS,
+                               label_name)
+    with h5py.File(output_path, 'w') as f:
+        for window_center in window_centers:
+            print("window_center", window_center)
+            subtomo_name = "subtomo_{0}".format(str(window_center))
+            subtomo_internal_path = join(label_internal_path, subtomo_name)
+            subtomo_raw_data = crop_window_around_point(
+                input=padded_raw_dataset,
+                crop_shape=crop_shape,
+                window_center=window_center)
+            f[subtomo_internal_path] = subtomo_raw_data[:]
+    return
+
+
 def write_raw_subtomograms_intersecting_mask(output_path: str,
                                              padded_raw_dataset: np.array,
                                              padded_mask_dataset: np.array,
@@ -469,7 +570,7 @@ def write_hdf_particles_from_motl(path_to_motl: str,
                                   hdf_output_path: str,
                                   output_shape: tuple,
                                   sphere_radius=8,
-                                  values_in_motl=True,
+                                  values_in_motl: bool = True,
                                   number_of_particles=None,
                                   z_shift=0,
                                   particle_classes=None,

@@ -3,6 +3,7 @@ import numpy as np
 import argparse
 from os import makedirs
 from os.path import join
+import torch.nn as nn
 
 from src.python.filereaders.datasets import load_dataset
 from src.python.coordinates_toolbox.utils import get_cluster_centroids
@@ -11,6 +12,7 @@ from src.python.filewriters.h5 import write_dataset_hdf, \
 from src.python.naming import h5_internal_paths
 
 from src.python.filewriters.csv import build_tom_motive_list
+
 
 parser = argparse.ArgumentParser()
 
@@ -84,7 +86,7 @@ write_dataset_from_subtomos_with_overlap_multiclass(
     subtomo_shape,
     subtomos_internal_path,
     class_number,
-    overlap)
+    overlap,final_activation=nn.Sigmoid())
 
 
 dataset = load_dataset(path_to_dataset=output_path)
@@ -93,7 +95,7 @@ clustering_labels, centroids_list, cluster_size_list = \
     get_cluster_centroids(dataset=dataset,
                           min_cluster_size=min_cluster_size,
                           max_cluster_size=max_cluster_size,
-                          connectivity=2)
+                          connectivity=1)
 
 clusters_output_path = join(output_dir, "clusters.hdf")
 write_dataset_hdf(output_path=clusters_output_path, tomo_data=clustering_labels)

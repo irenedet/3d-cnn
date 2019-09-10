@@ -2,11 +2,11 @@ import pandas as pd
 import numpy as np
 import argparse
 from os import makedirs
-
+from os.path import join
+import torch.nn as nn
 
 from src.python.filewriters.csv import \
     write_global_motl_from_overlapping_subtomograms_multiclass
-
 
 parser = argparse.ArgumentParser()
 
@@ -44,6 +44,7 @@ box_side = args.box_side
 overlap = args.overlap
 class_number = args.class_number
 min_peak_distance = args.min_peak_distance
+final_activation = nn.ELU()
 
 df = pd.read_csv(dataset_table)
 df['tomo_name'] = df['tomo_name'].astype(str)
@@ -57,12 +58,13 @@ print(subtomo_path)
 
 subtomo_shape = tuple(box_side * np.array([1, 1, 1]))
 output_shape = (z_dim, y_dim, x_dim)
-makedirs(name=output_dir, exist_ok=True)
 
-# Todo? Future local parameters:
 peaks_per_subtomo = int(box_side ** 3 / (2 * min_peak_distance) ** 3)
 print("peaks per subtomo = ", peaks_per_subtomo)
 number_peaks_uniquify = 7000
+output_dir = join(output_dir, "peaks")
+makedirs(name=output_dir, exist_ok=True)
+
 
 motl_file_name = write_global_motl_from_overlapping_subtomograms_multiclass(
     subtomograms_path=subtomo_path,
@@ -75,6 +77,7 @@ motl_file_name = write_global_motl_from_overlapping_subtomograms_multiclass(
     class_number=class_number,
     min_peak_distance=min_peak_distance,
     number_peaks_uniquify=number_peaks_uniquify,
-    z_shift=z_shift)
+    z_shift=z_shift,
+    final_activation=final_activation)
 
 print(motl_file_name)

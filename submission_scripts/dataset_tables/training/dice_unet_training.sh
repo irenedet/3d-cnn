@@ -24,28 +24,24 @@ echo '... done.'
 #190301/031
 #190301/033"
 
-tomo_training_list="181119/002
-181119/030
-181126/002
-181126/012
-181126/025"
+tomo_training_list="200,201,203,204,205,206,207,208,240,241,242,243,244,245,246,247"
 
-export path_to_dataset_table="/struct/mahamid/Irene/yeast/yeast_table.csv"
-export segmentation_names='ribo,fas,memb'
+export path_to_dataset_table="/struct/mahamid/Irene/liang_data/multiclass/liang_data_multiclass.csv"
+export segmentation_names='70S,50S,memb'
 export split=0.7
 
 # Data for the new model
-export log_dir="/g/scb2/zaugg/trueba/3d-cnn/log_dice_multi_label"
-export model_initial_name="2_corrected_memb"
-export model_path="/g/scb2/zaugg/trueba/3d-cnn/models/dice_multi_label/retrained/ED"
-export n_epochs=40
+export log_dir="/g/scb2/zaugg/trueba/3d-cnn/log_liang_multi_label"
+export model_initial_name="NO_DA_"
+export model_path="./models/liang_multi_class"
+export n_epochs=200
 export depth=2
 export initial_features=8
 export output_classes=3
 
 # Data for old models for resuming training:
 export retrain="False"
-export path_to_old_model="/g/scb2/zaugg/trueba/3d-cnn/models/dice_multi_label/retrained/Retrain_D2_IF8_NA_except_180711_003ribo_fas_memb_D_2_IF_8.pkl"
+export path_to_old_model="None"
 
 
 echo 'Training dice multi-label network'

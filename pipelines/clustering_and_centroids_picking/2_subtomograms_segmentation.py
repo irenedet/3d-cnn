@@ -42,7 +42,7 @@ depth = args.unet_depth
 output_classes = args.output_classes
 new_loader = strtobool(args.new_loader)
 
-conf = {'final_activation': nn.ELU(), 'depth': depth,
+conf = {'final_activation': nn.Sigmoid(), 'depth': depth,
         'initial_features': init_feat, 'out_channels': output_classes}
 
 model = UNet(**conf)

@@ -59,9 +59,22 @@ def get_right_padding_lengths(tomo_shape, shape_to_crop_zyx):
     return padding
 
 
-def pad_dataset(dataset: np.array,
-                cubes_with_border_shape: tuple,
-                overlap_thickness: int) -> np.array:
+def pad_dataset(dataset: np.array, cubes_with_border_shape: tuple,
+                overlap_thickness: int=12) -> np.array:
+    """
+
+    :param dataset: Orignal unpadded dataset to partition, of shape
+    (dim_z, dim_y, dim_x).
+    :param cubes_with_border_shape: shape of output subtomograms, in format
+    (box_z, box_y, box_x).
+    :param overlap_thickness: thickness of overlap (on each side of all
+    dimensions), by default is 12 pixels.
+    :return: a padded dataset of size
+    (2*overlap + nz*p_box_z, 2*overlap + ny*p_box_y, 2*overlap + nx*p_box_x)
+    where nz, ny, nx are the minimum integers such that ni*p_box_i > dim_i
+    and p_box_i is the side-length non-overlapping part of the subtomograms,
+    i.e., p_box_i = box_i - 2*overlap.
+    """
     internal_cube_shape = [dim - 2 * overlap_thickness for dim in
                            cubes_with_border_shape]
     right_padding = get_right_padding_lengths(dataset.shape,
@@ -78,8 +91,7 @@ def partition_tomogram(dataset, output_h5_file_path: str,
                        subtomo_shape: tuple,
                        overlap: int
                        ):
-    padded_dataset = pad_dataset(dataset, subtomo_shape,
-                                 overlap)
+    padded_dataset = pad_dataset(dataset, subtomo_shape, overlap)
     padded_particles_coordinates = get_particle_coordinates_grid_with_overlap(
         padded_dataset.shape,
         subtomo_shape,
@@ -168,5 +180,3 @@ def partition_raw_and_labels_tomograms_dice_multiclass(
         window_centers=padded_particles_coordinates,
         crop_shape=subtomo_shape)
     return
-
-

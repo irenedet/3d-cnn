@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 
 from src.python.networks.io import get_device
-from src.python.networks.unet import UNet
+from src.python.networks.unet import UNet, UNet_dropout, UNet_BN
 from src.python.filewriters.h5 import segment_and_write
 
 parser = argparse.ArgumentParser()
@@ -29,6 +29,9 @@ parser.add_argument("-init_feat", "--initial_features",
 parser.add_argument("-depth", "--unet_depth",
                     help="Depth of the UNet",
                     type=int)
+parser.add_argument("-BN", "--Batch_Normalization",
+                    help="Batch_Normalization",
+                    type=str, default="None")
 parser.add_argument("-out_classes", "--output_classes",
                     help="Integer indicating number of classes to segment",
                     type=int)
@@ -46,17 +49,18 @@ init_feat = args.initial_features
 depth = args.unet_depth
 output_classes = args.output_classes
 new_loader = strtobool(args.new_loader)
-
-
+BN = args.Batch_Normalization
 df = pd.read_csv(dataset_table)
 df['tomo_name'] = df['tomo_name'].astype(str)
 tomo_df = df[df['tomo_name'] == tomo_name]
 data_path = tomo_df.iloc[0]['test_partition']
-
 conf = {'final_activation': nn.ELU(), 'depth': depth,
         'initial_features': init_feat, 'out_channels': output_classes}
+if BN == "None":
+    model = UNet(**conf)
+else:
+    model = UNet_BN(**conf)
 
-model = UNet(**conf)
 device = get_device()
 if new_loader:
     checkpoint = torch.load(path_to_model, map_location=device)

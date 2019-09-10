@@ -2,34 +2,107 @@ import numpy as np
 # from src.python.filereaders.datasets import load_dataset
 from src.python.filewriters.h5 import write_dataset_hdf
 
-# lamella_file = "/struct/mahamid/Irene/liang_data/lamella.hdf"
-# lamella = np.ones((450, 928, 928))
-# write_dataset_hdf(lamella_file, lamella)
-#
-# TOMOS = ["173", "172", "174", "175", "176", "177", "178", "179", "180", "190",
-#          "191", "192", "193", "194", "195", "196", "198", "199", "200", "201",
-#          ]
+fraction_files = [
+    "004_fraction_0.h5",
+    "004_fraction_1.h5",
+    "004_fraction_2.h5",
+    "004_fraction_3.h5",
+    "004_fraction_4.h5",
+    "005_fraction_0.h5",
+    "005_fraction_1.h5",
+    "005_fraction_2.h5",
+    "005_fraction_3.h5",
+    "005_fraction_4.h5",
+    # "021_fraction_0.h5",
+    # "021_fraction_1.h5",
+    # "021_fraction_2.h5",
+    # "021_fraction_3.h5",
+    # "021_fraction_4.h5",
+]
 
+input_dir = "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/"
 
-
-
-
-
-model_name = "fjdgbjsdbame"
-model_path_pkl = "msahfdh"
-log_model = "log_model"
-depth = 33
-initial_features = 2
-n_epochs = 30
-training_paths_list = ["a", "b"]
-split = 0.7
-output_classes = 3
-segmentation_names = ["a1", "2w"]
-retrain = True
-path_to_old_model = "path_to_old_model"
-models_notebook = "/home/papalotl/Downloads/dummy.csv"
-from src.python.filewriters.csv import write_on_models_notebook
-write_on_models_notebook(model_name, model_path_pkl, log_model, depth,
-                         initial_features, n_epochs, training_paths_list,
-                         split, output_classes, segmentation_names, retrain,
-                         path_to_old_model, models_notebook)
+output_files = [
+    "fraction_0.h5",
+    "fraction_1.h5",
+    "fraction_2.h5",
+    "fraction_3.h5",
+    "fraction_4.h5",
+]
+a = [
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/004_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/004_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/004_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/004_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/004_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/005_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/005_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/005_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/005_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/005_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/021_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/021_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/021_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/021_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_0/021_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/004_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/004_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/004_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/004_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/004_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/005_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/005_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/005_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/005_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/005_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/021_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/021_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/021_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/021_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_1/021_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/004_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/004_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/004_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/004_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/004_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/005_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/005_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/005_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/005_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/005_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/021_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/021_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/021_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/021_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_2/021_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/004_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/004_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/004_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/004_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/004_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/005_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/005_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/005_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/005_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/005_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/021_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/021_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/021_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/021_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_3/021_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/004_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/004_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/004_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/004_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/004_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/005_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/005_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/005_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/005_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/005_fraction_4.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/021_fraction_0.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/021_fraction_1.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/021_fraction_2.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/021_fraction_3.h5"
+    "/scratch/trueba/3d-cnn/training_data/dice-multi-class/cross-validation/training_fraction_4/021_fraction_4.h5"
+]

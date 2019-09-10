@@ -1,4 +1,3 @@
-import sys
 import pandas as pd
 import numpy as np
 import argparse
@@ -8,7 +7,6 @@ from os import makedirs
 from src.python.filewriters.csv import \
     write_global_motl_from_overlapping_subtomograms_multiclass
 
-# from os.path import join
 
 parser = argparse.ArgumentParser()
 

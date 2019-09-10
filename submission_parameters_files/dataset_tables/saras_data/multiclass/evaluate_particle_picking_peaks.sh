@@ -6,11 +6,19 @@ TOMOS="248
 251"
 
 # Tomograms data
-export path_to_dataset_table="/struct/mahamid/Irene/liang_data/liang_data_multiclass.csv"
+export path_to_dataset_table="/struct/mahamid/Irene/yeast/yeast_table.csv"
 export class_number=0 # 0=ribo, 1=fas, 2=memb
-export semantic_classes="70S,50S,memb"
-export statistics_file="/struct/mahamid/Irene/liang_data/multiclass/clustering_statistics_class_"$class_number".csv"
+export semantic_classes="ribo,fas,memb"
 
+if [ $class_number == 0 ]; then
+    echo "class_number is 0"
+    export statistics_file="/struct/mahamid/Irene/yeast/ribos_yeast_statistics_corrected_motls.csv"
+elif [ $class_number == 1 ]; then
+    echo "class_number is 1"
+    export statistics_file="/struct/mahamid/Irene/yeast/fas_yeast_statistics.csv"
+else
+    echo "class_number non-supported for now"
+fi
 
 # CNN parameters:
 path_to_model="/g/scb2/zaugg/trueba/3d-cnn/models/lang_unets/NO_DA_ribo_D_2_IF_8.pkl"
@@ -29,7 +37,7 @@ border_xy=10
 lamella_extension=0
 same_peak_radius_pr_analysis=20
 score_threshold=-1
-global_output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/liang_dataset/"$model_nickname"/peak_calling/pr_radius_"$same_peak_radius_pr_analysis
+global_output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/yeast_dataset/"$model_nickname"/peak_calling/pr_radius_"$same_peak_radius_pr_analysis
 
 mkdir -p $global_output_dir
 

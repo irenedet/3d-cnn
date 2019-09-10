@@ -5,7 +5,7 @@ def write_model_description(file_path: str,
                             model_name_pkl: str,
                             conf: dict,
                             data_order: list = [],
-                            skip_training_set: int = -1) -> None:
+                            skip_training_set: int or list = None) -> None:
     with open(file_path, 'w') as txt_file:
         txt_file.write("training_data_path = " + training_data_path)
         txt_file.write("\n")

@@ -151,6 +151,33 @@ class DiceCoefficientLoss(nn.Module):
                 channel_target * channel_target).sum()
             dice_loss += (1 - 2 * intersection / denominator.clamp(
                 min=self.eps))
+        dice_loss /= channels  # normalize loss
+        return dice_loss
+
+
+class TanhDiceLoss(nn.Module):
+    def __init__(self, eps=1e-6):
+        super().__init__()
+        self.eps = eps
+        # the dice coefficient of two sets represented as vectors a, b can be
+        # computed as (2 *|a b| / (a^2 + b^2))
+
+    def forward(self, input, target):
+        input.float()
+        target.float()
+        dice_loss = 0
+        channels = input.shape[1]
+        print(input.shape)
+        tanh = torch.nn.Hardtanh(min_val=0, max_val=0.5, inplace=False)
+        for channel in range(channels):
+            channel_prediction = tanh(input[:, channel, ...].float()).float()
+            channel_target = target[:, channel, ...].float()
+            intersection = (channel_prediction * channel_target).sum()
+            denominator = (channel_prediction * channel_prediction).sum() + (
+                channel_target * channel_target).sum()
+            dice_loss += (1 - 2 * intersection / denominator.clamp(
+                min=self.eps))
+        dice_loss /= channels  # normalize loss
         return dice_loss
 
 

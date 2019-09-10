@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 4G
-#SBATCH --time 0-02:00
+#SBATCH --time 0-01:30
 #SBATCH -o slurm.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -17,18 +17,18 @@ echo "...done."
 
 export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
 
-tomo=195
-label_name="NO_DA_ribo_D_2_IF_8"
-subtomos_path="/scratch/trueba/liang_data/"$tomo"/train_and_test_partitions/full_partition.h5"
-output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/liang_dataset/"$label_name"/"$tomo
+tomo=246
+label_name="NO_DA_corr_dim1_tanhdice_softmax_70S_50S_memb_D_2_IF_8"
+subtomos_path="/scratch/trueba/liang_data/"$tomo"/multi_class/train_and_test_partitions/full_partition.h5"
+output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/liang_dataset/multilabel/"$label_name"/pr_radius_20/clustering/"$tomo
 box=128
 overlap_thickness=12
-output_classes=1
+output_classes=3
 output_xdim=928
 output_ydim=928
 output_zdim=450
-#segmentation_names="ribo,fas,memb"
-segmentation_names="ribo"
+segmentation_names="70S,50S,memb"
+#segmentation_names="ribo"
 
 
 

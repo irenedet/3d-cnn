@@ -1,5 +1,7 @@
 import os
 from os import makedirs
+from distutils.util import strtobool
+
 from src.python.filewriters.h5 import write_hdf_particles_from_motl
 import argparse
 
@@ -23,6 +25,8 @@ parser.add_argument("-shape_y", "--output_shape_y",
                     type=int)
 parser.add_argument("-shape_z", "--output_shape_z",
                     type=int)
+parser.add_argument("-values_in_motl", "--values_in_motl",
+                    type=str, default=True)
 
 args = parser.parse_args()
 path_to_motl = args.path_to_motl
@@ -33,6 +37,7 @@ z_shift = args.output_z_shift
 coords_in_tom_format = args.coords_in_tom_format
 radius = args.sphere_radius
 hdf_output_path = args.hdf_output_path
+values_in_motl = strtobool(args.values_in_motl)
 
 print("coords_in_tom_format = ", coords_in_tom_format)
 output_dir = os.path.dirname(hdf_output_path)
@@ -45,7 +50,7 @@ write_hdf_particles_from_motl(path_to_motl=path_to_motl,
                               hdf_output_path=hdf_output_path,
                               output_shape=output_shape,
                               sphere_radius=radius,
-                              values_in_motl=True,
+                              values_in_motl=values_in_motl,
                               number_of_particles=None,
                               z_shift=z_shift,
                               particles_in_tom_format=True)

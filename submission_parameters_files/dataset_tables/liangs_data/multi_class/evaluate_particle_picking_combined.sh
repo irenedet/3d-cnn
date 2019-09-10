@@ -6,16 +6,10 @@ TOMOS="248
 251"
 
 # Tomograms data
-export path_to_dataset_table="/struct/mahamid/Irene/liang_data/liang_data.csv"
-export class_number=0
-export semantic_classes="ribo"
-
-if [ $class_number == 0 ]; then
-    echo "class_number is 0"
-    export statistics_file="/struct/mahamid/Irene/liang_data/combined_peak_clusters_statistics.csv"
-else
-    echo "class_number non-supported for now"
-fi
+export path_to_dataset_table="/struct/mahamid/Irene/liang_data/multiclass/liang_data_multiclass.csv"
+export class_number=0 # 0=ribo, 1=fas, 2=memb
+export semantic_classes="70S,50S,memb"
+export statistics_file="/struct/mahamid/Irene/liang_data/multiclass/combined_statistics_class_"$class_number".csv"
 
 
 # CNN parameters:

@@ -1,4 +1,4 @@
-!/usr/bin/env bash
+#!/usr/bin/env bash
 
 #file-specifics:
 FILES="/g/scb2/zaugg/trueba/3d-cnn/submission_data/SPOMBE/ED_DEFOCUS/190301_005.sh"

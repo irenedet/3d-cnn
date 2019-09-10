@@ -3,11 +3,12 @@ import os
 from os.path import join
 
 import numpy as np
+
 from src.python.coordinates_toolbox.utils import \
     extract_coordinates_and_values_from_em_motl
 from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import read_em
 from src.python.filereaders.datasets import load_dataset
+from src.python.filereaders.em import read_em
 from src.python.osactions.filesystem import create_dir
 
 
@@ -222,3 +223,5 @@ def union_of_motls(path_to_motl_1: str, path_to_motl_2: str):
     coordinates = np.concatenate((coordinates_1, coordinates_2), axis=0)
     values = list(values_1) + list(values_2)
     return values, coordinates
+
+

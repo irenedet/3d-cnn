@@ -1,3 +1,8 @@
+log_fractions_004_005/
+log_liang_multi_label/
+plot_counts.png
+runners/testing_runners/fraction_data_cv_runner.sh
+src/python/networks/__pycache__/
 *.pdf
 new_DA_logs
 data_aug_slurm.*

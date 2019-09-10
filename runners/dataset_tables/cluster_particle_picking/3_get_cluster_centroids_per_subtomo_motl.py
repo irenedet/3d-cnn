@@ -67,7 +67,7 @@ subtomo_shape = tuple(box_side * np.array([1, 1, 1]))
 output_shape = (z_dim, y_dim, x_dim)
 makedirs(name=output_dir, exist_ok=True)
 
-full_centroids_list = \
+full_centroids_list, full_cluster_size_list = \
     get_cluster_centroids_from_partition(partition=partition,
                                          label_name=label_name,
                                          min_cluster_size=min_cluster_size,
@@ -77,21 +77,16 @@ full_centroids_list = \
                                          segmentation_class=class_number)
 
 # Double-check centroids to avoid duplicates
-unique_centroids = average_duplicated_centroids(
-    motl_coords=full_centroids_list, min_peak_distance=particle_radius)
-
-print("min point[2]", np.min([point[2] for point in unique_centroids]))
-print("min point[1]", np.min([point[1] for point in unique_centroids]))
-print("min point[0]", np.min([point[0] for point in unique_centroids]))
-
-print("max point[2]", np.max([point[2] for point in unique_centroids]))
-print("max point[1]", np.max([point[1] for point in unique_centroids]))
-print("max point[0]", np.max([point[0] for point in unique_centroids]))
+unique_centroids, unique_cluster_size_list = average_duplicated_centroids(
+    motl_coords=full_centroids_list, cluster_size_list=full_cluster_size_list,
+    min_peak_distance=particle_radius//2)
 
 motl_name = "motl_" + str(len(unique_centroids)) + ".csv"
 motl_file_name = join(output_dir, motl_name)
 
 motive_list_df = build_tom_motive_list(
-    list_of_peak_coordinates=unique_centroids, in_tom_format=False)
+    list_of_peak_coordinates=unique_centroids,
+    list_of_peak_scores=unique_cluster_size_list, in_tom_format=False)
+
 motive_list_df.to_csv(motl_file_name, index=False, header=False)
 print("Motive list saved in", motl_file_name)

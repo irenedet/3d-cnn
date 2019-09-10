@@ -6,6 +6,8 @@ from os import makedirs
 from os.path import join
 
 import numpy as np
+from functools import reduce
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -16,7 +18,7 @@ from src.python.networks.visualizers import TensorBoard_multiclass
 
 from src.python.filewriters.csv import write_on_models_notebook
 from src.python.networks.io import get_device
-from src.python.networks.loss import DiceCoefficientLoss
+from src.python.networks.loss import DiceCoefficientLoss, TanhDiceLoss
 from src.python.datasets.actions import split_dataset
 from src.python.filereaders import h5
 from src.python.filewriters.txt import write_model_description
@@ -24,9 +26,6 @@ from src.python.image.filters import preprocess_data
 from src.python.networks.utils import save_unet_model, load_unet_model
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-label", "--label_name",
-                    help="label name of segmentation class",
-                    type=str)
 parser.add_argument("-log_dir", "--log_dir",
                     help="logs directory where training losses will be stored",
                     type=str)
@@ -67,13 +66,16 @@ parser.add_argument("-models_notebook", "--models_notebook",
                     default="None",
                     type=str)
 parser.add_argument("-skip", "--skip",
-                    type=int)
+                    type=str)
+parser.add_argument("-final_activation", "--final_activation",
+                    type=str, default="sigmoid")
 
 args = parser.parse_args()
 training_paths_list = args.training_paths_list
 training_paths_list = training_paths_list.split('\n')
 skip_training = args.skip
-label_name = args.label_name
+skip_training = list(map(int, skip_training.split(',')))
+print("skip_training", skip_training)
 split = args.split
 log_dir = args.log_dir
 model_initial_name = args.model_initial_name
@@ -85,6 +87,7 @@ retrain = strtobool(args.retrain)
 path_to_old_model = args.path_to_old_model
 depth = args.depth
 initial_features = args.initial_features
+final_activation = args.final_activation
 weight = args.weights_per_class
 weight = list(map(float, weight.split(',')))
 segmentation_names = args.segmentation_names
@@ -93,7 +96,13 @@ segmentation_names = list(map(str, segmentation_names.split(',')))
 makedirs(name=log_dir, exist_ok=True)
 makedirs(name=model_path, exist_ok=True)
 
-final_activation = nn.Sigmoid()
+if final_activation == "softmax":
+    final_activation = nn.Softmax(dim=1)
+    loss = TanhDiceLoss()
+else:
+    final_activation = nn.Sigmoid()
+    loss = DiceCoefficientLoss()
+
 net_confs = [
     {'final_activation': final_activation,
      'depth': depth,
@@ -112,7 +121,7 @@ device = get_device()
 
 for n, training_data_path in enumerate(training_paths_list):
     print("\n")
-    if skip_training == n:
+    if n in skip_training:
         print("Skipping ", training_data_path)
     else:
         print("Loading training set from ", training_data_path)
@@ -184,12 +193,14 @@ for conf in net_confs:
     else:
         net = UNet(**conf)
         net = net.to(device)
-        loss = DiceCoefficientLoss()
         loss = loss.to(device)
         optimizer = optim.Adam(net.parameters())
         old_epoch = 0
 
     metric = loss
+
+    label_name = reduce(lambda x, y: x + "_" + y, segmentation_names)
+
     model_name = model_initial_name + label_name + "_D_" + \
                  str(conf['depth']) + "_IF_" + \
                  str(conf['initial_features'])

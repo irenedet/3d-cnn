@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 200G
-#SBATCH --time 0-5:00
+#SBATCH --mem 300G
+#SBATCH --time 0-8:00
 #SBATCH -o slurm.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -54,20 +54,20 @@ training_list="/scratch/trueba/liang_data/172/train_and_test_partitions/full_par
 export label_name="ribo"
 export segmentation_names='ribo'
 export split=0.8
-export skip=53 #4 except 180711_003 (healthy), except 181126_012 (ED)
+export skip=-1 #4 except 180711_003 (healthy), except 181126_012 (ED)
 
 # Data for the new model
 export log_dir="/g/scb2/zaugg/trueba/log_lang_unets"
-export model_initial_name="NO_DA_BN_172_192_"
+export model_initial_name="2_NO_DA_BN_172_192_"
 export model_path="/g/scb2/zaugg/trueba/3d-cnn/models/lang_unets"
-export n_epochs=40
-export depth=3
+export n_epochs=80
+export depth=2
 export initial_features=8
 export output_classes=1
 
 #Special parameters
 export BN="True"
-export dropout=0.15
+export dropout=0 #0.15
 
 # Data for old models for resuming training:
 export retrain="False"

@@ -1,6 +1,8 @@
 import csv
 import re
 import time
+import os
+
 from os.path import join
 from os import makedirs
 import h5py
@@ -8,14 +10,17 @@ import numpy as np
 import pandas as pd
 import datetime
 from functools import reduce
+import torch.nn as nn
 
 from src.python.coordinates_toolbox.utils import \
     filtering_duplicate_coords_with_values, to_tom_coordinate_system
 from src.python.naming import h5_internal_paths
 from src.python.peak_toolbox.subtomos import \
     get_peaks_per_subtomo_with_overlap, \
-    get_peaks_per_subtomo_with_overlap_multiclass, \
-    get_subtomo_corner_and_side_lengths, shift_coordinates_by_vector
+    get_peaks_per_subtomo_with_overlap_multiclass
+from src.python.coordinates_toolbox.utils import shift_coordinates_by_vector
+from src.python.coordinates_toolbox.subtomos import \
+    get_subtomo_corner_and_side_lengths
 from src.python.coordinates_toolbox.utils import \
     arrange_coordinates_list_by_score
 from src.python.peak_toolbox.utils import read_motl_data
@@ -91,7 +96,8 @@ def motl_writer(path_to_output_folder: str, list_of_peak_scores: list,
 def build_tom_motive_list(list_of_peak_coordinates: list,
                           list_of_peak_scores=None,
                           list_of_angles_in_degrees=None,
-                          list_of_classes=None) -> pd.DataFrame:
+                          list_of_classes=None,
+                          in_tom_format=True) -> pd.DataFrame:
     """
     This function builds a motive list of particles, according to the tom format
     standards:
@@ -132,7 +138,11 @@ def build_tom_motive_list(list_of_peak_coordinates: list,
     :return:
     """
     empty_cell_value = 0  # float('nan')
-    xs, ys, zs = list(np.array(list_of_peak_coordinates, int).transpose())
+    if in_tom_format:
+        xs, ys, zs = list(np.array(list_of_peak_coordinates, int).transpose())
+    else:
+        zs, ys, xs = list(np.array(list_of_peak_coordinates, int).transpose())
+
     n_particles = len(list_of_peak_coordinates)
     tom_indices = list(range(1, 1 + n_particles))
     create_const_list = lambda x: [x for _ in range(n_particles)]
@@ -303,7 +313,8 @@ def write_global_motl_from_overlapping_subtomograms_multiclass(
         min_peak_distance: int,
         class_number: int,
         number_peaks_uniquify: int,
-        z_shift: int) -> str:
+        z_shift: int,
+        final_activation: nn.Module = None) -> str:
     with h5py.File(subtomograms_path, 'r') as h5file:
         subtomos_internal_path = join(
             h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS, label_name)
@@ -323,7 +334,8 @@ def write_global_motl_from_overlapping_subtomograms_multiclass(
                     numb_peaks=numb_peaks,
                     class_number=class_number,
                     min_peak_distance=min_peak_distance,
-                    overlap=overlap)
+                    overlap=overlap,
+                    final_activation=final_activation)
             print(len(subtomo_maxima_coords), "peaks in ", subtomo_name,
                   " computed")
             subtomo_corner, _ = get_subtomo_corner_and_side_lengths(
@@ -485,9 +497,12 @@ def write_on_models_notebook(model_name: str, model_path: str,
                              segmentation_names: list,
                              retrain: str or bool,
                              path_to_old_model: str, models_notebook_path: str,
-                             dropout: str or float = "None"):
+                             dropout: np.nan or float = np.nan,
+                             BN: bool = False):
     """
 
+    :type segmentation_names: a list of semantic classes names that the model
+    predicts, e.g. ["ribo", "memb"]
     :type model_path: pkl file that stores model parameters.
     """
     training_paths = reduce(lambda x, y: x + ", " + y, training_paths_list)
@@ -511,9 +526,32 @@ def write_on_models_notebook(model_name: str, model_path: str,
     mini_notebook_df['retrain'] = str(retrain)
     mini_notebook_df['old_model'] = path_to_old_model
     mini_notebook_df['date'] = date
-    models_notebook_df = pd.read_csv(models_notebook_path)
+    mini_notebook_df['BN'] = str(BN)
+    if os.path.isfile(models_notebook_path):
+        models_notebook_df = pd.read_csv(models_notebook_path)
 
-    pd.merge(models_notebook_df, mini_notebook_df, how='inner')
+        models_notebook_df = models_notebook_df.append(mini_notebook_df,
+                                                       sort="False")
+        models_notebook_df.to_csv(path_or_buf=models_notebook_path, index=False)
+    else:
+        mini_notebook_df.to_csv(path_or_buf=models_notebook_path, index=False)
+    return
 
-    models_notebook_df.to_csv(path_or_buf=models_notebook_path, index=False)
+
+def write_statistics(statistics_file: str, statistics_label: str,
+                     tomo_name: str, stat_measure: float):
+    dict_stats = {'tomo_name': [tomo_name],
+                  statistics_label: [stat_measure]}
+    mini_stats_df = pd.DataFrame(dict_stats)
+    if os.path.isfile(statistics_file):
+        print("The statistics file exists")
+        stats_df = pd.read_csv(statistics_file)
+        stats_df['tomo_name'] = stats_df['tomo_name'].astype(str)
+        stats_df = pd.merge(stats_df, mini_stats_df, on='tomo_name',
+                            how='outer')
+        stats_df.to_csv(path_or_buf=statistics_file, index=False)
+
+    else:
+        print("The statistics file does not exist, we will create it.")
+        mini_stats_df.to_csv(path_or_buf=statistics_file, index=False)
     return
