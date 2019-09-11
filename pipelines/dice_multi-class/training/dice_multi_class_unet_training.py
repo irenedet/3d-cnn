@@ -179,7 +179,8 @@ val_set = du.TensorDataset(torch.from_numpy(val_data),
                            torch.from_numpy(val_labels))
 
 # wrap into data-loader (shuffle in False works better apparently)
-train_loader = du.DataLoader(train_set, shuffle=False, batch_size=5)
+#ToDo re-check if shuffling is ok
+train_loader = du.DataLoader(train_set, shuffle=True, batch_size=5)
 val_loader = du.DataLoader(val_set, batch_size=5)
 
 for conf in net_confs:

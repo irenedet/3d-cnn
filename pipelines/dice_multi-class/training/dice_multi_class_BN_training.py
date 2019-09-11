@@ -238,9 +238,9 @@ for conf in net_confs:
                 validation_loss = current_validation_loss
                 save_unet_model(path_to_model=model_path_pkl, epoch=new_epoch,
                                 net=net, optimizer=optimizer, loss=loss)
-                if epoch > n_epochs // 2:
-                    for g in optimizer.param_groups:
-                        g['lr'] = 0.015
+                # if epoch > n_epochs // 2:
+                #     for g in optimizer.param_groups:
+                #         g['lr'] = 0.015
             else:
                 print("this model was not the best")
 

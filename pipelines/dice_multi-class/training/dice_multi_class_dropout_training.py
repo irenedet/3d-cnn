@@ -1,5 +1,3 @@
-#! /home/trueba/.conda/envs/mlcourse/bin/python3
-
 import argparse
 from distutils.util import strtobool
 from os import makedirs

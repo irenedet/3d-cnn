@@ -7,7 +7,7 @@ def train_float(model, loader, optimizer, loss_function,
                 epoch, device, log_interval=20, tb_logger=None):
     # set the model to train mode
     model.train()
-
+    train_loss = 0
     # iterate over the batches of this epoch
     for batch_id, (x, y) in enumerate(loader):
         # move input and target to the active device (either cpu or gpu)
@@ -20,8 +20,7 @@ def train_float(model, loader, optimizer, loss_function,
         # apply model, calculate loss and run backwards pass
         prediction = model(x)
         loss = loss_function(prediction.float(), y.float())
-        loss.backward()
-        optimizer.step()
+        train_loss += loss.item()
 
         # log to console
         if batch_id % log_interval == 0:
@@ -60,13 +59,21 @@ def train_float(model, loader, optimizer, loss_function,
                                             0, 0, slice_index].to(
                                             'cpu'),
                                         step=step)
+        loss.backward()
+        optimizer.step()
+
+    train_loss /= len(loader)
+    if tb_logger is not None:
+        step = epoch * len(loader)
+        tb_logger.log_scalar(tag='Average_train_loss', value=train_loss,
+                             step=step)
 
 
 def train(model, loader, optimizer, loss_function,
           epoch, device, log_interval=20, tb_logger=None, log_image=True):
     # set the model to train mode
     model.train()
-
+    train_loss = 0
     # iterate over the batches of this epoch
     for batch_id, (x, y) in enumerate(loader):
         # move input and target to the active device (either cpu or gpu)
@@ -78,8 +85,7 @@ def train(model, loader, optimizer, loss_function,
         # apply model, calculate loss and run backwards pass
         prediction = model(x)
         loss = loss_function(prediction, y.long())
-        loss.backward()
-        optimizer.step()
+        train_loss += loss.item()
 
         # log to console
         if batch_id % log_interval == 0:
@@ -164,6 +170,14 @@ def train(model, loader, optimizer, loss_function,
                             print("the size of the target tensor isnt loggable")
                     else:
                         print("Not logging images.")
+        loss.backward()
+        optimizer.step()
+
+    train_loss /= len(loader)
+    if tb_logger is not None:
+        step = epoch * len(loader)
+        tb_logger.log_scalar(tag='Average_train_loss', value=train_loss,
+                             step=step)
 
 
 def validate(model, loader, loss_function, metric, device, step=None,
