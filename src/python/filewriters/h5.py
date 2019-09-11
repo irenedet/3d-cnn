@@ -361,7 +361,7 @@ def write_subtomograms_from_dataset(output_path, padded_dataset,
             subtomo_name = "subtomo_{0}".format(str(window_center))
             subtomo_h5_internal_path = join(h5_internal_paths.RAW_SUBTOMOGRAMS,
                                             subtomo_name)
-            subtomo_data = crop_window_around_point(input=padded_dataset,
+            subtomo_data = crop_window_around_point(input_array=padded_dataset,
                                                     crop_shape=crop_shape,
                                                     window_center=window_center)
             f[subtomo_h5_internal_path] = subtomo_data
@@ -381,7 +381,7 @@ def write_joint_raw_and_labels_subtomograms(output_path: str,
                 h5_internal_paths.RAW_SUBTOMOGRAMS,
                 subtomo_name)
             subtomo_raw_data = crop_window_around_point(
-                input=padded_raw_dataset,
+                input_array=padded_raw_dataset,
                 crop_shape=crop_shape,
                 window_center=window_center)
 
@@ -392,7 +392,7 @@ def write_joint_raw_and_labels_subtomograms(output_path: str,
                 subtomo_name)
 
             subtomo_label_data = crop_window_around_point(
-                input=padded_labels_dataset,
+                input_array=padded_labels_dataset,
                 crop_shape=crop_shape,
                 window_center=window_center)
             if np.max(subtomo_label_data) > 0.5:
@@ -416,7 +416,7 @@ def write_classification_dataset(output_path: str,
             subtomo_name = "subtomo_{0}".format(str(window_center))
             subtomo_internal_path = join(label_internal_path, subtomo_name)
             subtomo_raw_data = crop_window_around_point(
-                input=padded_raw_dataset,
+                input_array=padded_raw_dataset,
                 crop_shape=crop_shape,
                 window_center=window_center)
             f[subtomo_internal_path] = subtomo_raw_data[:]
@@ -435,12 +435,12 @@ def write_raw_subtomograms_intersecting_mask(output_path: str,
                 h5_internal_paths.RAW_SUBTOMOGRAMS,
                 subtomo_name)
             subtomo_raw_data = crop_window_around_point(
-                input=padded_raw_dataset,
+                input_array=padded_raw_dataset,
                 crop_shape=crop_shape,
                 window_center=window_center)
 
             subtomo_label_data = crop_window_around_point(
-                input=padded_mask_dataset,
+                input_array=padded_mask_dataset,
                 crop_shape=crop_shape,
                 window_center=window_center)
             if np.max(subtomo_label_data) > 0:
@@ -465,7 +465,7 @@ def write_joint_raw_and_labels_subtomograms_dice_multiclass(
                 h5_internal_paths.RAW_SUBTOMOGRAMS,
                 subtomo_name)
             subtomo_raw_data = crop_window_around_point(
-                input=padded_raw_dataset,
+                input_array=padded_raw_dataset,
                 crop_shape=crop_shape,
                 window_center=window_center)
 
@@ -475,7 +475,7 @@ def write_joint_raw_and_labels_subtomograms_dice_multiclass(
             for label_name, padded_label in zip(segmentation_names,
                                                 padded_labels_list):
                 subtomo_label_data = crop_window_around_point(
-                    input=padded_label,
+                    input_array=padded_label,
                     crop_shape=crop_shape,
                     window_center=window_center)
                 subtomo_label_data_list += [subtomo_label_data]

@@ -96,9 +96,9 @@ print("labels_dataset.shape =", labels_dataset.shape)
 crop_shape = tuple([min([r_shape, l_shape]) for r_shape, l_shape in
                     zip(raw_dataset.shape, labels_dataset.shape)])
 
-raw_dataset = crop_window(input=raw_dataset, shape_to_crop=crop_shape,
+raw_dataset = crop_window(input_array=raw_dataset, shape_to_crop=crop_shape,
                           window_corner=(0, 0, 0))
-labels_dataset = crop_window(input=labels_dataset, shape_to_crop=crop_shape,
+labels_dataset = crop_window(input_array=labels_dataset, shape_to_crop=crop_shape,
                              window_corner=(0, 0, 0))
 
 print("crop_shape =", crop_shape)

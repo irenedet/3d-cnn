@@ -188,7 +188,7 @@ def paste_rotated_disk(dataset: np.array, center: tuple, radius: int,
     return dataset
 
 
-def read_motl_coordinates_and_values(path_to_motl: str):
+def read_motl_coordinates_and_values(path_to_motl: str) -> tuple:
     _, motl_extension = os.path.splitext(path_to_motl)
     if motl_extension == ".em":
         print("motl in .em format")

@@ -10,6 +10,7 @@ from src.python.networks.utils import generate_train_val_loaders, \
 from src.python.networks.io import get_device
 import torchvision.utils as vutils
 
+
 class Classifier3D(nn.Module):
     def __init__(self, in_channels: int, output_classes: int, depth: int,
                  initial_features: int, final_activation: nn.Softmax(dim=1)):
@@ -75,17 +76,10 @@ class Classifier3D(nn.Module):
                     x_im = vutils.make_grid(x[:, :, sl, :, :],
                                             normalize=True,
                                             scale_each=True)
-                    y_im = vutils.make_grid(y[:, :, sl, :, :],
-                                            normalize=True,
-                                            scale_each=True)
-                    y_pred_im = vutils.make_grid(
-                        prediction[:, :, sl, :, :],
-                        normalize=True,
-                        scale_each=True)
 
                     writer.add_image('train/x', x_im, epoch)
-                    writer.add_image('train/y', y_im, epoch)
-                    writer.add_image('train/y_pred', y_pred_im, epoch)
+                    writer.add_image('train/y', y, epoch)
+                    writer.add_image('train/y_pred', prediction, epoch)
 
         loss_avg = loss_cum / cnt
         print('Average Train Loss: {:.6f}'.format(loss_avg))
@@ -97,14 +91,14 @@ class Classifier3D(nn.Module):
         x = self.final_activation(x)
         return x
 
+
 final_activation = nn.LogSoftmax(dim=1)  # dim=1 channel dimension: B,Ch,H,W,T
 
 classifier = Classifier3D(in_channels=1, output_classes=3, depth=2,
-                 initial_features=8, final_activation=final_activation)
-device = get_device()  # optimizer = optim.Adam(ynet.parameters())
+                          initial_features=8, final_activation=final_activation)
+device = get_device()
 loss_class = F.nll_loss()
 optimizer = optim.Adam(classifier.parameters())
-
 
 src_data = ""
 spl = 0.8  # 0.8  # training set percentage

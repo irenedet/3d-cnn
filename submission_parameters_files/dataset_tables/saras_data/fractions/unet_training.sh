@@ -31,6 +31,7 @@ export output_classes=3
 # Data for old models for resuming training:
 export retrain="False"
 export path_to_old_model="None"
+export models_notebook="struct/mahamid/Irene/fractions/models.csv"
 
 for fraction in $FRACTIONS
 do
@@ -51,7 +52,7 @@ do
 
     echo 'Job for fraction' $fraction
     export model_initial_name="Basis_004_005_frac_"$fraction"_"
-    sbatch ./submission_scripts/dataset_tables/training/training_runner.sh -fraction $fraction -path_to_dataset_table $path_to_dataset_table -tomo_training_list $tomo_training_list -split $split -output_classes $output_classes -log_dir $log_dir -model_initial_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features
+    sbatch ./submission_scripts/dataset_tables/training/training_runner.sh -fraction $fraction -path_to_dataset_table $path_to_dataset_table -tomo_training_list $tomo_training_list -split $split -output_classes $output_classes -log_dir $log_dir -model_initial_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook
 done
 
 

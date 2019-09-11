@@ -1,16 +1,16 @@
 import numpy as np
 
 
-def crop_tensor(input: np.array, shape_to_crop: tuple) -> np.array:
+def crop_tensor(input_array: np.array, shape_to_crop: tuple) -> np.array:
     """
     Function from A. Kreshuk to crop tensors of order 3, starting always from
     the origin.
-    :param input: the input np.array image
+    :param input_array: the input np.array image
     :param shape_to_crop: a tuple (cz, cy, cx), where each entry corresponds
     to the size of the  cropped region along each axis.
     :return: np.array of size (cz, cy, cx)
     """
-    input_shape = input.shape
+    input_shape = input_array.shape
     assert all(ish >= csh for ish, csh in zip(input_shape, shape_to_crop)), \
         "Input shape must be larger equal crop shape"
     # get the difference between the shapes
@@ -19,32 +19,34 @@ def crop_tensor(input: np.array, shape_to_crop: tuple) -> np.array:
     # calculate the crop
     crop = tuple(slice(sd, sh - sd)
                  for sd, sh in zip(shape_diff, input_shape))
-    return input[crop]
+    return input_array[crop]
 
 
-def crop_window(input, shape_to_crop, window_corner):
+def crop_window(input_array: np.array, shape_to_crop: tuple or list,
+                window_corner: tuple or list):
     """
     Function from A. Kreshuk to crop tensors of order 3, starting always
     from a given corner.
-    :param input: the input np.array image
+    :param input_array: the input np.array image
     :param shape_to_crop: a tuple (cz, cy, cx), where each entry corresponds
     to the size of the  cropped region along each axis.
     :param window_corner: point from where the window will be cropped.
     :return: np.array of size (cz, cy, cx)
     """
-    input_shape = input.shape
+    input_shape = input_array.shape
     assert all(ish >= csh for ish, csh in zip(input_shape, shape_to_crop)), \
         "Input shape must be larger equal crop shape"
     # get the difference between the shapes
     crop = tuple(slice(wc, wc + csh)
                  for wc, csh in zip(window_corner, shape_to_crop))
     # print(crop)
-    return input[crop]
+    return input_array[crop]
 
 
-def crop_window_around_point(input: np.array, crop_shape: tuple,
-                             window_center: tuple) -> np.array:
-    input_shape = input.shape
+def crop_window_around_point(input_array: np.array, crop_shape: tuple or list,
+                             window_center: tuple or list) -> np.array:
+    # The window center is not in tom_coordinates, it is (z, y, x)
+    input_shape = input_array.shape
     assert all(ish - csh // 2 - center >= 0 for ish, csh, center in
                zip(input_shape, crop_shape, window_center)), \
         "Input shape must be larger or equal than crop shape"
@@ -54,4 +56,4 @@ def crop_window_around_point(input: np.array, crop_shape: tuple,
     # get the difference between the shapes
     crop = tuple(slice(center - csh // 2, center + csh // 2)
                  for csh, center in zip(crop_shape, window_center))
-    return input[crop]
+    return input_array[crop]

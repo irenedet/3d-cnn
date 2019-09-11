@@ -20,6 +20,8 @@ def train_float(model, loader, optimizer, loss_function,
         # apply model, calculate loss and run backwards pass
         prediction = model(x)
         loss = loss_function(prediction.float(), y.float())
+        loss.backward()
+        optimizer.step()
         train_loss += loss.item()
 
         # log to console
@@ -59,8 +61,7 @@ def train_float(model, loader, optimizer, loss_function,
                                             0, 0, slice_index].to(
                                             'cpu'),
                                         step=step)
-        loss.backward()
-        optimizer.step()
+
 
     train_loss /= len(loader)
     if tb_logger is not None:
@@ -85,6 +86,8 @@ def train(model, loader, optimizer, loss_function,
         # apply model, calculate loss and run backwards pass
         prediction = model(x)
         loss = loss_function(prediction, y.long())
+        loss.backward()
+        optimizer.step()
         train_loss += loss.item()
 
         # log to console
@@ -170,8 +173,7 @@ def train(model, loader, optimizer, loss_function,
                             print("the size of the target tensor isnt loggable")
                     else:
                         print("Not logging images.")
-        loss.backward()
-        optimizer.step()
+
 
     train_loss /= len(loader)
     if tb_logger is not None:

@@ -73,6 +73,9 @@ while [ "$1" != "" ]; do
         -fraction | --fraction )   shift
                                 fraction=$1
                                 ;;
+        -models_notebook | --models_notebook )   shift
+                                models_notebook=$1
+                                ;;
         -h | --help )           usage
                                 exit
                                 ;;
@@ -100,8 +103,8 @@ export output_classes=$output_classes
 # Data for old models for resuming training:
 export retrain=$retrain
 export path_to_old_model=$path_to_old_model
-
+export models_notebook=$models_notebook
 
 echo 'Training dice multi-label network for fraction ' $fraction
-python3 ./runners/dataset_tables/training/dice_unet_training.py -dataset_table $path_to_dataset_table -tomo_training_list "${tomo_training_list[@]}" -split $split -classes $output_classes -log_dir $log_dir -model_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features
+python3 ./runners/dataset_tables/training/dice_unet_training.py -dataset_table $path_to_dataset_table -tomo_training_list "${tomo_training_list[@]}" -split $split -classes $output_classes -log_dir $log_dir -model_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook
 

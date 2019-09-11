@@ -562,3 +562,5 @@ def write_statistics(statistics_file: str, statistics_label: str,
         print("The statistics file does not exist, we will create it.")
         mini_stats_df.to_csv(path_or_buf=statistics_file, index=False)
     return
+
+

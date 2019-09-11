@@ -158,6 +158,7 @@ for n, training_data_path in enumerate(training_paths_list):
 
             # Normalize data
             preprocessed_data = preprocess_data(raw_data)
+            # add channel dimension:
             preprocessed_data = np.array(preprocessed_data)[:, None]
             labels = np.array(labels, dtype=np.long)
 
@@ -179,7 +180,7 @@ val_set = du.TensorDataset(torch.from_numpy(val_data),
                            torch.from_numpy(val_labels))
 
 # wrap into data-loader (shuffle in False works better apparently)
-#ToDo re-check if shuffling is ok
+# ToDo re-check if shuffling is ok
 train_loader = du.DataLoader(train_set, shuffle=True, batch_size=5)
 val_loader = du.DataLoader(val_set, batch_size=5)
 
@@ -231,7 +232,8 @@ for conf in net_confs:
               log_image=False)
         step = new_epoch * len(train_loader.dataset)
         # run validation after training epoch
-        current_validation_loss = validate(net, val_loader, loss, metric,
+        current_validation_loss = validate(model=net, loader=val_loader,
+                                           loss_function=loss, metric=metric,
                                            device=device, step=step,
                                            tb_logger=logger)
         if epoch == 0:

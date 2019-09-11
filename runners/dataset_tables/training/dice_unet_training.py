@@ -1,5 +1,3 @@
-#! /home/trueba/.conda/envs/mlcourse/bin/python3
-
 import argparse
 from distutils.util import strtobool
 from os import makedirs
@@ -11,6 +9,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as du
+
+from src.python.filewriters.csv import write_on_models_notebook
 from src.python.networks.routines import train, validate
 from src.python.networks.unet import UNet
 from src.python.networks.visualizers import TensorBoard_multiclass
@@ -63,7 +63,9 @@ parser.add_argument("-initial_features", "--initial_features",
                     type=int)
 parser.add_argument("-tomo_training_list", "--tomo_training_list",
                     type=str)
-
+parser.add_argument("-models_notebook", "--models_notebook",
+                    default="None",
+                    type=str)
 args = parser.parse_args()
 dataset_table = args.dataset_table
 tomo_training_list = args.tomo_training_list
@@ -79,6 +81,7 @@ retrain = strtobool(args.retrain)
 path_to_old_model = args.path_to_old_model
 depth = args.depth
 initial_features = args.initial_features
+models_notebook_path = args.models_notebook
 segmentation_names = args.segmentation_names
 segmentation_names = list(map(str, segmentation_names.split(',')))
 label_name = ""
@@ -206,6 +209,11 @@ for conf in net_confs:
     log_model = join(log_dir, model_name)
     logger = TensorBoard_multiclass(log_dir=log_model, log_image_interval=1)
     print("The neural network training is now starting")
+    write_on_models_notebook(model_name, model_path_pkl, log_model, depth,
+                             initial_features, n_epochs,
+                             training_partition_paths, split, output_classes,
+                             segmentation_names, retrain, path_to_old_model,
+                             models_notebook_path)
     for epoch in range(n_epochs):
         # apply training for one epoch
         new_epoch = epoch + old_epoch

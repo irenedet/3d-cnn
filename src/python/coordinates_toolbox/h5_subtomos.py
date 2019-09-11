@@ -34,11 +34,11 @@ def compute_best_cross_correlation_angle(array: np.array, mask: np.array,
         internal_path = join(h5_internal_paths.RAW_SUBTOMOGRAMS,
                              rotation_name)
         template = h5file[internal_path][:]
-        template = crop_window(input=template,
+        template = crop_window(input_array=template,
                                shape_to_crop=ref_side_lengths,
                                window_corner=ref_start_corners)
 
-        mask_adj = crop_window(input=mask,
+        mask_adj = crop_window(input_array=mask,
                                shape_to_crop=ref_side_lengths,
                                window_corner=ref_start_corners)
 
@@ -84,7 +84,7 @@ def compute_list_best_cross_correlation_angles(
                     dataset_shape=subtomo_shape,
                     subtomo_shape=side_lengths,
                     center=subtomo_center)
-            array = crop_window(input=dataset, shape_to_crop=side_lengths,
+            array = crop_window(input_array=dataset, shape_to_crop=side_lengths,
                                 window_corner=start_corners)
             best_cross_correlation, best_angle_index = \
                 compute_best_cross_correlation_angle(
