@@ -1,9 +1,64 @@
 from os.path import join
+from random import shuffle
 
 import h5py
 import numpy as np
 
 from src.python.naming import h5_internal_paths
+
+
+def get_subtomos_and_labels(path_to_output_h5, label):
+    with h5py.File(path_to_output_h5, 'r') as f:
+        internal_path = h5_internal_paths.LABELED_SUBTOMOGRAMS
+        internal_path = join(internal_path, label)
+        subtomos_names = list(f[internal_path])
+        subtomos_number = len(subtomos_names)
+        subtomos_list = []
+        for subtomo_name in subtomos_names:
+            subtomo_path = join(internal_path, subtomo_name)
+            subtomo = f[subtomo_path][:]
+            subtomos_list.append(subtomo)
+        labels = np.ones(subtomos_number)
+    return subtomos_list, labels
+
+
+def fill_multiclass_labels(semantic_classes, co_labeling_dict, labels_data):
+    # format of co_labeling_dict: if class1 \subset class2 then class2
+    # in co_labeling[class1]
+    for class_index, semantic_class in enumerate(semantic_classes):
+        for other_index, other_class in enumerate(semantic_classes):
+            if other_class in co_labeling_dict[semantic_class]:
+                print(semantic_class, " is a subset of ", other_class)
+                where_semantic_class = np.where(labels_data[class_index, :] > 0)
+                labels_data[other_index, where_semantic_class] = np.ones(
+                    (1, len(where_semantic_class)))
+    return labels_data
+
+
+def load_classification_training_set(semantic_classes, path_to_output_h5):
+    subtomos_data = []
+    # classes_number = len(semantic_classes)
+    labels_data = []  # np.zeros((classes_number, 0))
+    for class_number, semantic_class in enumerate(semantic_classes):
+        subtomos_list, labels = get_subtomos_and_labels(path_to_output_h5,
+                                                        semantic_class)
+        labels_semantic_class = [class_number for _ in range(len(labels))]
+
+        subtomos_data += subtomos_list
+        labels_data += labels_semantic_class
+        # labels_data = np.concatenate((labels_data, labels_semantic_class),
+        #                              axis=1)
+    # labels_data = labels_data.transpose()
+    # labels_data = list(labels_data)
+    # Shuffle both lists subtomos_data and labels_data together
+    zipped_data = list(zip(subtomos_data, labels_data))
+    shuffle(zipped_data)
+    subtomos_data = list(map(lambda p: p[0], zipped_data))
+    labels_data = list(map(lambda p: p[1], zipped_data))
+
+    labels_data = np.array(labels_data)
+    subtomos_data = np.array(subtomos_data)[:, None]
+    return subtomos_data, labels_data
 
 
 def read_training_data(training_data_path: str,
@@ -78,6 +133,7 @@ def read_training_data_dice_multi_class(training_data_path: str,
     print("Loaded data of shape", data.shape)
     print("Loaded labels of shape", labels.shape)
     return data, labels
+
 
 # Todo: remove after testing transformations
 def dummy_read_training_data_dice_multi_class(training_data_path: str,

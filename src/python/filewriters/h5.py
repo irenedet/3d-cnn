@@ -1,12 +1,16 @@
 import os
 import random
+import os.path
+from os import makedirs
 from os.path import join
-
 import h5py
 import numpy as np
 import torch
 import torch.nn as nn
+import pandas as pd
 
+from src.python.filereaders.datasets import load_dataset
+from src.python.peak_toolbox.utils import read_motl_coordinates_and_values
 from src.python.networks.unet import UNet
 from src.python.coordinates_toolbox import subtomos
 from src.python.coordinates_toolbox.utils import \
@@ -403,23 +407,55 @@ def write_joint_raw_and_labels_subtomograms(output_path: str,
     return
 
 
-def write_classification_dataset(output_path: str,
-                                 padded_raw_dataset: np.array,
-                                 label_name: str,
-                                 window_centers: list,
-                                 crop_shape: tuple):
-    label_internal_path = join(h5_internal_paths.LABELED_SUBTOMOGRAMS,
-                               label_name)
-    with h5py.File(output_path, 'w') as f:
-        for window_center in window_centers:
-            print("window_center", window_center)
-            subtomo_name = "subtomo_{0}".format(str(window_center))
-            subtomo_internal_path = join(label_internal_path, subtomo_name)
-            subtomo_raw_data = crop_window_around_point(
-                input_array=padded_raw_dataset,
-                crop_shape=crop_shape,
-                window_center=window_center)
-            f[subtomo_internal_path] = subtomo_raw_data[:]
+def generate_classification_training_set(path_to_output_h5: str,
+                                         path_to_dataset: str,
+                                         motl_path: str, label: str,
+                                         subtomo_size: int or tuple or list):
+    assert isinstance(subtomo_size, (int, tuple, list))
+    if isinstance(subtomo_size, int):
+        crop_shape = (subtomo_size, subtomo_size, subtomo_size)
+    else:
+        crop_shape = subtomo_size
+
+    _, coordinates = read_motl_coordinates_and_values(motl_path)
+    dataset = load_dataset(path_to_dataset)
+
+    if os.path.isfile(path_to_output_h5):
+        mode = 'a'
+    else:
+        mode = 'w'
+
+    makedirs(name=os.path.dirname(path_to_output_h5), exist_ok=True)
+    with h5py.File(path_to_output_h5, mode) as f:
+        internal_path = h5_internal_paths.LABELED_SUBTOMOGRAMS
+        internal_path = join(internal_path, label)
+        for point in coordinates:
+            x, y, z = [int(entry) for entry in point]
+            subtomo_name = "subtomo_" + str(point)
+            subtomo = crop_window_around_point(input_array=dataset,
+                                               crop_shape=crop_shape,
+                                               window_center=(z, y, x))
+            subtomo_path = join(internal_path, subtomo_name)
+            f[subtomo_path] = subtomo[:]
+    return path_to_output_h5
+
+
+def generate_classification_training_set_per_tomo(dataset_table: str,
+                                                  tomo_name: str,
+                                                  semantic_classes: list,
+                                                  path_to_output_h5: str,
+                                                  box_side: int or tuple):
+    df = pd.read_csv(dataset_table)
+    df['tomo_name'] = df['tomo_name'].astype(str)
+    tomo_df = df[df['tomo_name'] == tomo_name]
+
+    for semantic_class in semantic_classes:
+        motl_label = "path_to_motl_clean_" + semantic_class
+        motl_path = tomo_df.iloc[0][motl_label]
+        path_to_dataset = tomo_df.iloc[0]['eman2_filetered_tomo']
+        generate_classification_training_set(path_to_output_h5, path_to_dataset,
+                                             motl_path, semantic_class,
+                                             box_side)
     return
 
 

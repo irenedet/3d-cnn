@@ -1,3 +1,4 @@
+*.out
 log_fractions_004_005/
 log_liang_multi_label/
 plot_counts.png

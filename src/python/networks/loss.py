@@ -142,7 +142,8 @@ class DiceCoefficientLoss(nn.Module):
         target.float()
         dice_loss = 0
         channels = input.shape[1]
-        print(input.shape)
+        # print("channels = ", channels)
+        # print("input.shape", input.shape)
         for channel in range(channels):
             channel_prediction = input[:, channel, ...].float()
             channel_target = target[:, channel, ...].float()
