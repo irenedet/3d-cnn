@@ -54,6 +54,9 @@ parser.add_argument("-retrain", "--retrain",
 parser.add_argument("-path_to_old_model", "--path_to_old_model",
                     default=False,
                     type=str)
+parser.add_argument("-shuffle", "--shuffle",
+                    default=True,
+                    type=str)
 parser.add_argument("-segmentation_names", "--segmentation_names",
                     default='ribo,fas,memb',
                     type=str)
@@ -70,7 +73,7 @@ args = parser.parse_args()
 dataset_table = args.dataset_table
 tomo_training_list = args.tomo_training_list
 tomo_training_list = tomo_training_list.split(',')
-
+shuffle = strtobool(args.shuffle)
 split = args.split
 log_dir = args.log_dir
 model_initial_name = args.model_initial_name
@@ -83,7 +86,7 @@ depth = args.depth
 initial_features = args.initial_features
 models_notebook_path = args.models_notebook
 segmentation_names = args.segmentation_names
-segmentation_names = list(map(str, segmentation_names.split(',')))
+segmentation_names = segmentation_names.split(',')
 label_name = ""
 for semantic_class in segmentation_names:
     label_name += semantic_class + "_"
@@ -150,24 +153,27 @@ for n, training_data_path in enumerate(training_partition_paths):
         print(training_data_path)
         print("labels.shape = ", labels.shape)
         print("raw_data.shape = ", raw_data.shape)
-        print("Initial unique labels", np.unique(labels))
+        if raw_data.shape[0] == 0:
+            print('Empty training set in ', training_data_path)
+        else:
+            print("Initial unique labels", np.unique(labels))
 
-        # Normalize data
-        preprocessed_data = preprocess_data(raw_data)
-        preprocessed_data = np.array(preprocessed_data)[:, None]
-        labels = np.array(labels, dtype=np.long)
+            # Normalize data
+            preprocessed_data = preprocess_data(raw_data)
+            preprocessed_data = np.array(preprocessed_data)[:, None]
+            labels = np.array(labels, dtype=np.long)
 
-        train_data_tmp, train_labels_tmp, val_data_tmp, val_labels_tmp, _ = \
-            split_dataset(preprocessed_data, labels, split)
+            train_data_tmp, train_labels_tmp, val_data_tmp, val_labels_tmp, _ = \
+                split_dataset(preprocessed_data, labels, split)
 
-        print("train_data.shape", train_data.shape)
-        print("train_labels.shape", train_labels.shape)
+            print("train_data.shape", train_data.shape)
+            print("train_labels.shape", train_labels.shape)
 
-        train_data = np.concatenate((train_data, train_data_tmp), axis=0)
-        train_labels = np.concatenate((train_labels, train_labels_tmp),
-                                      axis=0)
-        val_data = np.concatenate((val_data, val_data_tmp), axis=0)
-        val_labels = np.concatenate((val_labels, val_labels_tmp), axis=0)
+            train_data = np.concatenate((train_data, train_data_tmp), axis=0)
+            train_labels = np.concatenate((train_labels, train_labels_tmp),
+                                          axis=0)
+            val_data = np.concatenate((val_data, val_data_tmp), axis=0)
+            val_labels = np.concatenate((val_labels, val_labels_tmp), axis=0)
 
 train_set = du.TensorDataset(torch.from_numpy(train_data),
                              torch.from_numpy(train_labels))
@@ -175,7 +181,7 @@ val_set = du.TensorDataset(torch.from_numpy(val_data),
                            torch.from_numpy(val_labels))
 
 # wrap into data-loader (shuffle in False works better apparently)
-train_loader = du.DataLoader(train_set, shuffle=False, batch_size=5)
+train_loader = du.DataLoader(train_set, shuffle=shuffle, batch_size=5)
 val_loader = du.DataLoader(val_set, batch_size=5)
 
 for conf in net_confs:

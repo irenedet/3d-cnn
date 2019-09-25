@@ -18,20 +18,20 @@ export QT_QPA_PLATFORM='offscreen'
 echo 'starting virtual environment'
 source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 
-tomo="180711_005"
+tomo="180711/004"
 #/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/for_sara/Retrained_D4_IF8_NA_except_180711_003/180711_005/class_0/in_lamella/motl_833.csv
 
-export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/liang_dataset/clusters/test/clustering_test_NO_DA_ribo_D_2_IF_8_pr_radius_20/full_dataset/246/class_0/combined_motl_1.5sph"
+export output_dir="/struct/mahamid/Irene/yeast/healthy/180711/004/ribos/motl/to_check/undetected/overlapping_fas"
 #export path_to_motl_predicted="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/D2_IF8_NA/180426_004/class_0/in_lamella/motl_2608.csv"
-export path_to_motl_true="/struct/mahamid/Liang/tomogram/3D_CNN/network_training/data/00246_motl_ribo_clean.em"
-export path_to_motl_predicted=$output_dir"/combined_motl.csv"
+export path_to_motl_true="/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/004/FAS/TM/motl_clean_fas_4b.em"
+export path_to_motl_predicted="/struct/mahamid/Irene/yeast/healthy/180711/004/ribos/motl/to_check/undetected/motl_599.csv"
 export testing_set_data_path="None" #set the partition produced by particle picking pipeline
-export radius=20
+export radius=8
 export z_shift=0 # z_shift between original tomogram and subtomogram of partition
 export x_shift=0 # -16 for 004, 16 for 005 (if dataset is square)
-export shape_x=928
-export shape_y=928
-export shape_z=450
+export shape_x=960
+export shape_y=929
+export shape_z=500
 export box=128
 
 echo "Starting to generate precision recall plots"

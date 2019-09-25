@@ -5,15 +5,15 @@ from src.python.networks.unet import UNet
 from src.python.filewriters.h5 import segment_and_write
 
 # data to provide by user:
-data_path = "/scratch/trueba/3d-cnn/training_data/dice-multi-class/004/G_sigma1/train_and_test_partitions/partition_training.h5"
-model_path = "/g/scb2/zaugg/trueba/3d-cnn/models/dice_multi_label/0_w_1_1_1_ribo_fas_memb_D_2_IF_8.pkl"
+data_path = "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/ED_DEFOCUS/190301/009/tomo_partition.h5"
+model_path = "/g/scb2/zaugg/trueba/3d-cnn/models/dice_multi_label/retrained/Retrain_D2_IF8_NA_except_180711_003ribo_fas_memb_D_2_IF_8.pkl"
 output_classes = 3
 confs = {'final_activation': None,
          'depth': 2,
          'initial_features': 8,
          "out_channels": output_classes}
 model = UNet(**confs)
-label_name = "D_2_IF_8_0_w_1_1_1"
+label_name = "Retrain_D2_IF8_NA_except_180711_003"
 
 device = get_device()
 model.load_state_dict(torch.load(model_path, map_location=device)['model_state_dict'])

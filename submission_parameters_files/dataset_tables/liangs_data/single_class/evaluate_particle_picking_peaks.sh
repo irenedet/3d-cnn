@@ -44,8 +44,3 @@ do
 	echo "Submitting job for tomo $tomo_name"
 	sbatch ./submission_scripts/dataset_tables/cnn_evaluation_runners/peak_calling/runner.sh -statistics_file $statistics_file -output_dir $global_output_dir -dataset_table $path_to_dataset_table -tomo_name $tomo_name -path_to_model $path_to_model -label_name $model_nickname -depth $depth -init_feat $init_feat -output_classes $output_classes -class_number $class_number -box_side $box_side -new_loader $new_loader -minimum_peak_distance $particle_picking_radius -border_xy $border_xy -lamella_extension $lamella_extension -same_peak_distance $same_peak_radius_pr_analysis -threshold $score_threshold -BN $BN -semantic_classes $semantic_classes
 done
-
-# ... Finally:
-echo "Save a copy of this script for future reference"
-SCRIPT=`realpath $0`
-cp $SCRIPT $global_output_dir"/SCRIPT.txt"

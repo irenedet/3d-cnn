@@ -1,17 +1,14 @@
 import os
 
 import datetime
-# import torch
 import numpy as np
+
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 import torchvision.utils as vutils
 import tensorboardX as tb
-# from functools import reduce
 
 from src.python.networks.unet_new import UNetEncoder3D
-from src.python.networks.loss import DiceCoefficientLoss
 from src.python.networks.utils import generate_train_val_loaders
 from src.python.networks.io import get_device
 from src.python.filereaders.h5 import load_classification_training_set
@@ -52,7 +49,8 @@ class Classifier3D(nn.Module):
         self.final_activation = final_activation
         self.depth = depth
         self.initial_features = initial_features
-        self.volume_side = volume_side
+        number_binnings = 1
+        self.volume_side = volume_side // 2 ** number_binnings
 
         self.encoder = UNetEncoder3D(in_channels=in_channels, depth=depth,
                                      initial_features=initial_features)
@@ -209,38 +207,86 @@ class Classifier3D(nn.Module):
         writer.close()
 
     def forward(self, input_tensor):
-        _, x = self.encoder.forward(input_tensor=input_tensor)
+        x = nn.AvgPool3d(kernel_size=2, stride=2)(input_tensor)
+        _, x = self.encoder.forward(input_tensor=x)
         x = x.view(-1, self.linear_size)
         x = self.linear_tail.forward(x)
         x = self.final_activation(x)
         return x
 
 
-volume_side = 64
-spl = 0.7  # training set percentage
-epochs = 40  # 40  # 100
-depth = 1  # 2
-initial_features = 2  # 4
-output_classes = 2
+import argparse
 
-train_log_dir = "/g/scb2/zaugg/trueba/3d-cnn/logs_classification3D/"
-data_path = "/scratch/trueba/3Dclassifier/liang_data/training_data/200/training_set.h5"
-# data_path = "/scratch/trueba/3Dclassifier/liang_data/training_data/200/toy_training_set.h5"
-semantic_classes = ['70S', '50S']
-model_initial_name = "Test_CroSSEntLoss_"
+parser = argparse.ArgumentParser()
 
+parser.add_argument("-train_log_dir", "--train_log_dir",
+                    type=str,
+                    default="/g/scb2/zaugg/trueba/3d-cnn/logs_classification3D/")
+parser.add_argument("-data_path", "--data_path",
+                    type=str,
+                    default="/scratch/trueba/3Dclassifier/liang_data/training_data/200/training_set.h5")
+parser.add_argument("-semantic_classes", "--semantic_classes",
+                    type=str, default='70S,50S')
+parser.add_argument("-model_initial_name", "--model_initial_name",
+                    type=str, default='test_CrossEntropyLoss_')
+parser.add_argument("-volume_side", "--volume_side",
+                    type=int, default=64)
+parser.add_argument("-spl", "--spl",
+                    type=float, default=0.7)
+parser.add_argument("-epochs", "--epochs",
+                    type=int, default=40)
+parser.add_argument("-output_classes", "--output_classes",
+                    type=int, default=2)
+parser.add_argument("-depth", "--depth",
+                    type=int, default=3)
+parser.add_argument("-initial_features", "--initial_features",
+                    type=int, default=4)
+args = parser.parse_args()
+
+train_log_dir = args.train_log_dir
+
+data_path = args.data_path
+
+volume_side = args.volume_side
+
+spl = args.spl
+
+epochs = args.epochs
+
+output_classes = args.output_classes
+
+depth = args.depth
+
+initial_features = args.initial_features
+
+semantic_classes = args.semantic_classes
+semantic_classes = semantic_classes.split(',')
+model_initial_name = args.model_initial_name
+
+# volume_side = 64
+# spl = 0.7  # training set percentage
+# epochs = 40  # 40  # 100
+# depth = 3  # 2
+# initial_features = 8  # 4
+# output_classes = 2
+#
+# train_log_dir = "/g/scb2/zaugg/trueba/3d-cnn/logs_classification3D/"
+# data_path = "/scratch/trueba/3Dclassifier/liang_data/training_data/200/training_set.h5"
+# # data_path = "/scratch/trueba/3Dclassifier/liang_data/training_data/200/toy_training_set.h5"
+# semantic_classes = ['70S', '50S']
+# model_initial_name = "Test_CroSSEntLoss_"
 
 # loss = DiceCoefficientLoss()
 # final_activation = nn.Sigmoid()
-# TODO idea:
+# TODO idea: to be checked! already impllemented
 # add a mean pooling at the beginning to reduce the size of images nn.AvgPool3d
 
-#This does not work well!!!!!:
-#loss = nn.NLLLoss()#F.nll_loss  # nn.NLLLoss()  #  Neither works that well
-#final_activation = nn.LogSoftmax(dim=1) #dim=0  dimensions: B,Ch
+# This does not work well!!!!!:
+# loss = nn.NLLLoss()#F.nll_loss  # nn.NLLLoss()  #  Neither works that well
+# final_activation = nn.LogSoftmax(dim=1) #dim=0  dimensions: B,Ch
 
-loss = nn.CrossEntropyLoss() #F.nll_loss  # nn.NLLLoss()  #  Neither works that well
-final_activation = nn.ReLU() #dim=0  dimensions: B,Ch
+loss = nn.CrossEntropyLoss()  # F.nll_loss  # nn.NLLLoss()  #  Neither works that well
+final_activation = nn.ReLU()  # dim=0  dimensions: B,Ch
 
 ############## Load Dataset
 # df = pd.read_csv(dataset_table)
@@ -250,12 +296,11 @@ final_activation = nn.ReLU() #dim=0  dimensions: B,Ch
 volumes_raw, volumes_label = load_classification_training_set(semantic_classes,
                                                               data_path)
 
-
 print("volumes_raw.shape, volumes_label.shape", volumes_raw.shape,
       volumes_label.shape)
 
 now = datetime.datetime.now()
-date = str(now.year) + "." + str(now.month) + "."  + str(now.day)
+date = str(now.year) + "." + str(now.month) + "." + str(now.day)
 time = str(now.hour) + "h." + str(now.minute) + "min."
 
 net_name = model_initial_name + "D_" + str(depth) + "_IF_" + str(
@@ -301,6 +346,15 @@ classifier.train_net(train_loader=src_train_loader, test_loader=src_val_loader,
 # import torch
 #
 # subtomo = torch.from_numpy(volumes_raw[:1, ...])
+#
+# transformed = nn.AvgPool3d(kernel_size=2, stride=2)(subtomo)
+# print(transformed.shape)
+#
+# import matplotlib.pyplot as plt
+#
+# plt.imshow(transformed[0, 0, 16, :, :])
+# plt.show()
+
 # target = torch.from_numpy(volumes_label[:1, ...])
 #
 # print("target", target)

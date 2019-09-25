@@ -116,7 +116,6 @@ def read_training_data_dice_multi_class(training_data_path: str,
         for subtomo_name in raw_subtomo_names[:split]:
             raw_subtomo_h5_internal_path = join(
                 h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
-            data += [f[raw_subtomo_h5_internal_path][:]]
             labels_current_subtomo = []
             for label_name in segmentation_names:
                 labels_subtomo_h5_internal_path = join(
@@ -126,7 +125,13 @@ def read_training_data_dice_multi_class(training_data_path: str,
                     subtomo_name)
                 labels_current_subtomo += [
                     f[labels_subtomo_h5_internal_path][:]]
-            labels += [np.array(labels_current_subtomo)]
+            segm_max = [np.max(label_data) for label_data in
+                        labels_current_subtomo]
+            if np.max(segm_max) > 0.5:
+                data += [f[raw_subtomo_h5_internal_path][:]]
+                labels += [np.array(labels_current_subtomo)]
+            else:
+                print("Discard subtomo", subtomo_name)
 
     data = np.array(data)
     labels = np.array(labels)

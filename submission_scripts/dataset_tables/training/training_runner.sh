@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 260G
-#SBATCH --time 0-5:00
+#SBATCH --mem 65G
+#SBATCH --time 0-07:00
 #SBATCH -o slurm_outputs/training.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/training.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -42,6 +42,9 @@ while [ "$1" != "" ]; do
                                 ;;
         -split | --split )   shift
                                 split=$1
+                                ;;
+        -shuffle | --shuffle )   shift
+                                shuffle=$1
                                 ;;
         -log_dir | --log_dir )   shift
                                 log_dir=$1
@@ -90,7 +93,7 @@ export tomo_training_list=$tomo_training_list
 export path_to_dataset_table=$path_to_dataset_table
 export segmentation_names=$segmentation_names
 export split=$split
-
+export shuffle=$shuffle
 # Data for the new model
 export log_dir=$log_dir
 export model_initial_name=$model_initial_name
@@ -105,6 +108,26 @@ export retrain=$retrain
 export path_to_old_model=$path_to_old_model
 export models_notebook=$models_notebook
 
-echo 'Training dice multi-label network for fraction ' $fraction
-python3 ./runners/dataset_tables/training/dice_unet_training.py -dataset_table $path_to_dataset_table -tomo_training_list "${tomo_training_list[@]}" -split $split -classes $output_classes -log_dir $log_dir -model_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook
+
+echo tomo_training_list=$tomo_training_list
+echo path_to_dataset_table=$path_to_dataset_table
+echo segmentation_names=$segmentation_names
+echo split=$split
+echo shuffle=$shuffle
+
+echo log_dir=$log_dir
+echo model_initial_name=$model_initial_name
+echo model_path=$model_path
+echo n_epochs=$n_epochs
+echo depth=$depth
+echo initial_features=$initial_features
+echo output_classes=$output_classes
+
+echo retrain=$retrain
+echo path_to_old_model=$path_to_old_model
+echo models_notebook=$models_notebook
+
+echo 'Training dice multi-label network for fraction='$fraction
+echo 'and model_name='$model_initial_name
+python3 ./runners/dataset_tables/training/dice_unet_training.py -dataset_table $path_to_dataset_table -tomo_training_list "${tomo_training_list[@]}" -split $split -classes $output_classes -log_dir $log_dir -model_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook -shuffle $shuffle
 

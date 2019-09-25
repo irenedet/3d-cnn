@@ -2,8 +2,8 @@ import h5py
 from os.path import join
 from random import shuffle
 
-input_h5 = "/struct/mahamid/Irene/yeast/healthy/180426/021/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5"
-output_folder = "/struct/mahamid/Irene/yeast/healthy/180426/021/G_sigma1_non_sph/train_and_test_partitions/"
+input_h5 = "/scratch/trueba/3d-cnn/training_data/dice-multi-class/190301/005/train_and_test_partitions/full_partition.h5"
+output_folder = "/scratch/trueba/3d-cnn/training_data/dice-multi-class/190301/005/train_and_test_partitions/"
 fractions_number = 5
 semantic_classes = ['fas', 'memb', 'ribo']
 

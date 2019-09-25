@@ -92,7 +92,7 @@ if testing_set_data_path == "None":
     predicted_coordinates_test = predicted_coordinates
     predicted_values_test = predicted_values
 else:
-    print("Only particles in the test patiition will be considered",
+    print("Only particles in the test partition will be considered",
           "for testing...")
     start = time.time()
     true_coordinates_test, _ = \

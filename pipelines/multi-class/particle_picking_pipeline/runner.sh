@@ -83,15 +83,15 @@ export box_overlap=12
 export output_h5_file_path=$output_dir'partition_subtomograms_.h5'
 
 echo 'running python3 scripts: 1. Partitioning raw tomogram'
-python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/multi-class/particle_picking_pipeline/1_partition_tomogram.py -raw $path_to_raw -output $output_dir -outh5 $output_h5_file_path -box $box_side -overlap $box_overlap
+python3 ./pipelines/multi-class/particle_picking_pipeline/1_partition_tomogram.py -raw $path_to_raw -output $output_dir -outh5 $output_h5_file_path -box $box_side -overlap $box_overlap
 echo '... done.'
 
 echo 'running python3 scripts: 2. Segmenting raw subtomograms'
-python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/multi-class/evaluation/cnn_subtomo_segmentation.py -model $path_to_model -label $label_name -data_path $output_h5_file_path -init_feat $initial_features -depth $unet_depth -out_classes $output_classes
+python3 ./pipelines/multi-class/evaluation/cnn_subtomo_segmentation.py -model $path_to_model -label $label_name -data_path $output_h5_file_path -init_feat $initial_features -depth $unet_depth -out_classes $output_classes
 echo '... done.'
 
 echo 'running python3 scripts: 3. getting particles motive list'
-python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/multi-class/particle_picking_pipeline/3_get_peaks_motive_list.py -output $output_dir -label $label_name -subtomo $output_h5_file_path -box $box_side -xdim $output_xdim -ydim $output_ydim -zdim $output_zdim -class_number $class_number -min_peak_distance $min_peak_distance -z_shift $z_shift_original -overlap $box_overlap
+python3 ./pipelines/multi-class/particle_picking_pipeline/3_get_peaks_motive_list.py -output $output_dir -label $label_name -subtomo $output_h5_file_path -box $box_side -xdim $output_xdim -ydim $output_ydim -zdim $output_zdim -class_number $class_number -min_peak_distance $min_peak_distance -z_shift $z_shift_original -overlap $box_overlap
 echo 'finished whole script'
 
 

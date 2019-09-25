@@ -1,30 +1,24 @@
 #!/usr/bin/env bash
 
-TOMOS="190301/005"
+#TOMOS="190301/005"
+TOMOS="181119/002 181119/030 181126/002 181126/012 181126/025"
 
 # Tomograms data
 export path_to_dataset_table="/struct/mahamid/Irene/yeast/yeast_table.csv"
-export class_number=1 # 0=ribo, 1=fas, 2=memb
-export semantic_classes="ribo,fas,memb"
+export class_number=0
+export semantic_classes="fas"
 
-if [ $class_number == 0 ]; then
-    echo "class_number is 0"
-    export statistics_file="/struct/mahamid/Irene/yeast/ribos_yeast_statistics_corrected_motls.csv"
-elif [ $class_number == 1 ]; then
-    echo "class_number is 1"
-    export statistics_file="/struct/mahamid/Irene/yeast/fas_yeast_statistics.csv"
-else
-    echo "class_number non-supported for now"
-fi
+statistics_file="/struct/mahamid/Irene/yeast/fas_yeast_statistics.csv"
 
 # CNN parameters:
-path_to_model="models/fractions_004_005/Basis_004_005_shuffle_false_frac_0_ribo_fas_memb__D_1_IF_8.pkl"
-model_nickname="Basis_004_005_shuffle_false_frac_0_ribo_fas_memb__D_1_IF_8"
+path_to_model="models/fractions_004_005_021_ED/shuffle_false_frac_0_fas__D_2_IF_8.pkl"
+model_nickname="004_005_021_ED_shuffle_false_frac_0_fas__D_2_IF_8"
 
 BN=false
-depth=1
+frac=0
+depth=2
 init_feat=8
-output_classes=3
+output_classes=1
 box_side=128
 new_loader='True'
 
@@ -32,7 +26,7 @@ new_loader='True'
 particle_picking_radius=12 #for particle picking
 border_xy=10
 lamella_extension=0
-same_peak_radius_pr_analysis=8
+same_peak_radius_pr_analysis=10
 score_threshold=-1
 global_output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/yeast_dataset/"$model_nickname"/peak_calling/pr_radius_"$same_peak_radius_pr_analysis
 

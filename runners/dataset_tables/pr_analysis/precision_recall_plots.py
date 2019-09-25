@@ -130,7 +130,7 @@ if test_partition == "None":
     predicted_coordinates_test = predicted_coordinates
     predicted_values_test = predicted_values
 else:
-    print("Only particles in the test patiition will be considered",
+    print("Only particles in the test partition will be considered",
           "for testing...")
     start = time.time()
     true_coordinates_test, _ = \
@@ -174,8 +174,13 @@ value_redudndantly_detected_predicted = \
         radius=radius)
 
 F1_score = F1_score_calculator(precision, recall)
-max_F1 = np.max(F1_score)
-optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
+if len(F1_score)>0:
+    max_F1 = np.max(F1_score)
+    optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
+else:
+    max_F1 = np.nan
+    optimal_peak_number = np.nan
+
 auPRC = pr_auc_score(precision=precision, recall=recall)
 print("auPRC = ", auPRC, "and max_F1 = ", max_F1)
 

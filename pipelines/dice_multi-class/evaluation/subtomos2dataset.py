@@ -5,14 +5,7 @@ from src.python.filewriters.h5 import \
 from src.python.naming import h5_internal_paths
 import numpy as np
 
-# subtomos_path
-# output_dir
-# output_shape
-# box
-# overlap_thickness
-# output_classes
-# label_name
-# segmentation_names
+
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -68,7 +61,7 @@ segmentation_names = segmentation_names.split(",")
 subtomos_internal_path = join(
     h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS,
     label_name)
-
+print("subtomos_internal_path =", subtomos_internal_path)
 for n in range(output_classes):
     segmentation_name = segmentation_names[n]
     output_file = segmentation_name + ".hdf"

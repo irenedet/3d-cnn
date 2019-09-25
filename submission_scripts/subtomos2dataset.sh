@@ -20,13 +20,12 @@ echo "... done."
 #export output_path="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/D2_IF8_NA/180711_005/class_0/predicted_segmentation.hdf"
 export cluster_labels=False
 export class_number=0
-export output_shape=(928,928,450)
+export output_shape=(960,931,500)
 export box_length=128
 export box_overlap=12
-export label_name="NO_DA_corr_dim1_tanhdice_softmax_70S_50S_memb_D_2_IF_8"
-export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/liang_dataset/NO_DA_corr_dim1_tanhdice_softmax_70S_50S_memb_D_2_IF_8/246"
-DIRS="
-/scratch/trueba/liang_data/246/train_and_test_partitions/full_partition.h5
+export label_name="Retrain_retrained_D4_IF8_NA_except_180711_003"
+export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/for_sara/Retrain_retrained_D4_IF8_NA_except_180711_003/180711_018"
+DIRS="/struct/mahamid/Irene/yeast/healthy/180711/018/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5
 "
 #/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/D2_IF8_NA/180426_021
 #/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/D2_IF8_NA/180426_024

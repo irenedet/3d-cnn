@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 128G
-#SBATCH --time 0-2:50
+#SBATCH --mem 60G
+#SBATCH --time 0-02:30
 #SBATCH -o slurm_outputs/evaluate_particle_peaking_peaks.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/evaluate_particle_peaking_peaks.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
