@@ -24,6 +24,6 @@ def read_hdf(hdf_file_path: str) -> np.array:
     # hdf_file = h5py.File(path_to_file)
     # dataset = hdf_file['MDF']['images']['0']['image']
     with h5py.File(hdf_file_path, 'r') as f:
-        HDF_INTERNAL_PATH = "MDF/images/0/image"  # TODO
+        HDF_INTERNAL_PATH = "MDF/images/0/image"
         dataset = f[HDF_INTERNAL_PATH][:]
     return np.array(dataset)

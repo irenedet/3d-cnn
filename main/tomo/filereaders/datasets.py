@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from main.tomo import read_em
+from main.tomo.filereaders.em import read_em
 from main.tomo.filereaders.h5 import read_hdf
 
 
