@@ -197,7 +197,10 @@ class RandomRot3D(Transform):
                                                               self.rot_range))
 
     def volume_function(self, volume):
-        angle_z = self.get_random_variable('angle_z')
+        print("For now, the angle of rotation is fixed to rot_range =",
+              self.rot_range)
+        # angle_z = self.get_random_variable('angle_z')
+        angle_z = self.rot_range
         volume = interpolation.rotate(volume, angle_z, order=0, mode='reflect',
                                       axes=(1, 2), reshape=False)
         return volume

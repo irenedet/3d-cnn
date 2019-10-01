@@ -14,6 +14,7 @@ from src.python.networks.io import get_device
 from src.python.filereaders.h5 import load_classification_training_set
 
 
+
 class LinearTail(nn.Module):
     def __init__(self, in_features: int, out_features: int, p: float = 0.2):
         super().__init__()

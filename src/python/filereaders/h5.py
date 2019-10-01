@@ -108,12 +108,32 @@ def read_training_data(training_data_path: str,
 
 def read_training_data_dice_multi_class(training_data_path: str,
                                         segmentation_names: list,
-                                        split=-1) -> tuple:
+                                        split: int = -1) -> tuple:
+    
+    """
+    Loads partition training sets from h5 files, where the following are
+    internal paths for labels and raw files, respectively:
+    volumes/raw/
+    volumes/labels/<label name>/
+    :param training_data_path: 
+    :param segmentation_names: 
+    :param split: 
+    :return: (data, labels)
+    data: an array of shape N x 1 x Dx x Dy x Dz, where N is the total number
+    of raw volumes
+    labels: an array of shape N x S x Dx x Dy x Dz, where S is the number of
+    semantic classes (or labels) in segmentation_names
+
+    """
     data = []
     labels = []
     with h5py.File(training_data_path, 'r') as f:
         raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
-        for subtomo_name in raw_subtomo_names[:split]:
+        if split == -1:
+            subtomo_list = raw_subtomo_names
+        else:
+            subtomo_list = raw_subtomo_names[:split]
+        for subtomo_name in subtomo_list:
             raw_subtomo_h5_internal_path = join(
                 h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
             labels_current_subtomo = []
@@ -128,15 +148,15 @@ def read_training_data_dice_multi_class(training_data_path: str,
             segm_max = [np.max(label_data) for label_data in
                         labels_current_subtomo]
             if np.max(segm_max) > 0.5:
-                data += [f[raw_subtomo_h5_internal_path][:]]
+                data += [[f[raw_subtomo_h5_internal_path][:]]]
                 labels += [np.array(labels_current_subtomo)]
             else:
                 print("Discard subtomo", subtomo_name)
 
     data = np.array(data)
     labels = np.array(labels)
-    print("Loaded data of shape", data.shape)
-    print("Loaded labels of shape", labels.shape)
+    print("Loaded data of shape from the reader", data.shape)
+    print("Loaded labels of shape from the reader", labels.shape)
     return data, labels
 
 

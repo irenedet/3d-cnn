@@ -83,7 +83,7 @@ def generate_train_val_loaders(raw_array, label_array, split, batch_size=5,
 
 
 def data_loader(data_path: str, semantic_class: str,
-                number_vols: int = -1):
+                number_vols: int = -1, labeled_only: bool = False):
     raw_array = list()
     label_array = list()
     with h5py.File(data_path, 'r') as f:
@@ -98,8 +98,17 @@ def data_loader(data_path: str, semantic_class: str,
         for vol_name in source_raw_names[:number_vols]:
             src_raw_path = join(h5_path_raw, vol_name)
             src_label_path = join(h5_path_label, vol_name)
-            raw_array += [f[src_raw_path][:]]
-            label_array += [f[src_label_path][:]]
+            if labeled_only:
+                # Only read if at least one label is positive:
+                if np.max(f[src_label_path][:]) > 0:
+                    raw_array += [f[src_raw_path][:]]
+                    label_array += [f[src_label_path][:]]
+                else:
+                    print("Partition element with no label data: not included.")
+            else:
+                # Read all of the data.
+                raw_array += [f[src_raw_path][:]]
+                label_array += [f[src_label_path][:]]
         # Add channel dimension
         raw_array, label_array = np.array(raw_array)[:, None], np.array(
             label_array)[:, None]

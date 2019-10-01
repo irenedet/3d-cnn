@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 fractions="0 1 2 3 4"
+#TOMOS="181126/002"
 TOMOS="004 005 021 181119_002 181119_030 181126_002 181126_012 181126_025"
-fractions_name="004_005_021_ED"
+fractions_name="004_005_021_ED_and_vpp"
 # Tomograms data
 export path_to_dataset_table="/struct/mahamid/Irene/fractions/fractions_data.csv"
 export class_number=0 #
@@ -13,7 +14,7 @@ export statistics_file="/struct/mahamid/Irene/fractions_"$fractions_name"/fas/pe
 
 BN=false
 depth=1
-init_feat=8
+init_feat=16
 output_classes=1
 box_side=128
 new_loader='True'

@@ -19,8 +19,8 @@ export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
 export coords_in_tom_format='True'
 export class_number=0
 
-export hdf_output_path="/scratch/trueba/3d-cnn/cnn_evaluation/yeast_dataset/004_005_021_ED_shuffle_false_frac_0_fas__D_2_IF_8/peak_calling/pr_radius_10/190301/005/class_0/peaks/in_lamella/motl_843.hdf"
-export path_to_motl="/scratch/trueba/3d-cnn/cnn_evaluation/yeast_dataset/004_005_021_ED_shuffle_false_frac_0_fas__D_2_IF_8/peak_calling/pr_radius_10/190301/005/class_0/peaks/in_lamella/motl_843.csv"
+export hdf_output_path="/scratch/trueba/3d-cnn/cnn_evaluation/yeast_dataset/004_005_021_ED_shuffle_false_frac_1_fas__D_1_IF_8/peak_calling/pr_radius_10/190301/005/class_0/peaks/in_lamella/motl_250.hdf"
+export path_to_motl="/scratch/trueba/3d-cnn/cnn_evaluation/yeast_dataset/004_005_021_ED_shuffle_false_frac_1_fas__D_1_IF_8/peak_calling/pr_radius_10/190301/005/class_0/peaks/in_lamella/motl_250.csv"
 export radius=10
 export z_shift=0
 export shape_x=928

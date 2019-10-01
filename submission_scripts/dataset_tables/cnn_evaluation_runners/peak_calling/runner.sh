@@ -154,7 +154,7 @@ echo 'finished peak calling script'
 
 # 3. Filter coordinate points with lamella mask
 export output_dir=$output_dir"/peaks"
-export path_to_csv_motl=$(ls $output_dir"/"motl*)
+export path_to_csv_motl=$(ls $output_dir"/"motl*.csv)
 export lamella_output_dir=$output_dir"/in_lamella"
 
 echo "Now filtering points in lamella mask"
@@ -163,7 +163,7 @@ echo "...done filtering points in lamella mask."
 
 
 # 3. Precision-Recall analysis
-export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir/motl*)
+export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir"/"motl*.csv)
 echo "Starting to generate precision recall plots"
 python3 ./runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_number $class_number -summary_file $summary_file -semantic_classes $semantic_classes
 echo "...done with precision recall plots."

@@ -93,9 +93,8 @@ def train(model, loader, optimizer, loss_function,
         # log to console
         if batch_id % log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_id * len(x),
-                len(loader.dataset),
-                       100. * batch_id / len(loader), loss.item()))
+                epoch, (batch_id + 1) * len(x), len(loader.dataset),
+                       100. * (batch_id + 1) / len(loader), loss.item()))
 
         # log to tensorboard
         if tb_logger is not None:

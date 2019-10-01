@@ -23,10 +23,9 @@ export class_number=0
 export output_shape=(960,931,500)
 export box_length=128
 export box_overlap=12
-export label_name="Retrain_retrained_D4_IF8_NA_except_180711_003"
-export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/for_sara/Retrain_retrained_D4_IF8_NA_except_180711_003/180711_018"
-DIRS="/struct/mahamid/Irene/yeast/healthy/180711/018/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5
-"
+export label_name="004_005_021_ED_shuffle_false_frac_1_fas__D_1_IF_8"
+export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/yeast_dataset/004_005_021_ED_shuffle_false_frac_1_fas__D_1_IF_8/peak_calling/pr_radius_10/190301/005/"
+DIRS="/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/ED_DEFOCUS/190301/005/tomo_partition.h5"
 #/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/D2_IF8_NA/180426_021
 #/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/D2_IF8_NA/180426_024
 #/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/D2_IF8_NA/180711_003

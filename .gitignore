@@ -1,3 +1,10 @@
+log_dummy_test/
+log_fas_fractions_004_005_021_ED/
+log_fractions_004_005_021_ED_and_vpp/
+log_fractions_004/
+log_fractions_004_005_021/
+log_fractions_004_005_021_ED/
+logs_classification3D/
 *.out
 log_fractions_004_005/
 log_liang_multi_label/
