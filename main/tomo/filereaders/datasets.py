@@ -1,7 +1,7 @@
 import os
 import numpy as np
-from tomo.filereaders.em import read_em
-from tomo.filereaders.h5 import read_hdf
+from main.tomo import read_em
+from main.tomo.filereaders.h5 import read_hdf
 
 
 def load_dataset(path_to_dataset: str) -> np.array:
