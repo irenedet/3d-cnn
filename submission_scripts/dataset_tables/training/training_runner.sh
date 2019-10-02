@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 65G
-#SBATCH --time 0-5:00
+#SBATCH --time 0-10:00
 #SBATCH -o slurm_outputs/training.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/training.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
