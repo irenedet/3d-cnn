@@ -20,7 +20,7 @@ export log_dir="/g/scb2/zaugg/trueba/3d-cnn/log_"$fractions_name
 export model_path="./models/"$fractions_name
 export n_epochs=300
 export depth=1
-export initial_features=8
+export initial_features=10
 export output_classes=1
 export shuffle=false
 
