@@ -50,54 +50,73 @@ discarded_points_dir = join(output_dir, "outside_lamella")
 makedirs(name=conserved_points_dir, exist_ok=True)
 makedirs(name=discarded_points_dir, exist_ok=True)
 
-lamella_indicator = load_dataset(path_to_dataset=lamella_file)
 motl_predicted = read_motl_from_csv(path_to_csv_motl=csv_motl)
-
-lamella_indicator = np.array(lamella_indicator)
-lamella_z, lamella_y, lamella_x = lamella_indicator.shape
 motl_values = [row[0] for row in motl_predicted]
 predicted_coordinates = [np.array([row[7], row[8], row[9]]) for row in
                          motl_predicted]
 
-print("min x", np.min([point[2] for point in predicted_coordinates]))
-print("min y", np.min([point[1] for point in predicted_coordinates]))
-print("min z", np.min([point[0] for point in predicted_coordinates]))
-print("max x", np.max([point[2] for point in predicted_coordinates]))
-print("max y", np.max([point[1] for point in predicted_coordinates]))
-print("max z", np.max([point[0] for point in predicted_coordinates]))
+if isinstance(lamella_file, float):
+    print("Lamella file does not exist. All points will be conserved "
+          "for the analysis.")
+    conserved_values = motl_values
+    conserved_points = predicted_coordinates
+    discarded_values = []
+    discarded_points = []
+    motl_writer(path_to_output_folder=conserved_points_dir,
+                list_of_peak_scores=conserved_values,
+                list_of_peak_coords=conserved_points,
+                in_tom_format=True)
+    motl_writer(path_to_output_folder=discarded_points_dir,
+                list_of_peak_scores=discarded_values,
+                list_of_peak_coords=discarded_points,
+                in_tom_format=True)
+else:
+    lamella_indicator = load_dataset(path_to_dataset=lamella_file)
 
-conserved_points = []
-conserved_values = []
-discarded_points = []
-discarded_values = []
-for value, point in zip(motl_values, predicted_coordinates):
-    point = [int(entry) for entry in point]
-    x, y, z = point
-    z_up = z - z_shift + lamella_extension
-    z_down = z - z_shift - lamella_extension
-    lamella_border_up = np.min([z_up, z_dim - 1])
-    lamella_border_down = np.max([z_down, 0])
-    if np.min([lamella_x - x, lamella_y - y, lamella_z - z]) > 0 and np.min([x, y, z]) >= 0:
-        if lamella_indicator[z - z_shift, y, x] == 1 and np.min([x, y, x_dim - x, y_dim - y]) > dataset_border_xy:
-            conserved_values += [value]
-            conserved_points += [point]
-        elif lamella_indicator[lamella_border_up, y, x] == 1 and np.min(
-            [x, y, x_dim - x, y_dim - y]) > dataset_border_xy:
-            conserved_values += [value]
-            conserved_points += [point]
-        elif lamella_indicator[lamella_border_down, y, x] == 1 and np.min(
-            [x, y, x_dim - x, y_dim - y]) > dataset_border_xy:
-            conserved_values += [value]
-            conserved_points += [point]
-        else:
-            discarded_points += [point]
-            discarded_values += [value]
+    lamella_indicator = np.array(lamella_indicator)
+    lamella_z, lamella_y, lamella_x = lamella_indicator.shape
 
-motl_writer(path_to_output_folder=conserved_points_dir,
-list_of_peak_scores = conserved_values,
-list_of_peak_coords = conserved_points,
-in_tom_format = True)
-motl_writer(path_to_output_folder=discarded_points_dir,
-list_of_peak_scores = discarded_values,
-list_of_peak_coords = discarded_points,
-in_tom_format = True)
+    print("min x", np.min([point[2] for point in predicted_coordinates]))
+    print("min y", np.min([point[1] for point in predicted_coordinates]))
+    print("min z", np.min([point[0] for point in predicted_coordinates]))
+    print("max x", np.max([point[2] for point in predicted_coordinates]))
+    print("max y", np.max([point[1] for point in predicted_coordinates]))
+    print("max z", np.max([point[0] for point in predicted_coordinates]))
+
+    conserved_points = []
+    conserved_values = []
+    discarded_points = []
+    discarded_values = []
+    for value, point in zip(motl_values, predicted_coordinates):
+        point = [int(entry) for entry in point]
+        x, y, z = point
+        z_up = z - z_shift + lamella_extension
+        z_down = z - z_shift - lamella_extension
+        lamella_border_up = np.min([z_up, z_dim - 1])
+        lamella_border_down = np.max([z_down, 0])
+        if np.min([lamella_x - x, lamella_y - y, lamella_z - z]) > 0 and np.min(
+                [x, y, z]) >= 0:
+            if lamella_indicator[z - z_shift, y, x] == 1 and np.min(
+                    [x, y, x_dim - x, y_dim - y]) > dataset_border_xy:
+                conserved_values += [value]
+                conserved_points += [point]
+            elif lamella_indicator[lamella_border_up, y, x] == 1 and np.min(
+                    [x, y, x_dim - x, y_dim - y]) > dataset_border_xy:
+                conserved_values += [value]
+                conserved_points += [point]
+            elif lamella_indicator[lamella_border_down, y, x] == 1 and np.min(
+                    [x, y, x_dim - x, y_dim - y]) > dataset_border_xy:
+                conserved_values += [value]
+                conserved_points += [point]
+            else:
+                discarded_points += [point]
+                discarded_values += [value]
+
+    motl_writer(path_to_output_folder=conserved_points_dir,
+                list_of_peak_scores=conserved_values,
+                list_of_peak_coords=conserved_points,
+                in_tom_format=True)
+    motl_writer(path_to_output_folder=discarded_points_dir,
+                list_of_peak_scores=discarded_values,
+                list_of_peak_coords=discarded_points,
+                in_tom_format=True)

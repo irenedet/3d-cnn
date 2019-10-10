@@ -129,6 +129,6 @@ echo models_notebook=$models_notebook
 
 echo 'Training dice multi-label network for fraction='$fraction
 echo 'and model_name='$model_initial_name
-python3 ./runners/dataset_tables/training/dice_unet_training.py -dataset_table $path_to_dataset_table -tomo_training_list "${tomo_training_list[@]}" -split $split -classes $output_classes -log_dir $log_dir -model_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook -shuffle $shuffle
+python3 runners/dataset_tables/training/dice_unet_training.py -dataset_table $path_to_dataset_table -tomo_training_list "${tomo_training_list[@]}" -split $split -classes $output_classes -log_dir $log_dir -model_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook -shuffle $shuffle
 
 

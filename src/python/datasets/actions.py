@@ -8,7 +8,7 @@ from src.python.filewriters.h5 import \
 from src.python.coordinates_toolbox.subtomos import \
     get_particle_coordinates_grid_with_overlap
 from src.python.filewriters.h5 import write_subtomograms_from_dataset, \
-    write_joint_raw_and_labels_subtomograms
+    write_joint_raw_and_labels_subtomograms, write_strongly_labeled_subtomograms
 from src.python.image.filters import preprocess_data
 from src.python.filereaders.h5 import read_training_data_dice_multi_class
 
@@ -190,30 +190,35 @@ def split_dataset(data: np.array, labels: np.array, split: float,
     print("volumes number before data augmentation", original_volumes_number)
     print("volumes number after data augmentation", len(data))
 
-    split = _define_splitting(split=split, n_total=original_volumes_number)
+    if len(data) == 1:
+        print("No validation set from this list.")
+        train_data, train_labels = data, labels
+        val_data, val_labels = [], []
+        final_data_order = [0]
+    else:
+        split = _define_splitting(split=split, n_total=original_volumes_number)
+        raw_data_chunks, labels_data_chunks = \
+            _chunkify_by_data_augmentation_rounds(raw_data=data, labels=labels,
+                                                  n_chunks=n_chunks)
+        zipped_train, zipped_val = \
+            _split_data_augmentation_chunks(raw_data_chunks=raw_data_chunks,
+                                            labels_data_chunks=labels_data_chunks,
+                                            split=split, shuffle=shuffle)
 
-    raw_data_chunks, labels_data_chunks = \
-        _chunkify_by_data_augmentation_rounds(raw_data=data, labels=labels,
-                                              n_chunks=n_chunks)
-    zipped_train, zipped_val = \
-        _split_data_augmentation_chunks(raw_data_chunks=raw_data_chunks,
-                                        labels_data_chunks=labels_data_chunks,
-                                        split=split, shuffle=shuffle)
+        data_order_train, shuffled_raw_chunks_train, shuffled_label_chunks_train = \
+            _get_unzipped_data(zipped_chunks=zipped_train, n_chunks=n_chunks)
 
-    data_order_train, shuffled_raw_chunks_train, shuffled_label_chunks_train = \
-        _get_unzipped_data(zipped_chunks=zipped_train, n_chunks=n_chunks)
+        data_order_val, shuffled_raw_chunks_val, shuffled_label_chunks_val = \
+            _get_unzipped_data(zipped_chunks=zipped_val, n_chunks=n_chunks)
 
-    data_order_val, shuffled_raw_chunks_val, shuffled_label_chunks_val = \
-        _get_unzipped_data(zipped_chunks=zipped_val, n_chunks=n_chunks)
+        final_data_order = data_order_train + data_order_val
 
-    final_data_order = data_order_train + data_order_val
-
-    train_data, train_labels = \
-        _unchunkify_data(raw_data_chunks=shuffled_raw_chunks_train,
-                         labels_data_chunks=shuffled_label_chunks_train)
-    val_data, val_labels = \
-        _unchunkify_data(raw_data_chunks=shuffled_raw_chunks_val,
-                         labels_data_chunks=shuffled_label_chunks_val)
+        train_data, train_labels = \
+            _unchunkify_data(raw_data_chunks=shuffled_raw_chunks_train,
+                             labels_data_chunks=shuffled_label_chunks_train)
+        val_data, val_labels = \
+            _unchunkify_data(raw_data_chunks=shuffled_raw_chunks_val,
+                             labels_data_chunks=shuffled_label_chunks_val)
     return train_data, train_labels, val_data, val_labels, final_data_order
 
 
@@ -271,8 +276,11 @@ def load_training_dataset_list(training_partition_paths: list,
 
             train_data += list(train_data_tmp)
             train_labels += list(train_labels_tmp)
-            val_data += list(val_data_tmp)
-            val_labels += list(val_labels_tmp)
+
+            not_empty = len(val_labels_tmp) > 0
+            if not_empty:
+                val_data += list(val_data_tmp)
+                val_labels += list(val_labels_tmp)
 
     train_data = np.array(train_data)
     train_labels = np.array(train_labels)
@@ -406,4 +414,39 @@ def partition_raw_and_labels_tomograms_dice_multiclass(
         segmentation_names=segmentation_names,
         window_centers=padded_particles_coordinates,
         crop_shape=subtomo_shape)
+    return
+
+
+def generate_strongly_labeled_partition(path_to_raw: str,
+                                        labels_dataset_list: list,
+                                        segmentation_names: list,
+                                        output_h5_file_path: str,
+                                        subtomo_shape: tuple,
+                                        overlap: int,
+                                        min_label_fraction: float = 0):
+    raw_dataset = load_dataset(path_to_raw)
+    padded_raw_dataset = pad_dataset(raw_dataset, subtomo_shape, overlap)
+    padded_particles_coordinates = get_particle_coordinates_grid_with_overlap(
+        padded_raw_dataset.shape,
+        subtomo_shape,
+        overlap)
+    padded_labels_dataset_list = []
+    for path_to_labeled in labels_dataset_list:
+        labels_dataset = load_dataset(path_to_labeled)
+        labels_dataset = np.array(labels_dataset)
+        print(path_to_labeled, "shape", labels_dataset.shape)
+        padded_labels_dataset = pad_dataset(labels_dataset, subtomo_shape,
+                                            overlap)
+        padded_labels_dataset_list += [padded_labels_dataset]
+    datasets_shapes = [padded.shape for padded in padded_labels_dataset_list]
+    datasets_shapes += [padded_raw_dataset.shape]
+    print("padded_dataset.shapes = ", datasets_shapes)
+    write_strongly_labeled_subtomograms(
+        output_path=output_h5_file_path,
+        padded_raw_dataset=padded_raw_dataset,
+        padded_labels_list=padded_labels_dataset_list,
+        segmentation_names=segmentation_names,
+        window_centers=padded_particles_coordinates,
+        crop_shape=subtomo_shape,
+        min_label_fraction=min_label_fraction)
     return

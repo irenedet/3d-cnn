@@ -548,12 +548,14 @@ def write_statistics(statistics_file: str, statistics_label: str,
         stats_df = pd.read_csv(statistics_file)
         stats_df['tomo_name'] = stats_df['tomo_name'].astype(str)
         if statistics_label in stats_df.keys():
+            print("Model's statistics label exists")
             if tomo_name in stats_df['tomo_name'].values:
                 row = stats_df['tomo_name'] == tomo_name
-                stats_df.loc[row, statistics_label] = stat_measure
+                stats_df.loc[row, statistics_label] = [stat_measure]
             else:
                 stats_df = stats_df.append(mini_stats_df, sort=False)
         else:
+            print("Tomo name does not exist")
             stats_df = pd.merge(stats_df, mini_stats_df, on='tomo_name',
                                 how='outer')
         stats_df.to_csv(path_or_buf=statistics_file, index=False)

@@ -1,6 +1,6 @@
 #! /bin/bash
 
-FRACTIONS="0 1 2 3 4"
+FRACTIONS="2 3 4"
 
 
 tomo_training_list0="004_0_1,004_0_2,004_0_3,004_0_4,005_0_1,005_0_2,005_0_3,005_0_4,021_0_1,021_0_2,021_0_3,021_0_4,181119_002_0_1,181119_002_0_2,181119_002_0_3,181119_002_0_4,181119_030_0_1,181119_030_0_2,181119_030_0_3,181119_030_0_4,181126_002_0_1,181126_002_0_2,181126_002_0_3,181126_002_0_4,181126_012_0_1,181126_012_0_2,181126_012_0_3,181126_012_0_4,181126_025_0_1,181126_025_0_2,181126_025_0_3,181126_025_0_4"
@@ -19,8 +19,8 @@ export fractions_name="fas_fractions_004_005_021_ED"
 export log_dir="/g/scb2/zaugg/trueba/3d-cnn/log_"$fractions_name
 export model_path="./models/"$fractions_name
 export n_epochs=300
-export depth=1
-export initial_features=10
+export depth=2
+export initial_features=8
 export output_classes=1
 export shuffle=false
 

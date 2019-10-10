@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
-fractions="0 1 2 3 4"
-TOMOS="004 005 021 181119_002 181119_030 181126_002 181126_012 181126_025"
+fractions="2 3 4"
+#TOMOS="004 005 021 181119_002 181119_030 181126_002 181126_012 181126_025"
+TOMOS="190301_003 190301_005 190301_009 190301_016 190301_022 190301_028
+       190301_031 190301_032 190301_033 190301_035 190301_037 190301_043
+       190301_045"
 fractions_name="fas_fractions_004_005_021_ED"
 # Tomograms data
 export path_to_dataset_table="/struct/mahamid/Irene/fractions/fas_fractions_data.csv"
@@ -13,7 +16,7 @@ export statistics_file="/struct/mahamid/Irene/"$fractions_name"/peak_statistics_
 
 BN=false
 depth=1
-init_feat=8
+init_feat=6
 output_classes=1
 box_side=128
 new_loader='True'
