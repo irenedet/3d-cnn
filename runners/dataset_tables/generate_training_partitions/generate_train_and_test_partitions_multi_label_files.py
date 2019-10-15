@@ -84,7 +84,7 @@ print(labels_dataset_list)
 
 output_shape = (z_dim, y_dim, x_dim)
 subtomogram_shape = (box_side, box_side, box_side)
-output_dir = join(output_dir, "train_and_test_partitions")
+# output_dir = join(output_dir, "train_and_test_partitions")
 output_h5_file_name = "full_partition.h5"
 output_h5_file_path = join(output_dir, output_h5_file_name)
 output_data_path = join(output_dir, "data_aug_on_train_partition.h5")

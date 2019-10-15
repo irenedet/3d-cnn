@@ -5,6 +5,7 @@ import time
 
 from os import makedirs
 from os.path import join
+from distutils.util import strtobool
 
 from src.python.peak_toolbox.subtomos import select_coordinates_in_subtomos, \
     select_coordinates_and_values_in_subtomos
@@ -75,6 +76,8 @@ parser.add_argument("-threshold", "--score_threshold",
                     type=float)
 parser.add_argument("-summary_file", "--summary_file",
                     type=str)
+parser.add_argument("-test_partition_from_table", "--test_partition_from_table",
+                    type=str, default='True')
 
 args = parser.parse_args()
 dataset_table = args.dataset_table
@@ -93,7 +96,7 @@ label_name = args.label_name
 summary_file = args.summary_file
 semantic_classes = semantic_classes.split(",")
 class_name = semantic_classes[class_number]
-
+test_partition_from_table = strtobool(args.test_partition_from_table)
 df = pd.read_csv(dataset_table)
 
 df['tomo_name'] = df['tomo_name'].astype(str)
@@ -104,7 +107,10 @@ x_shift = int(tomo_df.iloc[0]['x_shift'])
 x_dim = int(tomo_df.iloc[0]['x_dim'])
 y_dim = int(tomo_df.iloc[0]['y_dim'])
 z_dim = int(tomo_df.iloc[0]['z_dim'])
-test_partition = tomo_df.iloc[0]['test_partition']
+if test_partition_from_table:
+    test_partition = tomo_df.iloc[0]['test_partition']
+else:
+    test_partition = "None"
 clean_motive_list_name = 'path_to_motl_clean_' + class_name
 path_to_motl_true = tomo_df.iloc[0][clean_motive_list_name]
 
@@ -174,7 +180,7 @@ value_redudndantly_detected_predicted = \
         radius=radius)
 
 F1_score = F1_score_calculator(precision, recall)
-if len(F1_score)>0:
+if len(F1_score) > 0:
     max_F1 = np.max(F1_score)
     optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
 else:
@@ -305,3 +311,5 @@ write_statistics(statistics_file=statistics_file,
                  statistics_label=statistics_label,
                  tomo_name=tomo_name,
                  stat_measure=auPRC)
+
+

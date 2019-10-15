@@ -19,10 +19,10 @@ new_loader='True'
 shuffle=false
 
 # Evaluation and particle picking parameters:
-particle_picking_radius=130 #for particle picking
+particle_picking_radius=80 #for particle picking
 border_xy=10
 lamella_extension=0
-same_peak_radius_pr_analysis=120
+same_peak_radius_pr_analysis=90
 score_threshold=-10
 
 for tomo_name in $TOMOS

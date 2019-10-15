@@ -36,7 +36,7 @@
 #init_feat=12
 
 # WT_VPP:
-#TOMOS="180426/004 180426/024"
+#TOMOS="180426/004 180426/005 180426/021 180426/024"
 TOMOS="180426/024"
 frac=0
 depth=2
@@ -70,13 +70,14 @@ lamella_extension=0
 same_peak_radius_pr_analysis=10
 score_threshold=0
 global_output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/yeast_dataset/"$model_nickname"/peak_calling/pr_radius_"$same_peak_radius_pr_analysis
+test_partition_from_table=false
 
 mkdir -p $global_output_dir
 
 for tomo_name in $TOMOS
 do
 	echo "Submitting job for tomo $tomo_name"
-	sbatch submission_scripts/dataset_tables/cnn_evaluation_runners/peak_calling/runner.sh -statistics_file $statistics_file -output_dir $global_output_dir -dataset_table $path_to_dataset_table -tomo_name $tomo_name -path_to_model $path_to_model -label_name $model_nickname -depth $depth -init_feat $init_feat -output_classes $output_classes -class_number $class_number -box_side $box_side -new_loader $new_loader -minimum_peak_distance $particle_picking_radius -border_xy $border_xy -lamella_extension $lamella_extension -same_peak_distance $same_peak_radius_pr_analysis -threshold $score_threshold -BN $BN -semantic_classes $semantic_classes
+	bash submission_scripts/dataset_tables/cnn_evaluation_runners/peak_calling/runner.sh -statistics_file $statistics_file -output_dir $global_output_dir -dataset_table $path_to_dataset_table -tomo_name $tomo_name -path_to_model $path_to_model -label_name $model_nickname -depth $depth -init_feat $init_feat -output_classes $output_classes -class_number $class_number -box_side $box_side -new_loader $new_loader -minimum_peak_distance $particle_picking_radius -border_xy $border_xy -lamella_extension $lamella_extension -same_peak_distance $same_peak_radius_pr_analysis -threshold $score_threshold -BN $BN -semantic_classes $semantic_classes -test_partition_from_table $test_partition_from_table
 done
 
 
