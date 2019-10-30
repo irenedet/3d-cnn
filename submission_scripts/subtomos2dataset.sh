@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 40G
-#SBATCH --time 0-00:30
+#SBATCH --mem 20G
+#SBATCH --time 0-00:10
 #SBATCH -o slurm_outputs/subtomos2dataset.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -43,16 +43,16 @@ echo "... done."
 # # For FAS
 export cluster_labels=False
 export class_number=0
-export output_shape=(928,928,1000)
+export output_shape=(928,928,500)
 export box_length=128
 export box_overlap=12
 #reconstruction_type is either "prediction" or "labels" or "raw":
 export reconstruction_type="prediction"
-export label_name="fas_fractions_004_005_021_ED_and_def_shuffle_false_frac_0_fas__D_2_IF_8"
-export tomo_name="180426/004"
-export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/yeast_dataset/fas_fractions_004_005_021_ED_and_def_shuffle_false_frac_0_fas__D_2_IF_8/peak_calling/pr_radius_10/180426/004/"
+export label_name="fas_fractions_004_005_021_ED_and_def_shuffle_false_frac_4_fas__D_1_IF_12"
+export tomo_name="181126/002"
+export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/yeast_dataset/"$label_name"/peak_calling/pr_radius_10/"$tomo_name
 mkdir -p $output_dir
-DIRS="/struct/mahamid/Irene/yeast/healthy/180426/004/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5"
+DIRS="/struct/mahamid/Irene/yeast/ED/"$tomo_name"/eman_filt_eman_filt_tomo_partition.h5"
 
 count=0
 for dir in $DIRS

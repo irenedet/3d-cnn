@@ -65,13 +65,16 @@ def get_transform_list(volumes_number: int, rot_range: float,
 def write_raw_tensor(dst_data, raw_tensor, iteration):
     print("raw_tensor.shape", raw_tensor.shape)
     volumes_number = raw_tensor.shape[0]
+    print("volumes_number =", volumes_number)
+    global_subtomo_raw_h5_path = h5_internal_paths.RAW_SUBTOMOGRAMS
     with h5py.File(dst_data, 'a') as f:
         for batch_id in range(volumes_number):
             subtomo_name = str(iteration) + "_" + str(batch_id)
-            subtomo_raw_h5_path = h5_internal_paths.RAW_SUBTOMOGRAMS
-
-            subtomo_raw_h5_path = join(subtomo_raw_h5_path, subtomo_name)
+            print("batch_id =", batch_id)
+            print("subtomo_name =", subtomo_name)
+            subtomo_raw_h5_path = join(global_subtomo_raw_h5_path, subtomo_name)
             f[subtomo_raw_h5_path] = raw_tensor[batch_id, 0, :, :, :]
+            print(list(f[global_subtomo_raw_h5_path]))
     return
 
 

@@ -37,6 +37,9 @@ parser.add_argument("-min_peak_distance", "--min_peak_distance",
 parser.add_argument("-final_activation", "--final_activation",
                     help="name of final_activation to apply to segmentation",
                     type=str, default="elu")
+parser.add_argument("-threshold", "--threshold",
+                    help="threshold of peak score value",
+                    type=str, default="None")
 
 args = parser.parse_args()
 output_dir = args.output_dir
@@ -48,6 +51,12 @@ overlap = args.overlap
 class_number = args.class_number
 min_peak_distance = args.min_peak_distance
 final_activation = args.final_activation
+threshold = args.threshold
+
+if threshold == "None":
+    threshold = -np.inf
+else:
+    threshold = float(threshold)
 
 if final_activation == "elu":
     final_activation = nn.ELU()
@@ -87,6 +96,7 @@ motl_file_name = write_global_motl_from_overlapping_subtomograms_multiclass(
     min_peak_distance=min_peak_distance,
     number_peaks_uniquify=number_peaks_uniquify,
     z_shift=z_shift,
-    final_activation=final_activation)
+    final_activation=final_activation,
+    threshold=threshold)
 
 print(motl_file_name)

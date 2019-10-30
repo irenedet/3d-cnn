@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 30G
-#SBATCH --time 0-04:35
+#SBATCH --mem 40G
+#SBATCH --time 0-04:15
 #SBATCH -o slurm_outputs/evaluate_particle_peaking_peaks.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/evaluate_particle_peaking_peaks.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -61,9 +61,9 @@ while [ "$1" != "" ]; do
         -box_side | --box_side )   shift
                                 box_side=$1
                                 ;;
-        -min_peak_distance | --min_peak_distance )   shift
-                                min_peak_distance=$1
-                                ;;
+#        -min_peak_distance | --min_peak_distance )   shift
+#                                min_peak_distance=$1
+#                                ;;
         -depth | --depth )   shift
                                 depth=$1
                                 ;;
@@ -153,7 +153,7 @@ echo '... done.'
 
 # 2. Peak calling and motl writing
 echo 'running python3 scripts: getting particles motive list'
-python3 runners/dataset_tables/particle_picking_scripts/3_get_activated_score_peaks_motive_list.py -dataset_table $dataset_table -tomo_name $tomo_name -output $output_dir -label $label_name -box $box_side -class_number $class_number -min_peak_distance $minimum_peak_distance -overlap $box_overlap
+python3 runners/dataset_tables/particle_picking_scripts/3_get_activated_score_peaks_motive_list.py -dataset_table $dataset_table -tomo_name $tomo_name -output $output_dir -label $label_name -box $box_side -class_number $class_number -min_peak_distance $minimum_peak_distance -overlap $box_overlap -threshold $threshold
 echo 'finished peak calling script'
 
 

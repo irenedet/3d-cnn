@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 30G
-#SBATCH --time 0-00:40
+#SBATCH --time 0-01:10
 #SBATCH -o slurm.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -17,3 +17,5 @@ echo "... done"
 
 echo "Starting python script"
 python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/generate_label_masks/threshold_maps.py
+
+

@@ -119,7 +119,8 @@ def get_peaks_per_subtomo_with_overlap_multiclass(
         class_number: int,
         min_peak_distance: int,
         overlap: int,
-        final_activation: nn.Module = None) -> tuple:
+        final_activation: nn.Module = None,
+        threshold: float = -np.inf) -> tuple:
     subtomo_corner, subtomo_side_lengths, zero_padding = \
         get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name,
                                                          subtomo_shape,
@@ -147,10 +148,10 @@ def get_peaks_per_subtomo_with_overlap_multiclass(
     mask_out_overlap = np.ones(shape_minus_overlap)
     mask_out_overlap = np.pad(mask_out_overlap, zero_padding, "constant")
     data_subtomo = mask_out_overlap * data_subtomo
-
+    print("Extracting peaks of ", subtomo_name)
     subtomo_list_of_maxima, subtomo_list_of_maxima_coords = \
         extract_peaks(dataset=data_subtomo, numb_peaks=numb_peaks,
-                      radius=min_peak_distance)
+                      radius=min_peak_distance, threshold=threshold)
     print("len(subtomo_list_of_maxima_coords) = ",
           len(subtomo_list_of_maxima_coords))
 

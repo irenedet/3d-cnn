@@ -5,6 +5,8 @@ from os.path import join
 import numpy as np
 
 from src.python.coordinates_toolbox.utils import \
+    filtering_duplicate_coords_with_values
+from src.python.coordinates_toolbox.utils import \
     extract_coordinates_and_values_from_em_motl
 from src.python.filereaders.csv import read_motl_from_csv
 from src.python.filereaders.datasets import load_dataset
@@ -33,73 +35,76 @@ def paste_sphere_in_dataset(dataset: np.array, radius: int, value: float,
         for delta_p in unit_particle]
     for coord in particle:
         if (coord[0] < dataset_dimensions[0]) and (
-                    coord[1] < dataset_dimensions[1]) and (
-                    coord[2] < dataset_dimensions[2]) and (0 <= coord[0]) and (
-                    0 <= coord[1]) and (0 <= coord[2]):
+                coord[1] < dataset_dimensions[1]) and (
+                coord[2] < dataset_dimensions[2]) and (0 <= coord[0]) and (
+                0 <= coord[1]) and (0 <= coord[2]):
             dataset[coord[0], coord[1], coord[2]] = value
     return dataset
 
 
 def _get_next_max(dataset: np.array, coordinates_list: list, radius: int,
                   numb_peaks: int, global_min: float) -> tuple:
-    dataset_dimensions = dataset.shape
     unit_particle = _generate_unit_particle(radius)
     if len(coordinates_list) < numb_peaks:
         for p in coordinates_list:
-            particle = [
-                (p[0] + delta_p[0], p[1] + delta_p[1], p[2] + delta_p[2])
-                for delta_p in unit_particle]
+            particle = [np.array(p) + np.array(dp) for dp in unit_particle]
             for coord in particle:
-                if (coord[0] < dataset_dimensions[0]) and \
-                        (coord[1] < dataset_dimensions[1]) and \
-                        (coord[2] < dataset_dimensions[2]) and \
-                        (0 <= coord[0]) and (0 <= coord[1]) and \
-                        (0 <= coord[2]):
-                    dataset[coord[0]][coord[1]][coord[2]] = global_min - 1
+                x, y, z = coord.astype(int)
+                if (coord < dataset.shape).all() and 0 <= np.min(coord):
+                    dataset[x, y, z] = global_min - 1
         next_max = np.ndarray.max(dataset)
         next_max_coords = np.where(next_max == dataset)
-        next_max_coords_list = []
+        dataset[next_max_coords] = global_min - 1
         n = len(next_max_coords[0])
-        for next_p in range(n):
-            next_max_coords_list += [(next_max_coords[0][next_p],
-                                      next_max_coords[1][next_p],
-                                      next_max_coords[2][next_p])]
+        next_max_coords_list = \
+            list(np.transpose(np.array(next_max_coords)).astype(int))
+        next_values_list = next_max * np.ones(n)
+        _, unique_next_coords = filtering_duplicate_coords_with_values(
+            motl_coords=next_max_coords_list,
+            motl_values=next_values_list,
+            min_peak_distance=radius,
+            preference_by_score=False,
+            max_num_points=numb_peaks)
         flag = "not_overloaded"
     else:
-        next_max = 0
-        next_max_coords_list = []
+        next_max = global_min - 1
+        unique_next_coords = []
         flag = "overloaded"
-    return next_max, next_max_coords_list, flag
+    return next_max, unique_next_coords, flag
 
 
-def extract_peaks(dataset: np.array, numb_peaks: int, radius: int):
+def extract_peaks(dataset: np.array, numb_peaks: int, radius: int,
+                  threshold: float = -np.inf):
     global_max = np.ndarray.max(dataset)
-    global_min = np.ndarray.min(dataset)
+    if threshold == -np.inf:
+        global_min = np.ndarray.min(dataset)
+    else:
+        global_min = threshold
+    print("global_min =", global_min)
     global_max_coords = np.where(dataset == global_max)
-    print(global_max_coords)
-    coordinates_list = [(global_max_coords[0][0], global_max_coords[1][0],
+    print("global_max_coords =", global_max_coords)
+    coordinates_list = [(global_max_coords[0][0],
+                         global_max_coords[1][0],
                          global_max_coords[2][0])]
-    print(coordinates_list)
+    print("coordinates_list =", coordinates_list)
     list_of_maxima = [global_max]
     list_of_maxima_coords = coordinates_list
-
-    for n in range(numb_peaks):
-        next_max, coordinates_list, flag = _get_next_max(dataset,
-                                                         coordinates_list,
-                                                         radius,
-                                                         numb_peaks,
-                                                         global_min)
-        if "overloaded" == flag:
-            print("overloaded, reached a level with no more local maxima")
-            print("maxima in subtomo:", len(list_of_maxima_coords))
-            return list_of_maxima, list_of_maxima_coords
-        elif next_max == global_min - 1:
-            print("No more maxima, reached indicator  global_min - 1.")
-            print("maxima in subtomo:", len(list_of_maxima_coords))
-            return list_of_maxima, list_of_maxima_coords
+    # for n in range(numb_peaks):
+    flag = "not_overloaded"
+    while flag != "overloaded":
+        next_max, coordinates_list, flag = \
+            _get_next_max(dataset, coordinates_list, radius, numb_peaks,
+                          global_min)
+        print("next_max =", next_max)
+        print("len(coordinates_list) =", len(coordinates_list))
+        print("flag =", flag)
+        if next_max < global_min:
+            print("Either reached indicator == global_min - 1 or threshold.")
+            flag = "overloaded"
         else:
             list_of_maxima += [next_max for _ in coordinates_list]
             list_of_maxima_coords += coordinates_list
+    print("Number of peaks in subtomo =", len(list_of_maxima_coords))
     return list_of_maxima, list_of_maxima_coords
 
 
@@ -223,5 +228,3 @@ def union_of_motls(path_to_motl_1: str, path_to_motl_2: str):
     coordinates = np.concatenate((coordinates_1, coordinates_2), axis=0)
     values = list(values_1) + list(values_2)
     return values, coordinates
-
-

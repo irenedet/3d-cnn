@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 30G
-#SBATCH --time 0-00:15
+#SBATCH --mem 20G
+#SBATCH --time 0-02:15
 #SBATCH -o slurm_outputs/print_middle_slice.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/print_middle_slice.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL

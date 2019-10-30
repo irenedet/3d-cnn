@@ -58,7 +58,7 @@ def _boxing2D(dataset: np.array, point: Tuple, size: int) -> np.array:
     y = int(y)
     z = int(z)
     if (x - ds) >= 0 and (y - ds) >= 0 and (x + ds) < ds_side_length and (
-                y + ds) < ds_side_length:
+            y + ds) < ds_side_length:
         box = dataset[z, y - ds:y + ds, x - ds:x + ds]
         return box
     else:
@@ -134,7 +134,22 @@ def filtering_duplicate_coords(motl_coords: list, min_peak_distance: int):
 def filtering_duplicate_coords_with_values(motl_coords: list,
                                            motl_values: list,
                                            min_peak_distance: int,
-                                           preference_by_score=True):
+                                           preference_by_score=True,
+                                           max_num_points: float = np.inf):
+    """
+    Filter out coordinates that are close by a given radius to each other.
+    :param motl_coords: list of coordinate points to filter
+    :param motl_values: list of score values associated
+    :param min_peak_distance: radius of tolerance for distance between points
+    to filter
+    :param preference_by_score: Boolean, when True, the peak of highest score
+    will be kept and the neighbouring coordinates with lower score will be
+    filtered out.
+    :param max_num_points: optional, if a maximum number of coordinates should
+    be considered
+    :return: a list of coordinate points where none of them are close to the
+    rest by the given radius
+    """
     motl_coords = np.array(motl_coords)
     unique_motl_coords = [motl_coords[0]]
     unique_motl_values = [motl_values[0]]
@@ -142,18 +157,20 @@ def filtering_duplicate_coords_with_values(motl_coords: list,
     for value, point in zip(motl_values[1:], motl_coords[1:]):
         flag = "unique"
         n_point = 0
-        while flag == "unique" and n_point < len(unique_motl_coords):
-            x = unique_motl_coords[n_point]
-            x_val = unique_motl_values[n_point]
-            n_point += 1
-            if np.linalg.norm(x - point) <= min_peak_distance:
-                flag = "repeated"
-                if preference_by_score and (x_val < value):
-                    unique_motl_coords[n_point] = point
-                    unique_motl_values[n_point] = value
-        if flag == "unique":
-            unique_motl_coords += [point]
-            unique_motl_values += [value]
+        n_unique_points = len(unique_motl_coords)
+        if n_unique_points < max_num_points:
+            while flag == "unique" and n_point < n_unique_points:
+                x = unique_motl_coords[n_point]
+                x_val = unique_motl_values[n_point]
+                n_point += 1
+                if np.linalg.norm(x - point) <= min_peak_distance:
+                    flag = "repeated"
+                    if preference_by_score and (x_val < value):
+                        unique_motl_coords[n_point] = point
+                        unique_motl_values[n_point] = value
+            if flag == "unique":
+                unique_motl_coords += [point]
+                unique_motl_values += [value]
     print("Number of unique coordinates after filtering:",
           len(unique_motl_coords))
     return unique_motl_values, unique_motl_coords
@@ -197,10 +214,10 @@ def get_clusters_within_size_range(dataset: np.array, min_cluster_size: int,
                                         connectivity=connectivity)
     labels_list, cluster_size = np.unique(labeled_clusters, return_counts=True)
     labels_list_within_range = labels_list[(cluster_size > min_cluster_size) & (
-        cluster_size < max_cluster_size)]
+            cluster_size < max_cluster_size)]
     cluster_size_within_range = list(
         cluster_size[(cluster_size > min_cluster_size) & (
-            cluster_size < max_cluster_size)])
+                cluster_size < max_cluster_size)])
     print("Clusters in subtomo before size filtering =", num)
     return labeled_clusters, labels_list_within_range, cluster_size_within_range
 

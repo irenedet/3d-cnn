@@ -62,7 +62,6 @@ def train_float(model, loader, optimizer, loss_function,
                                             'cpu'),
                                         step=step)
 
-
     train_loss /= len(loader)
     if tb_logger is not None:
         step = epoch * len(loader)
@@ -172,8 +171,7 @@ def train(model, loader, optimizer, loss_function,
                             print("the size of the target tensor isnt loggable")
                     else:
                         print("Not logging images.")
-
-
+    print("train_loss", train_loss, "len(loader)", len(loader))
     train_loss /= len(loader)
     if tb_logger is not None:
         step = epoch * len(loader)
@@ -183,36 +181,29 @@ def train(model, loader, optimizer, loss_function,
 
 def validate(model, loader, loss_function, metric, device, step=None,
              tb_logger=None):
-    # set model to eval mode
     model.eval()
-    # running loss and metric values
     val_loss = 0
     val_metric = 0
 
     # disable gradients during validation
     with torch.no_grad():
-
         # iterate over validation loader and update loss and metric values
         for x, y in loader:
             x, y = x.to(device), y.to(device)
             prediction = model(x)
-            val_loss += loss_function(prediction, y.long()).item()
+            loss = loss_function(prediction, y.long()).item()
+            val_loss += loss
             val_metric += metric(prediction, y.long()).item()
 
-    # normalize loss and metric
-    val_loss /= len(loader.dataset)
-    val_metric /= len(loader.dataset)
+        # un-normalize loss and metric
+        val_loss /= len(loader)
+        val_metric /= len(loader)
 
-    if tb_logger is not None:
-        assert step is not None, \
-            "Need to know the current step to log validation results"
-        tb_logger.log_scalar(tag='val_loss', value=val_loss, step=step)
-        tb_logger.log_scalar(tag='val_metric', value=val_metric, step=step)
-        # we always log the last validation images
-        # pshape = prediction.shape
-        # tb_logger.log_image(tag='val_input', image=crop_tensor(x, pshape)[0, 0].to('cpu'), step=step)
-        # tb_logger.log_image(tag='val_target', image=crop_tensor(y, pshape)[0, 0].to('cpu'), step=step)
-        # tb_logger.log_image(tag='val_prediction', image=prediction[0, 0].to('cpu'), step=step)
+        if tb_logger is not None:
+            assert step is not None, \
+                "Need to know the current step to log validation results"
+            tb_logger.log_scalar(tag='val_loss', value=val_loss, step=step)
+            tb_logger.log_scalar(tag='val_metric', value=val_metric, step=step)
 
     print('\nValidate: Average loss: {:.4f}, Average Metric: {:.4f}\n'.format(
         val_loss, val_metric))
@@ -241,8 +232,8 @@ def validate_float(model, loader, loss_function, metric, device, step=None,
                                                      prediction.shape)).item()
 
     # normalize loss and metric
-    val_loss /= len(loader.dataset)
-    val_metric /= len(loader.dataset)
+    val_loss /= len(loader)
+    val_metric /= len(loader)
 
     if tb_logger is not None:
         assert step is not None, \

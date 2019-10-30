@@ -314,7 +314,8 @@ def write_global_motl_from_overlapping_subtomograms_multiclass(
         class_number: int,
         number_peaks_uniquify: int,
         z_shift: int,
-        final_activation: nn.Module = None) -> str:
+        final_activation: nn.Module = None,
+        threshold: float = -np.inf) -> str:
     with h5py.File(subtomograms_path, 'r') as h5file:
         subtomos_internal_path = join(
             h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS, label_name)
@@ -323,7 +324,9 @@ def write_global_motl_from_overlapping_subtomograms_multiclass(
         overlap_shift = overlap * np.array([1, 1, 1])
         z_shift_vector = [z_shift, 0, 0]
         print(z_shift_vector)
+        start = time.time()
         for subtomo_name in list(h5file[subtomos_internal_path]):
+            print(subtomo_name)
             subtomo_list_of_maxima, subtomo_maxima_coords = \
                 get_peaks_per_subtomo_with_overlap_multiclass(
                     h5file=h5file,
@@ -335,7 +338,8 @@ def write_global_motl_from_overlapping_subtomograms_multiclass(
                     class_number=class_number,
                     min_peak_distance=min_peak_distance,
                     overlap=overlap,
-                    final_activation=final_activation)
+                    final_activation=final_activation,
+                    threshold=threshold)
             print(len(subtomo_maxima_coords), "peaks in ", subtomo_name,
                   " computed")
             subtomo_corner, _ = get_subtomo_corner_and_side_lengths(
@@ -350,26 +354,30 @@ def write_global_motl_from_overlapping_subtomograms_multiclass(
 
             list_of_maxima += subtomo_list_of_maxima
             list_of_maxima_coords += subtomo_maxima_coords
-        print("Before saving, the total number of peaks is:",
-              len(list_of_maxima_coords))
+        end = time.time()
+        print("The total number of peaks is:", len(list_of_maxima_coords),
+              "and the elapsed time to compute (ms) =", end - start)
 
         # To arrange by score is necesary, otherwise most are trash
         # from the last tomogram:
-        values = []
-        coordinates = []
-        for val, zyx_coord in sorted(
-                list(zip(list_of_maxima, list_of_maxima_coords)),
-                key=lambda x: x[0], reverse=1)[:number_peaks_uniquify]:
-            values += [val]
-            coordinates += [zyx_coord]
-
-        motl_file_name = unique_coordinates_motl_writer(
-            path_to_output_folder=motive_list_output_dir,
-            list_of_peak_scores=list_of_maxima,
-            list_of_peak_coords=list_of_maxima_coords,
-            number_peaks_to_uniquify=number_peaks_uniquify,
-            minimum_peaks_distance=min_peak_distance,
-            class_number=class_number)
+    values = []
+    coordinates = []
+    peaks_by_value = sorted(list(zip(list_of_maxima, list_of_maxima_coords)),
+                            key=lambda x: x[0], reverse=True)
+    for val, zyx_coord in peaks_by_value[:number_peaks_uniquify]:
+        values += [val]
+        coordinates += [zyx_coord]
+    start = time.time()
+    print("Sorted list with peaks:", len(values))
+    motl_file_name = unique_coordinates_motl_writer(
+        path_to_output_folder=motive_list_output_dir,
+        list_of_peak_scores=list_of_maxima,
+        list_of_peak_coords=list_of_maxima_coords,
+        number_peaks_to_uniquify=number_peaks_uniquify,
+        minimum_peaks_distance=min_peak_distance,
+        class_number=class_number)
+    end = time.time()
+    print("Elapsed time for uniquifying motl (ms):", end - start)
     return motl_file_name
 
 
@@ -566,5 +574,3 @@ def write_statistics(statistics_file: str, statistics_label: str,
         makedirs(path, exist_ok=True)
         mini_stats_df.to_csv(path_or_buf=statistics_file, index=False)
     return
-
-

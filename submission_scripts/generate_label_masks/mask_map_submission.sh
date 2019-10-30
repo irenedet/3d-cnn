@@ -3,7 +3,7 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 64G
+#SBATCH --mem 30G
 #SBATCH --time 0-02:00
 #SBATCH -o slurm.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
@@ -11,9 +11,9 @@
 #SBATCH --mail-user=irene.de.teresa@embl.de
 
 module load Anaconda3
-echo 'starting virtual environment'
-source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse
-
+echo "activating virtual environment"
+source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
+echo "... done"
 export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
 
 echo "Starting python script"
