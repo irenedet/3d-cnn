@@ -74,8 +74,6 @@ parser.add_argument("-overlap", "--overlap",
 parser.add_argument("-threshold", "--score_threshold",
                     default=-10,
                     type=float)
-parser.add_argument("-summary_file", "--summary_file",
-                    type=str)
 parser.add_argument("-test_partition_from_table", "--test_partition_from_table",
                     type=str, default='True')
 
@@ -93,7 +91,6 @@ class_number = args.class_number
 semantic_classes = args.semantic_classes
 statistics_file = args.statistics_file
 label_name = args.label_name
-summary_file = args.summary_file
 semantic_classes = semantic_classes.split(",")
 class_name = semantic_classes[class_number]
 test_partition_from_table = strtobool(args.test_partition_from_table)

@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 20G
-#SBATCH --time 0-01:00
+#SBATCH --mem 8G
+#SBATCH --time 0-00:30
 #SBATCH -o slurm_outputs/data_aug_slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/data_aug_slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -18,17 +18,18 @@ export QT_QPA_PLATFORM='offscreen'
 echo 'starting virtual environment'
 source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 
-#export dataset_table="/struct/mahamid/Irene/yeast/npc/npc_DA_data.csv"
-export dataset_table="/struct/mahamid/Irene/NPC/SPombe/DA_NPC_SU_table.csv"
+export dataset_table="/struct/mahamid/Irene/NPC/SPombe/npc_gauss_0.06_0.01_masks/DA_NPC_SU_gauss0.06_0.01_masks_table.csv"
 #tomo_names="190218/043
 #190218/044
 #190218/048
 #190218/049
+#190218/050
 #190218/051
+#190218/052
 #190218/054
-#190218/056"
-#tomo_names="190218/059
-#190218/060
+#190218/056
+#190218/059"
+#tomo_names="190218/060
 #190218/061
 #190218/062
 #190218/063
@@ -85,6 +86,7 @@ export dataset_table="/struct/mahamid/Irene/NPC/SPombe/DA_NPC_SU_table.csv"
 #190218/119"
 #tomo_names="190218/120
 #190218/121
+#190218/122
 #190218/123
 #190218/124
 #190218/125
@@ -145,6 +147,8 @@ export dataset_table="/struct/mahamid/Irene/NPC/SPombe/DA_NPC_SU_table.csv"
 #190223/192
 #190223/194"
 
+tomo_names="190218/122"
+
 #tomo_names="180413/006
 #180413/007
 #180426/005
@@ -178,12 +182,9 @@ export dataset_table="/struct/mahamid/Irene/NPC/SPombe/DA_NPC_SU_table.csv"
 #180713/043
 #180713/050"
 
-
-#tomo_names="190218/056"
-
 #tomo_names="190218/050
-tomo_names="190218/052
-190218/122"
+#190218/052"
+
 
 export write_on_table=true
 export segmentation_names='npc'
@@ -192,12 +193,11 @@ export data_aug_rounds=4
 export rot_angle=180
 export elastic_alpha=2
 export sigma_noise=1.5
-#export src_data_path="/struct/mahamid/Irene/yeast/healthy/"$tomo_name"/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5"
 
 for tomo_name in $tomo_names
 do
-        export src_data_path="/scratch/trueba/3d-cnn/SPombe_NPC_SU/"$tomo_name"/training_data/strongly_labeled_0.002/full_partition.h5"
-        export dst_data_path="/scratch/trueba/3d-cnn/SPombe_NPC_SU/"$tomo_name"/training_data/strongly_labeled_0.002/G"$sigma_noise"_E"$elastic_alpha"_R"$rot_angle"_DArounds"$data_aug_rounds"/full_partition.h5"
+        export src_data_path="/scratch/trueba/3d-cnn/SPombe_NPC_SU/npc_gauss_0.06_0.01_masks/"$tomo_name"/training_data/strongly_labeled_0.02/full_partition.h5"
+          export dst_data_path="/scratch/trueba/3d-cnn/SPombe_NPC_SU/npc_gauss_0.06_0.01_masks/"$tomo_name"/training_data/strongly_labeled_0.02/G"$sigma_noise"_E"$elastic_alpha"_R"$rot_angle"_DArounds"$data_aug_rounds"/full_partition.h5"
 
         echo "starting python script for "$tomo_name
         python3 /g/scb2/zaugg/trueba/3d-cnn/runners/testing_runners/test_data_augm.py -tomo_name $tomo_name -dataset_table $dataset_table -dst_data_path $dst_data_path -segmentation_names $segmentation_names -data_aug_rounds $data_aug_rounds -rot_angle $rot_angle -sigma_noise  $sigma_noise -elastic_alpha $elastic_alpha -src_data_path $src_data_path  -write_on_table $write_on_table

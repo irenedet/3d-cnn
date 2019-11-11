@@ -600,6 +600,28 @@ def segment_and_write(data_path: str, model: UNet, label_name: str):
                                               subtomo_name=subtomo_name)
         else:
             print("The segmentation", label_name, " exists already.")
+            for subtomo_name in list(
+                    data_file[h5_internal_paths.RAW_SUBTOMOGRAMS]):
+                subtomo_h5_internal_path = join(
+                    h5_internal_paths.RAW_SUBTOMOGRAMS,
+                    subtomo_name)
+                prediction_internal_path = join(
+                    h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS,
+                    label_name)
+                if subtomo_name in list(data_file[prediction_internal_path]):
+                    print(subtomo_name, "already segmented")
+                else:
+                    subtomo_data = np.array(
+                        [data_file[subtomo_h5_internal_path][:]])
+                    subtomo_data = subtomo_data[:, None]
+                    print("subtomo_shape ", subtomo_data.shape)
+                    print("segmenting ", subtomo_name)
+                    segmented_data = model(torch.from_numpy(subtomo_data))
+                    segmented_data = segmented_data.detach().numpy()
+                    _write_segmented_subtomo_data(data_file=data_file,
+                                                  segmented_data=segmented_data,
+                                                  label_name=label_name,
+                                                  subtomo_name=subtomo_name)
     return
 
 

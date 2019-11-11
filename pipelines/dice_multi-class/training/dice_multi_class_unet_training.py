@@ -19,7 +19,7 @@ from src.python.networks.visualizers import TensorBoard_multiclass
 from src.python.filewriters.csv import write_on_models_notebook
 from src.python.networks.io import get_device
 from src.python.networks.loss import DiceCoefficientLoss, TanhDiceLoss
-from src.python.datasets.actions import split_dataset
+from src.python.datasets.actions import split_and_preprocess_dataset
 from src.python.filereaders import h5
 from src.python.filewriters.txt import write_model_description
 from src.python.image.filters import preprocess_data
@@ -141,7 +141,7 @@ for n, training_data_path in enumerate(training_paths_list):
             labels = np.array(labels, dtype=np.long)
 
             train_data, train_labels, val_data, val_labels, _ = \
-                split_dataset(preprocessed_data, labels, split)
+                split_and_preprocess_dataset(preprocessed_data, labels, split)
 
             print("train_data.shape", train_data.shape)
             print("train_labels.shape", train_labels.shape)
@@ -163,7 +163,7 @@ for n, training_data_path in enumerate(training_paths_list):
             labels = np.array(labels, dtype=np.long)
 
             train_data_tmp, train_labels_tmp, val_data_tmp, val_labels_tmp, _ = \
-                split_dataset(preprocessed_data, labels, split)
+                split_and_preprocess_dataset(preprocessed_data, labels, split)
 
             print("train_data.shape", train_data.shape)
             print("train_labels.shape", train_labels.shape)

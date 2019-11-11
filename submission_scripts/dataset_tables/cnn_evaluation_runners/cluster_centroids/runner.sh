@@ -136,9 +136,7 @@ export output_dir=$output_dir
 export BN=$Batch_Normalization
 export semantic_classes=$semantic_classes
 
-export summary_file=$output_dir"/summary_statistics_class"$class_number".csv"
-touch $summary_file
-export output_dir=$output_dir"/"$tomo_name"/class_"$class_number
+export output_dir=$output_dir/$label_name/$tomo_name/"class_"$class_number
 
 echo tomo_name = $tomo_name
 echo output_dir = $output_dir
@@ -170,6 +168,6 @@ echo "...done filtering points in lamella mask."
 # 3. Precision-Recall analysis
 export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir/motl*)
 echo "Starting to generate precision recall plots"
-python3 ./runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_number $class_number -summary_file $summary_file -semantic_classes $semantic_classes
+python3 ./runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_number $class_number -semantic_classes $semantic_classes
 echo "...done with precision recall plots."
 

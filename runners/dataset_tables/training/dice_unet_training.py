@@ -19,7 +19,7 @@ from src.python.datasets.actions import load_training_dataset_list
 
 from src.python.networks.io import get_device
 from src.python.networks.loss import DiceCoefficientLoss
-from src.python.datasets.actions import split_dataset
+from src.python.datasets.actions import split_and_preprocess_dataset
 from src.python.filereaders import h5
 from src.python.filewriters.txt import write_model_description
 from src.python.image.filters import preprocess_data

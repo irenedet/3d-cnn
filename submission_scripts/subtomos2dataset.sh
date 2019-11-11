@@ -43,26 +43,34 @@ echo "... done."
 # # For FAS
 export cluster_labels=False
 export class_number=0
-export output_shape=(928,928,500)
+export output_shape=(928,928,400)
 export box_length=128
 export box_overlap=12
 #reconstruction_type is either "prediction" or "labels" or "raw":
 export reconstruction_type="prediction"
-export label_name="fas_fractions_004_005_021_ED_and_def_shuffle_false_frac_4_fas__D_1_IF_12"
-export tomo_name="181126/002"
-export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/yeast_dataset/"$label_name"/peak_calling/pr_radius_10/"$tomo_name
-mkdir -p $output_dir
-DIRS="/struct/mahamid/Irene/yeast/ED/"$tomo_name"/eman_filt_eman_filt_tomo_partition.h5"
-
+export label_name="DA_G1.5_E2_R180_shuffle_false_npc__D_4_IF_8"
+export dataset_type="cylind_strongly_labeled0.002"
+#TOMOS="180713/037
+#180713/041
+#180713/050"
+TOMOS="180713/039"
+#TOMOS="180713/037
+#180713/041
+#180713/043
+#180713/050"
+# 180713/043
 count=0
-for dir in $DIRS
+for tomo_name in $TOMOS
 do
     echo $count
-    export subtomos_path=$dir
+    export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/$dataset_type/"$tomo_name"/"$label_name"/pr_radius_30/peak_calling/"$tomo_name
+    mkdir -p $output_dir
+    export subtomos_path="/scratch/trueba/3d-cnn/cnn_evaluation/yeast/healthy/"$tomo_name"/tomo_partition.h5"
     export output_path=$output_dir"/prediction.hdf"
 	  echo "Reading file $subtomos_path"
 	  echo "Running python script"
-    python3 runners/subtomos2dataset_new.py -subtomos_path $subtomos_path -class_number $class_number -output_path $output_path -output_shape $output_shape -box_length $box_length -overlap $box_overlap -label_name $label_name -cluster_labels $cluster_labels -reconstruction_type $reconstruction_type
+	  prediction_name=$dataset_type"_"$label_name
+    python3 runners/subtomos2dataset_new.py -subtomos_path $subtomos_path -class_number $class_number -output_path $output_path -output_shape $output_shape -box_length $box_length -overlap $box_overlap -label_name $prediction_name -cluster_labels $cluster_labels -reconstruction_type $reconstruction_type
     echo "... done."
     count=$((count+1))
 done

@@ -45,9 +45,18 @@ makedirs(name=output_dir, exist_ok=True)
 df = pd.read_csv(dataset_table)
 tomo_df = df[df['tomo_name'] == tomo_name]
 path_to_raw = tomo_df.iloc[0]['eman2_filetered_tomo']
+# Todo check
+# path_to_lamella = tomo_df.iloc[0]['lamella_file'].astype(str)
 path_to_lamella = tomo_df.iloc[0]['lamella_file']
+print("lamella_file =", path_to_lamella)
+
 raw_dataset = load_dataset(path_to_dataset=path_to_raw)
-lamella_mask = load_dataset(path_to_dataset=path_to_lamella)
+if isinstance(path_to_lamella, float):
+    print("No lamella file available")
+    lamella_mask = np.ones(raw_dataset.shape)
+else:
+    path_to_lamella = tomo_df.iloc[0]['lamella_file'].astype(str)
+    lamella_mask = load_dataset(path_to_dataset=path_to_lamella)
 
 lamella_shape = lamella_mask.shape
 dataset_shape = raw_dataset.shape

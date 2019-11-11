@@ -141,7 +141,7 @@ dataset_names = [
     "190218/119",
     "190218/120",
     "190218/121",
-    # "190218/122",
+    "190218/122",
     "190218/123",
     "190218/124",
     "190218/125",
@@ -204,6 +204,40 @@ dataset_names = [
     "190223/194",
 ]
 
+# dataset_names = [
+#     "190223/132",
+#     "190223/148",
+#     "190223/178",
+#     "190223/183",
+#     "190223/177",
+#     "190223/191",
+#     "190223/192",
+#     "190223/194",
+# ]
+
+pdf = matplotlib.backends.backend_pdf.PdfPages(
+    "/g/scb2/zaugg/trueba/3d-cnn/NPC_SU_gauss_0.06_0.01_masks_test_datasets.pdf")
+for index, tomo_name in enumerate(dataset_names):
+    print("tomo_name", tomo_name)
+    data_path = join("/struct/mahamid/Irene/NPC/SPombe", tomo_name)
+    data_label = join(data_path, "NPC_SU_mask_gauss_0.06_0.01_bin.hdf")
+    data_raw = join(data_path, "double_eman_filtered_raw_4b.hdf")
+
+    dataset_label = load_dataset(data_label)
+    dataset_raw = load_dataset(data_raw)
+    image_label = dataset_label[175, :, :]
+    image_raw = dataset_raw[175, :, :]
+    matplotlib.use('Agg')
+    plt.ioff()
+    figsize = (10, 10)
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=figsize,
+                             num=index, frameon=False)
+    axes[0].imshow(image_raw)
+    axes[1].imshow(image_label)
+    plt.suptitle("tomo " + tomo_name)
+    pdf.savefig(fig)
+pdf.close()
+
 # pdf = matplotlib.backends.backend_pdf.PdfPages(
 #     "/g/scb2/zaugg/trueba/3d-cnn/NPC_SU_strongly_labeled0.002.pdf")
 # for index, tomo_name in enumerate(dataset_names):
@@ -245,25 +279,25 @@ dataset_names = [
 #     pdf.savefig(fig)
 # pdf.close()
 
-for index, tomo_name in enumerate(dataset_names):
-    data_path = join("/scratch/trueba/3d-cnn/SPombe_NPC_SU",
-                     tomo_name)
-    data_path = join(data_path,
-                     "training_data/strongly_labeled_0.002/full_partition.h5")
-    DA_data_path = join("/scratch/trueba/3d-cnn/SPombe_NPC_SU",
-                        tomo_name)
-    DA_data_path = join(DA_data_path,
-                        "training_data/strongly_labeled_0.002")
-    DA_data_path = join(DA_data_path,
-                        "G1.5_E2_R180_DArounds4/full_partition.h5")
-
-    from src.python.naming import h5_internal_paths
-
-    with h5py.File(data_path, 'r') as f:
-        n_orig = len(list(f[h5_internal_paths.RAW_SUBTOMOGRAMS]))
-
-    with h5py.File(DA_data_path, 'r') as f:
-        n_DA = len(list(f[h5_internal_paths.RAW_SUBTOMOGRAMS]))
-
-    iterations = n_DA / n_orig
-    print("tomo ", tomo_name, "iterations =", iterations)
+# for index, tomo_name in enumerate(dataset_names):
+#     data_path = join("/scratch/trueba/3d-cnn/SPombe_NPC_SU",
+#                      tomo_name)
+#     data_path = join(data_path,
+#                      "training_data/strongly_labeled_0.002/full_partition.h5")
+#     DA_data_path = join("/scratch/trueba/3d-cnn/SPombe_NPC_SU",
+#                         tomo_name)
+#     DA_data_path = join(DA_data_path,
+#                         "training_data/strongly_labeled_0.002")
+#     DA_data_path = join(DA_data_path,
+#                         "G1.5_E2_R180_DArounds4/full_partition.h5")
+#
+#     from src.python.naming import h5_internal_paths
+#
+#     with h5py.File(data_path, 'r') as f:
+#         n_orig = len(list(f[h5_internal_paths.RAW_SUBTOMOGRAMS]))
+#
+#     with h5py.File(DA_data_path, 'r') as f:
+#         n_DA = len(list(f[h5_internal_paths.RAW_SUBTOMOGRAMS]))
+#
+#     iterations = n_DA / n_orig
+#     print("tomo ", tomo_name, "iterations =", iterations)

@@ -3,10 +3,10 @@
 #SBATCH -A zaugg
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 64G
-#SBATCH --time 0-00:40
-#SBATCH -o slurm.%N.%j.out
-#SBAtCH -e slurm.%N.%j.err
+#SBATCH --mem 4G
+#SBATCH --time 0-00:05
+#SBATCH -o slurm_outputs/generate_sph_mask.%N.%j.out
+#SBAtCH -e slurm_outputs/generate_sph_mask.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=irene.de.teresa@embl.de
 
@@ -17,17 +17,29 @@ echo "... done"
 export PYTHONPATH=$PYTHONPATH:/g/scb2/zaugg/trueba/3d-cnn
 
 
-TOMO_NAMES=( "190301_005" )
+TOMO_NAMES="181119/002
+181119/030
+181126/002
+181126/012
+181126/025"
+export output_dir="/struct/mahamid/Irene/yeast/ED"
+
+#TOMO_NAMES="180426/021
+#180426/024"
+#180426/005
+#180426/021
+#180426/024"
+#export output_dir="/struct/mahamid/Irene/yeast/healthy"
 
 
-export coords_in_tom_format='True'
-export class_number=0
 
-for tomo in ${TOMO_NAMES[@]}; do
+
+export coords_in_tom_format=true
+export class_number=1
+for tomo in $TOMO_NAMES
+do
     echo tomo=$tomo
-    export hdf_output_path="/struct/mahamid/Irene/yeast/ED/"$tomo"/clean_masks/class_$class_number/from_tobias_spherical_mask.hdf"
-    export parameters_file="/g/scb2/zaugg/trueba/3d-cnn/submission_data/SPOMBE/ED_DEFOCUS/"$tomo".sh"
-    source $parameters_file
+    export hdf_output_path=$output_dir/$tomo"/clean_masks/class_$class_number/corrected_motl_191108_sph_mask.hdf"
 
     if [ $class_number == 0 ]; then
         echo "class_number is 0"
@@ -41,18 +53,15 @@ for tomo in ${TOMO_NAMES[@]}; do
         echo "class_number non-supported for now"
     fi
 
-    export z_shift=$z_shift  # shift between original tomogram and subtomogram of analysis
-    export shape_x=$input_xdim
-    export shape_y=$input_ydim
-    export shape_z=$input_zdim
+    export z_shift=0  # shift between original tomogram and subtomogram of analysis
+    export shape_x=928
+    export shape_y=928
+    export shape_z=500
+    export values_in_motl=false
+    export path_to_motl=$output_dir/$tomo"/fas/motl/corrected_motl_191108.csv"
     echo path_to_motl = $path_to_motl
 
     echo "starting to generate hdf of particles in the motl"
-    python3 /g/scb2/zaugg/trueba/3d-cnn/pipelines/generate_label_masks/generate_hdf_from_motl.py -motl $path_to_motl -hdf_output_path $hdf_output_path -shape_x $shape_x -shape_y $shape_y -shape_z $shape_z -radius $radius -z_shift $z_shift -coords_in_tom_format $coords_in_tom_format
+    python3 pipelines/generate_label_masks/generate_hdf_from_motl.py -motl $path_to_motl -hdf_output_path $hdf_output_path -shape_x $shape_x -shape_y $shape_y -shape_z $shape_z -radius $radius -z_shift $z_shift -coords_in_tom_format $coords_in_tom_format -values_in_motl $values_in_motl
     echo "...done."
 done
-
-# ... Finally:
-#echo "Save a copy of this script for future reference"
-#SCRIPT=`realpath $0`
-#cp $SCRIPT $output_dir"/SCRIPT_SPH_PARTICLE.txt"

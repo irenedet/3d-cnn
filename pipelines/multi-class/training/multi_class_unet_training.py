@@ -14,7 +14,7 @@ from src.python.networks.classes.visualizers import TensorBoard_multiclass
 
 from networks.io import get_device
 from networks.routines import train, validate
-from src.python.datasets.actions import split_dataset
+from src.python.datasets.actions import split_and_preprocess_dataset
 from src.python.filereaders import h5
 from src.python.filewriters.txt import write_model_description
 from src.python.image.filters import preprocess_data
@@ -94,7 +94,7 @@ preprocessed_data = preprocess_data(raw_data)
 labels = np.array(labels, dtype=np.long)
 
 train_data, train_labels, val_data, val_labels, data_order = \
-    split_dataset(preprocessed_data, labels, split)
+    split_and_preprocess_dataset(preprocessed_data, labels, split)
 
 train_data = train_data[:, None]
 val_data = val_data[:, None]

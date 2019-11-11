@@ -111,7 +111,7 @@ class DiceCoefficient(nn.Module):
     # computed as (2 *|a b| / (a^2 + b^2))
     def forward(self, prediction, target):
         intersection = (prediction * target).sum()
-        denominator = (prediction * prediction).sum() + (target * target).sum()
+        denominator = prediction.sum() + target.sum()
         return 2 * intersection / denominator.clamp(min=self.eps)
 
 

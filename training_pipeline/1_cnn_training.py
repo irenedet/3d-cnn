@@ -18,7 +18,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as du
 
-from src.python.datasets.actions import split_dataset
+from src.python.datasets.actions import split_and_preprocess_dataset
 from src.python.filereaders import h5
 from src.python.image.filters import preprocess_data
 from src.python.image.viewers import view_images_h5
@@ -71,7 +71,7 @@ preprocessed_data = np.array(preprocessed_data)[:, None]
 labels = np.array(labels)[:, None]
 
 train_data, train_labels, val_data, val_labels, data_order = \
-    split_dataset(preprocessed_data, labels, split)
+    split_and_preprocess_dataset(preprocessed_data, labels, split)
 
 # print(data_order)
 

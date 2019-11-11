@@ -37,8 +37,9 @@ z_shift = args.output_z_shift
 coords_in_tom_format = args.coords_in_tom_format
 radius = args.sphere_radius
 hdf_output_path = args.hdf_output_path
+print("args.values_in_motl", args.values_in_motl)
 values_in_motl = strtobool(args.values_in_motl)
-
+print("values_in_motl", values_in_motl)
 print("coords_in_tom_format = ", coords_in_tom_format)
 output_dir = os.path.dirname(hdf_output_path)
 makedirs(name=output_dir, exist_ok=True)

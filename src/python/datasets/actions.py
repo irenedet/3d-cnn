@@ -162,8 +162,8 @@ def _unchunkify_data(raw_data_chunks: list, labels_data_chunks: list):
     return raw_data, labels_data
 
 
-def split_dataset(data: np.array, labels: np.array, split: float,
-                  data_aug_rounds: int = 0, shuffle=True) -> tuple:
+def split_and_preprocess_dataset(data: np.array, labels: np.array, split: float,
+                                 data_aug_rounds: int = 0, shuffle=True) -> tuple:
     """
     Splits a h5 partition into training and validation set, TrainSet and
     ValidationSet.
@@ -200,8 +200,17 @@ def split_dataset(data: np.array, labels: np.array, split: float,
         raw_data_chunks, labels_data_chunks = \
             _chunkify_by_data_augmentation_rounds(raw_data=data, labels=labels,
                                                   n_chunks=n_chunks)
+        # TODO: test this step
+        preprocessed_raw_data_chunks = list()
+        for data_chunk in raw_data_chunks:
+            data_chunk = preprocess_data(data=data_chunk)
+            preprocessed_raw_data_chunks.append(data_chunk)
+        print("data_chunks_shape", np.array(raw_data_chunks).shape,
+              "preprocessed_chunks.shape",
+              np.array(preprocessed_raw_data_chunks).shape)
+
         zipped_train, zipped_val = \
-            _split_data_augmentation_chunks(raw_data_chunks=raw_data_chunks,
+            _split_data_augmentation_chunks(raw_data_chunks=preprocessed_raw_data_chunks,
                                             labels_data_chunks=labels_data_chunks,
                                             split=split, shuffle=shuffle)
 
@@ -264,15 +273,12 @@ def load_training_dataset_list(training_partition_paths: list,
         else:
             print("Initial unique labels", np.unique(labels))
 
-            # Normalize data
-            preprocessed_data = preprocess_data(raw_data)
-            preprocessed_data = np.array(preprocessed_data)
             labels = np.array(labels, dtype=np.long)
 
             train_data_tmp, train_labels_tmp, \
             val_data_tmp, val_labels_tmp, _ = \
-                split_dataset(data=preprocessed_data, labels=labels,
-                              split=split, data_aug_rounds=data_aug_rounds)
+                split_and_preprocess_dataset(data=raw_data, labels=labels,
+                                             split=split, data_aug_rounds=data_aug_rounds)
 
             train_data += list(train_data_tmp)
             train_labels += list(train_labels_tmp)

@@ -3,6 +3,7 @@
 FRACTIONS="0 1 2 3 4"
 
 tomo_training_list0="004_0_1,004_0_2,004_0_3,004_0_4"
+tomo_training_list0="004_0_1,004_0_2,004_0_3,004_0_4"
 tomo_training_list1="004_1_0,004_1_2,004_1_3,004_1_4"
 tomo_training_list2="004_2_1,004_2_0,004_2_3,004_2_4"
 tomo_training_list3="004_3_1,004_3_2,004_3_0,004_3_4"
