@@ -132,6 +132,9 @@ train_data, train_labels, val_data, val_labels = \
     load_training_dataset_list(training_partition_paths, data_aug_rounds_list,
                                segmentation_names, split)
 
+print("train_data.shape", train_data.shape)
+print("val_data.shape", val_data.shape)
+
 train_set = du.TensorDataset(torch.from_numpy(train_data),
                              torch.from_numpy(train_labels))
 val_set = du.TensorDataset(torch.from_numpy(val_data),
