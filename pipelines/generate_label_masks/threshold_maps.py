@@ -5,7 +5,7 @@ from src.python.filereaders.datasets import load_dataset
 from src.python.filewriters.h5 import write_dataset_hdf
 
 # tomo_names = [
-#     # "190218/043",
+#     "190218/043",
 #     # "190218/044",
 #     # "190218/048",
 #     # "190218/049",
@@ -136,39 +136,24 @@ from src.python.filewriters.h5 import write_dataset_hdf
 
 tomo_names = ["181119/030"]
 value = 1
-threshold = 43  # todo check
+dx = 20
 
 for tomo_name in tomo_names:
     file_dir = join('/struct/mahamid/Irene/yeast/ED', tomo_name)
-    file_dir = join(file_dir, 'memb')
-    input_file_path = join(file_dir, "tomosegresult.hdf")
-    thresholded_set_name = 'tomosegresult_thr_' + str(threshold) + '.hdf'
-    output_file_path = join(file_dir, thresholded_set_name)
+    input_file_path = join(file_dir, 'memb/tomosegresult_thr_43.hdf')
+    lamella_file = join(file_dir, "lamellamask.hdf")
+    output_file_path = join(file_dir, 'memb/tomosegresult_thr_43_no_edge.hdf')
 
-    # print("Binarizing ", input_file_path)
-    # tomo_data = load_dataset(path_to_dataset=input_file_path)
-    # thresholded_dataset = value * (tomo_data > threshold)
+    print("Binarizing ", lamella_file)
+    lamella = load_dataset(path_to_dataset=lamella_file)
 
-    # write_dataset_hdf(output_path=output_file_path,
-    #                   tomo_data=thresholded_dataset)
+    print("Binarizing ", input_file_path)
+    tomo_data = load_dataset(path_to_dataset=input_file_path)
 
-    # tomo_data  = load_dataset(pa)
-    # file_dir = join('/struct/mahamid/Irene/NPC/SPombe', tomo_name)
-    # input_file_path06 = join(file_dir, 'gauss0.06_NPC_SU_mask.em')
-    # input_file_path01 = join(file_dir, 'gauss0.01_NPC_SU_mask.em')
-    # output_file_path = join(file_dir, 'NPC_SU_mask_gauss_0.06_0.01_bin.hdf')
-    #
-    # print("Binarizing ", input_file_path01)
-    # tomo_data01 = load_dataset(path_to_dataset=input_file_path01)
-    # thresholded_dataset01 = value * (tomo_data01 > threshold01)
-    #
-    # print("Binarizing ", input_file_path06)
-    # tomo_data06 = load_dataset(path_to_dataset=input_file_path06)
-    # thresholded_dataset06 = value * (tomo_data06 > threshold06)
-    #
-    # # thresholded_dataset = np.maximum(thresholded_dataset01,
-    # #                                  thresholded_dataset06)
-    # tomo_data = tomo_data06 + tomo_data01
-    # thresholded_dataset = value * (tomo_data >= 1)
-    # write_dataset_hdf(output_path=output_file_path,
-    #                   tomo_data=thresholded_dataset)
+    tomo_data = tomo_data * lamella
+    tomo_data[:, :dx, :] = np.zeros(tomo_data[:, :dx, :].shape)
+    tomo_data[:, -dx:, :] = np.zeros(tomo_data[:, -dx:, :].shape)
+    tomo_data[:, :, :dx] = np.zeros(tomo_data[:, :, :dx].shape)
+    tomo_data[:, :, -dx:] = np.zeros(tomo_data[:, :, -dx:].shape)
+
+    write_dataset_hdf(output_path=output_file_path, tomo_data=tomo_data)
