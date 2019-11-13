@@ -1,4 +1,5 @@
 from os.path import join
+import numpy as np
 
 from src.python.filereaders.datasets import load_dataset
 from src.python.coordinates_toolbox.utils import get_cluster_centroids
@@ -11,8 +12,8 @@ dataset = load_dataset(path_to_dataset=input_path)
 
 clustering_labels, centroids_list, cluster_size_list = \
     get_cluster_centroids(dataset=dataset,
-                          min_cluster_size=3,
-                          max_cluster_size=5000000,
+                          min_cluster_size=300000,
+                          max_cluster_size=np.inf,
                           connectivity=2)
 
 clusters_output_path = join(output_dir, "clusters.hdf")
