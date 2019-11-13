@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 8G
-#SBATCH --time 0-01:00
+#SBATCH --time 0-00:20
 #SBATCH -o slurm_outputs/data_aug_slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/data_aug_slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -20,8 +20,7 @@ source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 
 export dataset_table="/struct/mahamid/Irene/NPC/SPombe/npc_gauss_0.06_0.01_masks/DA_NPC_SU_gauss0.06_0.01_masks_table.csv"
 
-tomo_names="190218/044
-190218/049"
+tomo_names="190218/044"
 
 
 export write_on_table=true

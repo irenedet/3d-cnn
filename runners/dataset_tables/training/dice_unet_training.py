@@ -156,7 +156,7 @@ else:
     loss = loss.to(device)
     optimizer = optim.Adam(net.parameters())
     old_epoch = 0
-
+loss.requires_grad = True
 metric = loss
 model_name = model_initial_name + label_name + "_D_" + \
              str(net_conf['depth']) + "_IF_" + \
@@ -164,11 +164,11 @@ model_name = model_initial_name + label_name + "_D_" + \
 model_name_pkl = model_name + ".pkl"
 model_path_pkl = join(model_path, model_name_pkl)
 model_name_txt = model_name + ".txt"
-data_txt_path = join(model_path, model_name_txt)
-write_model_description(file_path=data_txt_path,
-                        training_data_path=str(training_partition_paths),
-                        label_name=label_name, split=split,
-                        model_name_pkl=model_path_pkl, conf=net_conf)
+# data_txt_path = join(model_path, model_name_txt)
+# write_model_description(file_path=data_txt_path,
+#                         training_data_path=str(training_partition_paths),
+#                         label_name=label_name, split=split,
+#                         model_name_pkl=model_path_pkl, conf=net_conf)
 log_model = join(log_dir, model_name)
 logger = TensorBoard_multiclass(log_dir=log_model, log_image_interval=1)
 

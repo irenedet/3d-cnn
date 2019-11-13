@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 30G
-#SBATCH --time 0-04:40
+#SBATCH --mem 8G
+#SBATCH --time 0-00:30
 #SBATCH -o slurm_outputs/generate_training_partition.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/generate_training_partition.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -15,8 +15,6 @@ module load Anaconda3
 echo 'activating virtual environment'
 source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 echo '... done.'
-
-export PYTHONPATH=/g/scb2/zaugg/trueba/3d-cnn
 
 TOMOS="190218/043
 190218/044
@@ -146,6 +144,7 @@ TOMOS="190218/043
 190223/192
 190223/194"
 
+TOMOS="190218/044"
 
 export path_to_dataset_table="/struct/mahamid/Irene/NPC/SPombe/npc_gauss_0.06_0.01_masks/NPC_SU_gauss0.06_0.01_masks_table.csv"
 export global_output_dir="/scratch/trueba/3d-cnn/SPombe_NPC_SU/npc_gauss_0.06_0.01_masks"
@@ -155,7 +154,7 @@ export segmentation_names='npc' #separated by commas
 export split=0.7
 export box_length=128
 export number_iterations_data_aug=0
-export min_label_fraction=0.02
+export min_label_fraction=0.002
 # Data for the new model
 
 # Data for old models for resuming training:

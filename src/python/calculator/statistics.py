@@ -214,3 +214,4 @@ def pr_auc_score(precision: list, recall: list) -> float:
     under the precision-recall (PR) curve.
     """
     return quadrature_calculator(recall, precision)
+

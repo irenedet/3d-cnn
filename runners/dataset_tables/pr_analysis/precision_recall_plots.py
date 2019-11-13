@@ -89,9 +89,9 @@ threshold = args.score_threshold
 tight_threshold = 0.1
 class_number = args.class_number
 semantic_classes = args.semantic_classes
+semantic_classes = semantic_classes.split(",")
 statistics_file = args.statistics_file
 label_name = args.label_name
-semantic_classes = semantic_classes.split(",")
 class_name = semantic_classes[class_number]
 test_partition_from_table = strtobool(args.test_partition_from_table)
 df = pd.read_csv(dataset_table)
@@ -243,8 +243,7 @@ plt.title(str(len(thresholded_predicted_indices)) + " peaks")
 plt.legend()
 plt.gcf()
 fig_name = join(figures_dir, "histogram_test_set.png")
-plt.savefig(fname=fig_name,
-            format="png")
+plt.savefig(fname=fig_name, format="png")
 
 plt.figure(3)
 plt.hist(value_detected_predicted_range, bins=45, label="true positives",

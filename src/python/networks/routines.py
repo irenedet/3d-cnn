@@ -83,8 +83,9 @@ def train(model, loader, optimizer, loss_function,
         optimizer.zero_grad()
 
         # apply model, calculate loss and run backwards pass
-        prediction = model(x)
-        loss = loss_function(prediction, y.long())
+        prediction = model(x.float())
+        loss = loss_function(prediction.long(), y.long())
+        loss.requires_grad = True
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
