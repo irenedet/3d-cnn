@@ -162,15 +162,6 @@ if retrain:
     net = net.to(device)
     loss = loss.to(device)
 else:
-<<<<<<< HEAD
-    net = UNet(**net_conf)
-    net = net.to(device)
-    loss = DiceCoefficientLoss()
-    loss = loss.to(device)
-    optimizer = optim.Adam(net.parameters())
-    old_epoch = 0
-loss.requires_grad = True
-=======
     if BN:
         net = UNet_BN(**net_conf)
         net = net.to(device)
@@ -195,7 +186,6 @@ loss.requires_grad = True
         optimizer = optim.Adam(net.parameters())
         old_epoch = 0
 
->>>>>>> ab81f7d
 metric = loss
 model_name = model_initial_name + label_name + "_D_" + \
              str(net_conf['depth']) + "_IF_" + \
