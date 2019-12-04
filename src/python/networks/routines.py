@@ -27,8 +27,7 @@ def train_float(model, loader, optimizer, loss_function,
         # log to console
         if batch_id % log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_id * len(x),
-                len(loader.dataset),
+                epoch, batch_id * len(x), len(loader.dataset),
                        100. * batch_id / len(loader), loss.item()))
 
         # log to tensorboard
@@ -61,7 +60,6 @@ def train_float(model, loader, optimizer, loss_function,
                                             0, 0, slice_index].to(
                                             'cpu'),
                                         step=step)
-
 
     train_loss /= len(loader)
     if tb_logger is not None:
@@ -173,7 +171,6 @@ def train(model, loader, optimizer, loss_function,
                     else:
                         print("Not logging images.")
 
-
     train_loss /= len(loader)
     if tb_logger is not None:
         step = epoch * len(loader)
@@ -200,8 +197,8 @@ def validate(model, loader, loss_function, metric, device, step=None,
             val_metric += metric(prediction, y.long()).item()
 
     # normalize loss and metric
-    val_loss /= len(loader.dataset)
-    val_metric /= len(loader.dataset)
+    val_loss /= len(loader)
+    val_metric /= len(loader)
 
     if tb_logger is not None:
         assert step is not None, \
@@ -241,8 +238,8 @@ def validate_float(model, loader, loss_function, metric, device, step=None,
                                                      prediction.shape)).item()
 
     # normalize loss and metric
-    val_loss /= len(loader.dataset)
-    val_metric /= len(loader.dataset)
+    val_loss /= len(loader)
+    val_metric /= len(loader)
 
     if tb_logger is not None:
         assert step is not None, \

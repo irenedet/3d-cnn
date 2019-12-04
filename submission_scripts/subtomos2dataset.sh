@@ -40,7 +40,7 @@ do
     export output_path=$output_dir"/class_"$class_number"/prediction.hdf"
 	echo "Reading file $subtomos_path"
 	echo "Running python script"
-    python3 ./runners/subtomos2dataset_new.py -subtomos_path $subtomos_path -class_number $class_number -output_path $output_path -output_shape $output_shape -box_length $box_length -overlap $box_overlap -label_name $label_name -cluster_labels $cluster_labels
+    python3 $UPICKER_PATH/runners/subtomos2dataset_new.py -subtomos_path $subtomos_path -class_number $class_number -output_path $output_path -output_shape $output_shape -box_length $box_length -overlap $box_overlap -label_name $label_name -cluster_labels $cluster_labels
     echo "... done."
 done
 

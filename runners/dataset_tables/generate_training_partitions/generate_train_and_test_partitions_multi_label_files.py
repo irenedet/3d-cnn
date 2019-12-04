@@ -5,13 +5,12 @@ from distutils.util import strtobool
 from src.python.datasets.random_transformations import \
     transform_data_from_h5_dice_multi_class
 from src.python.datasets.actions import \
-    partition_raw_and_labels_tomograms_dice_multiclass
+    partition_raw_and_labels_tomograms_dice_multiclass, \
+    generate_strongly_labeled_partition
 from src.python.filewriters.h5 import \
     split_and_write_h5_partition_dice_multi_class
 
 import argparse
-
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-segmentation_names", "--segmentation_names",
@@ -35,12 +34,15 @@ parser.add_argument("-dataset_table", "--dataset_table",
 parser.add_argument("-tomo_name", "--tomo_name",
                     help="tomo_name in sessiondate/datanumber format",
                     type=str)
+parser.add_argument("-min_label_fraction", "--min_label_fraction",
+                    help="min_label_fraction",
+                    type=float)
 
 args = parser.parse_args()
 tomo_name = args.tomo_name
 dataset_table = args.dataset_table
 output_dir = args.output_dir
-
+min_label_fraction = args.min_label_fraction
 box_side = args.box_side
 number_iter = args.number_iter
 split = args.split
@@ -63,7 +65,6 @@ print(segmentation_names)
 overlap = 12
 print("output_dir", output_dir)
 
-
 df = pd.read_csv(dataset_table)
 df['tomo_name'] = df['tomo_name'].astype(str)
 tomo_df = df[df['tomo_name'] == tomo_name]
@@ -83,7 +84,7 @@ print(labels_dataset_list)
 
 output_shape = (z_dim, y_dim, x_dim)
 subtomogram_shape = (box_side, box_side, box_side)
-output_dir = join(output_dir, "train_and_test_partitions")
+# output_dir = join(output_dir, "train_and_test_partitions")
 output_h5_file_name = "full_partition.h5"
 output_h5_file_path = join(output_dir, output_h5_file_name)
 output_data_path = join(output_dir, "data_aug_on_train_partition.h5")
@@ -97,14 +98,21 @@ h5_test_partition_path = join(output_dir, "test_partition.h5")
 
 makedirs(name=output_dir, exist_ok=True)
 
-partition_raw_and_labels_tomograms_dice_multiclass(
-    path_to_raw=path_to_raw,
-    labels_dataset_list=labels_dataset_list,
-    segmentation_names=segmentation_names,
-    output_h5_file_path=output_h5_file_path,
-    subtomo_shape=subtomogram_shape,
-    overlap=overlap)
+# partition_raw_and_labels_tomograms_dice_multiclass(
+#     path_to_raw=path_to_raw,
+#     labels_dataset_list=labels_dataset_list,
+#     segmentation_names=segmentation_names,
+#     output_h5_file_path=output_h5_file_path,
+#     subtomo_shape=subtomogram_shape,
+#     overlap=overlap)
 
+generate_strongly_labeled_partition(path_to_raw=path_to_raw,
+                                    labels_dataset_list=labels_dataset_list,
+                                    segmentation_names=segmentation_names,
+                                    output_h5_file_path=output_h5_file_path,
+                                    subtomo_shape=subtomogram_shape,
+                                    overlap=overlap,
+                                    min_label_fraction=min_label_fraction)
 print("The training data path is ", output_h5_file_path)
 #
 # print("Splitting training and testing data into two different files...")

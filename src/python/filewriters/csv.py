@@ -527,6 +527,8 @@ def write_on_models_notebook(model_name: str, model_path: str,
     mini_notebook_df['old_model'] = path_to_old_model
     mini_notebook_df['date'] = date
     mini_notebook_df['BN'] = str(BN)
+    models_notebook_dir = os.path.dirname(models_notebook_path)
+    makedirs(models_notebook_dir, exist_ok=True)
     if os.path.isfile(models_notebook_path):
         models_notebook_df = pd.read_csv(models_notebook_path)
 
@@ -564,5 +566,3 @@ def write_statistics(statistics_file: str, statistics_label: str,
         makedirs(path, exist_ok=True)
         mini_stats_df.to_csv(path_or_buf=statistics_file, index=False)
     return
-
-

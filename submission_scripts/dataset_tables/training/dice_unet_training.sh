@@ -3,15 +3,15 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 260G
-#SBATCH --time 0-5:00
+#SBATCH --mem 120G
+#SBATCH --time 0-25:00
 #SBATCH -o slurm.%N.%j.out
 #SBAtCH -e slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=irene.de.teresa@embl.de
 #SBATCH -p gpu
-#SBATCH -C gpu=1080Ti
-#SBATCH --gres=gpu:1
+#SBATCH -C gpu=2080Ti
+#SBATCH --gres=gpu:4
 
 module load GCC
 module load Anaconda3
@@ -45,7 +45,7 @@ export path_to_old_model="None"
 
 
 echo 'Training dice multi-label network'
-python3 ./runners/dataset_tables/training/dice_unet_training.py -dataset_table $path_to_dataset_table -tomo_training_list "${tomo_training_list[@]}" -split $split -classes $output_classes -log_dir $log_dir -model_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features
+python3 $UPICKER_PATH/runners/dataset_tables/training/dice_unet_training.py -dataset_table $path_to_dataset_table -tomo_training_list "${tomo_training_list[@]}" -split $split -classes $output_classes -log_dir $log_dir -model_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features
 
 echo "Save a copy of this script for future reference"
 SCRIPT=`realpath $0`

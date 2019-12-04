@@ -12,7 +12,7 @@ import torch.utils.data as du
 
 from src.python.filewriters.csv import write_on_models_notebook
 from src.python.networks.routines import train, validate
-from src.python.networks.unet import UNet
+from src.python.networks.unet import UNet, UNet_BN, UNet_dropout
 from src.python.networks.visualizers import TensorBoard_multiclass
 from src.python.networks.utils import save_unet_model, load_unet_model
 from src.python.datasets.actions import load_training_dataset_list
@@ -70,6 +70,15 @@ parser.add_argument("-tomo_training_list", "--tomo_training_list",
 parser.add_argument("-models_notebook", "--models_notebook",
                     default="None",
                     type=str)
+parser.add_argument("-BN", "--Batch_Normalization",
+                    default="False",
+                    type=str)
+parser.add_argument("-encoder_dropout", "--encoder_dropout",
+                    default=0,
+                    type=float)
+parser.add_argument("-decoder_dropout", "--decoder_dropout",
+                    default=0,
+                    type=float)
 args = parser.parse_args()
 dataset_table = args.dataset_table
 tomo_training_list = args.tomo_training_list
@@ -84,6 +93,9 @@ n_epochs = args.number_of_epochs
 retrain = strtobool(args.retrain)
 path_to_old_model = args.path_to_old_model
 depth = args.depth
+decoder_dropout = args.decoder_dropout
+encoder_dropout = args.encoder_dropout
+BN = strtobool(args.Batch_Normalization)
 initial_features = args.initial_features
 models_notebook_path = args.models_notebook
 segmentation_names = args.segmentation_names
@@ -147,12 +159,29 @@ if retrain:
     net = net.to(device)
     loss = loss.to(device)
 else:
-    net = UNet(**net_conf)
-    net = net.to(device)
-    loss = DiceCoefficientLoss()
-    loss = loss.to(device)
-    optimizer = optim.Adam(net.parameters())
-    old_epoch = 0
+    if BN:
+        net = UNet_BN(**net_conf)
+        net = net.to(device)
+        loss = DiceCoefficientLoss()
+        loss = loss.to(device)
+        optimizer = optim.Adam(net.parameters())
+        old_epoch = 0
+    elif np.max([encoder_dropout, decoder_dropout]) > 0:
+        net_conf["encoder_dropout"] = encoder_dropout
+        net_conf["decoder_dropout"] = decoder_dropout
+        net = UNet_dropout(**net_conf)
+        net = net.to(device)
+        loss = DiceCoefficientLoss()
+        loss = loss.to(device)
+        optimizer = optim.Adam(net.parameters())
+        old_epoch = 0
+    else:
+        net = UNet(**net_conf)
+        net = net.to(device)
+        loss = DiceCoefficientLoss()
+        loss = loss.to(device)
+        optimizer = optim.Adam(net.parameters())
+        old_epoch = 0
 
 metric = loss
 model_name = model_initial_name + label_name + "_D_" + \

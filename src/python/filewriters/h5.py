@@ -103,7 +103,8 @@ def write_dataset_from_subtomos_with_overlap_multiclass(
         subtomos_internal_path: str,
         class_number: int,
         overlap: int,
-        final_activation: None or nn.Module = None):
+        final_activation: None or nn.Module = None,
+        reconstruction_type: str = "prediction"):
     output_shape_with_overlap = output_shape  # [dim + overlap_thickness for
     # dim in
     # output_shape]
@@ -119,48 +120,62 @@ def write_dataset_from_subtomos_with_overlap_multiclass(
                 output_shape,
                 internal_subtomo_shape,
                 subtomo_center)
-            overlap_shift = overlap * np.array([1, 1, 1])
-            start_corner -= overlap_shift
-            end_corner -= overlap_shift
-            subtomo_h5_internal_path = join(subtomos_internal_path,
-                                            subtomo_name)
-            channels = f[subtomo_h5_internal_path][:].shape[0]
-            internal_subtomo_data = np.zeros(lengths)
-            if channels > 1:
-                assert class_number < channels
-                # ToDo: define if we want this to plot only one
-                # class at a time (delete for loop... not needed)
-                for n in range(1):  # leave out the background class
-                    channel_data = f[subtomo_h5_internal_path][n + class_number,
-                                   overlap:lengths[0] + overlap,
-                                   overlap:lengths[1] + overlap,
-                                   overlap:lengths[2] + overlap]
+            if np.min(lengths) < 0:
+                print("Internal data of", subtomo_name)
+                print("totally out from original input. "
+                      "Calculated lengths of internal dataset =", lengths)
+            else:
+                overlap_shift = overlap * np.array([1, 1, 1])
+                start_corner -= overlap_shift
+                end_corner -= overlap_shift
+                subtomo_h5_internal_path = join(subtomos_internal_path,
+                                                subtomo_name)
+                channels = f[subtomo_h5_internal_path][:].shape[0]
+                internal_subtomo_data = np.zeros(lengths)
+                if channels > 1:
+                    assert class_number < channels
+                    # ToDo: define if we want this to plot only one
+                    # class at a time (delete for loop... not needed)
+                    if reconstruction_type == "prediction":
+                        for n in range(1):  # leave out the background class
+                            channel_data = f[subtomo_h5_internal_path][
+                                           n + class_number,
+                                           overlap:lengths[0] + overlap,
+                                           overlap:lengths[1] + overlap,
+                                           overlap:lengths[2] + overlap]
+                            if final_activation is not None:
+                                channel_data = np.array(final_activation(
+                                    torch.from_numpy(channel_data).double()))
+                            else:
+                                print("No final activation.")
+                            print("channel ", n, ", min, max = ",
+                                  np.min(channel_data),
+                                  np.max(channel_data))
+                            internal_subtomo_data += channel_data
+                    else:
+                        channel_data = f[subtomo_h5_internal_path][
+                                       overlap:lengths[0] + overlap,
+                                       overlap:lengths[1] + overlap,
+                                       overlap:lengths[2] + overlap]
+                        internal_subtomo_data += channel_data
+                else:
+                    internal_subtomo_data = f[subtomo_h5_internal_path][0,
+                                            overlap:lengths[0] + overlap,
+                                            overlap:lengths[1] + overlap,
+                                            overlap:lengths[2] + overlap]
                     if final_activation is not None:
-                        channel_data = np.array(final_activation(
-                            torch.from_numpy(channel_data).double()))
+                        internal_subtomo_data = np.array(final_activation(
+                            torch.from_numpy(internal_subtomo_data).double()))
                     else:
                         print("No final activation.")
-                    print("channel ", n, ", min, max = ", np.min(channel_data),
-                          np.max(channel_data))
-                    internal_subtomo_data += channel_data
-            else:
-                internal_subtomo_data = f[subtomo_h5_internal_path][0,
-                                        overlap:lengths[0] + overlap,
-                                        overlap:lengths[1] + overlap,
-                                        overlap:lengths[2] + overlap]
-                if final_activation is not None:
-                    internal_subtomo_data = np.array(final_activation(
-                        torch.from_numpy(internal_subtomo_data).double()))
-                else:
-                    print("No final activation.")
-            tomo_data[start_corner[0]: end_corner[0],
-            start_corner[1]: end_corner[1],
-            start_corner[2]: end_corner[2]] = internal_subtomo_data
-            print("internal_subtomo_data = ",
-                  internal_subtomo_data.shape)
+                tomo_data[start_corner[0]: end_corner[0],
+                start_corner[1]: end_corner[1],
+                start_corner[2]: end_corner[2]] = internal_subtomo_data
+                print("internal_subtomo_data = ",
+                      internal_subtomo_data.shape)
     write_dataset_hdf(output_path, tomo_data)
     print("right before deleting the maximum is", np.max(tomo_data))
-    del tomo_data
+    return
 
 
 def write_clustering_labels_subtomos(
@@ -585,6 +600,32 @@ def segment_and_write(data_path: str, model: UNet, label_name: str):
                                               subtomo_name=subtomo_name)
         else:
             print("The segmentation", label_name, " exists already.")
+            print(h5_internal_paths.RAW_SUBTOMOGRAMS)
+            print(list(data_file[h5_internal_paths.RAW_SUBTOMOGRAMS]))
+            prediction_path = join(
+                h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS,
+                label_name)
+            predicted_subtomos_names = list(data_file[prediction_path])
+            for subtomo_name in list(
+                    data_file[h5_internal_paths.RAW_SUBTOMOGRAMS]):
+                subtomo_h5_internal_path = join(
+                    h5_internal_paths.RAW_SUBTOMOGRAMS,
+                    subtomo_name)
+
+                if subtomo_name in predicted_subtomos_names:
+                    print(subtomo_name, "was already segmented")
+                else:
+                    subtomo_data = np.array(
+                        [data_file[subtomo_h5_internal_path][:]])
+                    subtomo_data = subtomo_data[:, None]
+                    print("subtomo_shape ", subtomo_data.shape)
+                    print("segmenting ", subtomo_name)
+                    segmented_data = model(torch.from_numpy(subtomo_data))
+                    segmented_data = segmented_data.detach().numpy()
+                    _write_segmented_subtomo_data(data_file=data_file,
+                                                  segmented_data=segmented_data,
+                                                  label_name=label_name,
+                                                  subtomo_name=subtomo_name)
     return
 
 
