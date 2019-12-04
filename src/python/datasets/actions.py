@@ -1,6 +1,10 @@
 import numpy as np
 import random
+from os.path import join
+import h5py
 
+from src.python.naming import h5_internal_paths
+from src.python.tensors.actions import crop_window_around_point
 from src.python.filereaders.datasets import load_dataset
 from src.python.filewriters.h5 import write_raw_subtomograms_intersecting_mask
 from src.python.filewriters.h5 import \
@@ -221,7 +225,8 @@ def split_and_preprocess_dataset(data: np.array, labels: np.array, split: float,
                     split=split, shuffle=shuffle)
 
             data_order_train, shuffled_raw_chunks_train, shuffled_label_chunks_train = \
-                _get_unzipped_data(zipped_chunks=zipped_train, n_chunks=n_chunks)
+                _get_unzipped_data(zipped_chunks=zipped_train,
+                                   n_chunks=n_chunks)
 
             data_order_val, shuffled_raw_chunks_val, shuffled_label_chunks_val = \
                 _get_unzipped_data(zipped_chunks=zipped_val, n_chunks=n_chunks)
@@ -278,9 +283,19 @@ def load_training_dataset_list(training_partition_paths: list,
 
         if raw_data.shape[0] == 0:
             print('Empty training set in ', training_data_path)
+        elif raw_data.shape[0] == data_aug_rounds + 1:
+            print('Single training example in ', training_data_path)
+            # Normalize data
+            preprocessed_data = preprocess_data(raw_data)
+            preprocessed_data = np.array(preprocessed_data)
+            labels = np.array(labels, dtype=np.long)
+            train_data += list(preprocessed_data)
+            train_labels += list(labels)
         else:
             print("Initial unique labels", np.unique(labels))
-
+            # Normalize data
+            preprocessed_data = preprocess_data(raw_data)
+            preprocessed_data = np.array(preprocessed_data)
             labels = np.array(labels, dtype=np.long)
 
             train_data_tmp, train_labels_tmp, \
@@ -464,4 +479,65 @@ def generate_strongly_labeled_partition(path_to_raw: str,
         window_centers=padded_particles_coordinates,
         crop_shape=subtomo_shape,
         min_label_fraction=min_label_fraction)
+    return
+
+
+def write_strongly_labeled_subtomograms(output_path: str,
+                                        padded_raw_dataset: np.array,
+                                        padded_labels_list: list,
+                                        segmentation_names: list,
+                                        window_centers: list,
+                                        crop_shape: tuple,
+                                        min_label_fraction: float = 0):
+    with h5py.File(output_path, 'w') as f:
+        for window_center in window_centers:
+            print("window_center", window_center)
+            subtomo_name = "subtomo_{0}".format(str(window_center))
+            subtomo_raw_h5_internal_path = join(
+                h5_internal_paths.RAW_SUBTOMOGRAMS,
+                subtomo_name)
+            subtomo_raw_data = crop_window_around_point(
+                input_array=padded_raw_dataset,
+                crop_shape=crop_shape,
+                window_center=window_center)
+            volume = crop_shape[0] * crop_shape[1] * crop_shape[2]
+            subtomo_label_data_list = []
+            subtomo_label_h5_internal_path_list = []
+            segmentation_max = 0
+            label_fraction = 0
+            # Getting label channels for our current raw subtomo
+            for label_name, padded_label in zip(segmentation_names,
+                                                padded_labels_list):
+                subtomo_label_data = crop_window_around_point(
+                    input_array=padded_label,
+                    crop_shape=crop_shape,
+                    window_center=window_center)
+                subtomo_label_data_list += [subtomo_label_data]
+                print("subtomo_max = ", np.max(subtomo_label_data))
+                subtomo_label_h5_internal_path = join(
+                    h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
+                subtomo_label_h5_internal_path = join(
+                    subtomo_label_h5_internal_path,
+                    subtomo_name)
+                subtomo_label_h5_internal_path_list += [
+                    subtomo_label_h5_internal_path]
+                segmentation_max = np.max(
+                    [segmentation_max, np.max(subtomo_label_data)])
+                label_indicator = np.where(subtomo_label_data > 0)
+                if len(label_indicator) > 0:
+                    current_fraction = len(label_indicator[0]) / volume
+                    label_fraction = np.max(
+                        [label_fraction, current_fraction])
+            print("window_center, label_fraction", window_center,
+                  label_fraction)
+            if segmentation_max > 0.5 and label_fraction > min_label_fraction:
+                print("Saving window_center, subtomo_raw_h5_internal_path",
+                      window_center, subtomo_raw_h5_internal_path)
+                f[subtomo_raw_h5_internal_path] = subtomo_raw_data
+                for subtomo_label_h5_internal_path, subtomo_label_data in zip(
+                        subtomo_label_h5_internal_path_list,
+                        subtomo_label_data_list):
+                    f[subtomo_label_h5_internal_path] = subtomo_label_data
+            else:
+                print("subtomo ", subtomo_name, "discarded")
     return

@@ -3,12 +3,12 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 30G
-#SBATCH --time 0-06:35
+#SBATCH --mem 20G
+#SBATCH --time 0-00:40
 #SBATCH -o slurm_outputs/evaluate_particle_peaking_peaks.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/evaluate_particle_peaking_peaks.slurm.%N.%j.err
-#SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=irene.de.teresa@embl.de
+#SBAtCH --mail-type=END,FAIL
+#SBAtCH --mail-user=irene.de.teresa@embl.de
 
 #SBAtCH -p gpu
 #SBAtCH -C gpu=1080Ti
@@ -91,8 +91,11 @@ while [ "$1" != "" ]; do
         -BN | --Batch_Normalization )   shift
                                 Batch_Normalization=$1
                                 ;;
-        -test_partition_from_table | --test_partition_from_table )   shift
-                                test_partition_from_table=$1
+        -decoder_dropout | --decoder_dropout )   shift
+                                decoder_dropout=$1
+                                ;;
+        -encoder_dropout | --encoder_dropout )   shift
+                                encoder_dropout=$1
                                 ;;
         -h | --help )           usage
                                 exit
@@ -111,9 +114,11 @@ echo class_number = $class_number
 echo output_classes = $output_classes
 echo BN = $Batch_Normalization
 echo semantic_classes = $semantic_classes
-echo test_partition_from_table=$test_partition_from_table
+echo encoder_dropout = $encoder_dropout
+echo decoder_dropout = $decoder_dropout
 
-export test_partition_from_table=$test_partition_from_table
+export encoder_dropout=$encoder_dropout
+export decoder_dropout=$decoder_dropout
 export dataset_table=$dataset_table
 export threshold=$threshold
 export path_to_model=$path_to_model
@@ -145,12 +150,12 @@ export box_overlap=12
 
 # 1. Segmenting test_partition:
 echo 'running python3 scripts: Segmenting raw subtomograms'
-python3 runners/dataset_tables/particle_picking_scripts/2_subtomograms_segmentation_no_activation.py -model $path_to_model -label $label_name -dataset_table $dataset_table -tomo_name $tomo_name -init_feat $init_feat -depth $depth -out_classes $output_classes -new_loader $new_loader -BN $BN
+python3 $UPICKER_PATH/runners/dataset_tables/particle_picking_scripts/2_subtomograms_segmentation_no_activation.py -model $path_to_model -label $label_name -dataset_table $dataset_table -tomo_name $tomo_name -init_feat $init_feat -depth $depth -out_classes $output_classes -new_loader $new_loader -BN $BN -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout
 echo '... done.'
 
 # 2. Peak calling and motl writing
 echo 'running python3 scripts: getting particles motive list'
-python3 runners/dataset_tables/particle_picking_scripts/3_get_activated_score_peaks_motive_list.py -dataset_table $dataset_table -tomo_name $tomo_name -output $output_dir -label $label_name -box $box_side -class_number $class_number -min_peak_distance $minimum_peak_distance -overlap $box_overlap
+python3 $UPICKER_PATH/runners/dataset_tables/particle_picking_scripts/3_get_activated_score_peaks_motive_list.py -dataset_table $dataset_table -tomo_name $tomo_name -output $output_dir -label $label_name -box $box_side -class_number $class_number -min_peak_distance $minimum_peak_distance -overlap $box_overlap
 echo 'finished peak calling script'
 
 
@@ -160,12 +165,13 @@ export path_to_csv_motl=$(ls $output_dir"/"motl*.csv)
 export lamella_output_dir=$output_dir"/in_lamella"
 
 echo "Now filtering points in lamella mask"
-python3 runners/dataset_tables/pr_analysis/filter_with_lamella_mask.py -dataset_table $dataset_table -tomo_name $tomo_name -csv_motl $path_to_csv_motl -output_dir $output_dir -border_xy $border_xy -lamella_extension $lamella_extension
+python3 $UPICKER_PATH/runners/dataset_tables/pr_analysis/filter_with_lamella_mask.py -dataset_table $dataset_table -tomo_name $tomo_name -csv_motl $path_to_csv_motl -output_dir $output_dir -border_xy $border_xy -lamella_extension $lamella_extension
 echo "...done filtering points in lamella mask."
 
 
 # 3. Precision-Recall analysis
 export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir"/"motl*.csv)
 echo "Starting to generate precision recall plots"
-python3 runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_number $class_number -semantic_classes $semantic_classes -test_partition_from_table $test_partition_from_table
+python3 $UPICKER_PATH/runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_number $class_number -summary_file $summary_file -semantic_classes $semantic_classes
 echo "...done with precision recall plots."
+

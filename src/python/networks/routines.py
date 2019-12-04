@@ -27,8 +27,7 @@ def train_float(model, loader, optimizer, loss_function,
         # log to console
         if batch_id % log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_id * len(x),
-                len(loader.dataset),
+                epoch, batch_id * len(x), len(loader.dataset),
                        100. * batch_id / len(loader), loss.item()))
 
         # log to tensorboard
@@ -172,7 +171,7 @@ def train(model, loader, optimizer, loss_function,
                             print("the size of the target tensor isnt loggable")
                     else:
                         print("Not logging images.")
-    print("train_loss", train_loss, "len(loader)", len(loader))
+
     train_loss /= len(loader)
     if tb_logger is not None:
         step = epoch * len(loader)
@@ -196,15 +195,15 @@ def validate(model, loader, loss_function, metric, device, step=None,
             val_loss += loss
             val_metric += metric(prediction, y.long()).item()
 
-        # un-normalize loss and metric
-        val_loss /= len(loader)
-        val_metric /= len(loader)
+    # normalize loss and metric
+    val_loss /= len(loader)
+    val_metric /= len(loader)
 
-        if tb_logger is not None:
-            assert step is not None, \
+    if tb_logger is not None:
+        assert step is not None, \
                 "Need to know the current step to log validation results"
-            tb_logger.log_scalar(tag='val_loss', value=val_loss, step=step)
-            tb_logger.log_scalar(tag='val_metric', value=val_metric, step=step)
+        tb_logger.log_scalar(tag='val_loss', value=val_loss, step=step)
+        tb_logger.log_scalar(tag='val_metric', value=val_metric, step=step)
 
     print('\nValidate: Average loss: {:.4f}, Average Metric: {:.4f}\n'.format(
         val_loss, val_metric))

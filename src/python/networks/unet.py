@@ -41,7 +41,8 @@ class UNet(nn.Module):
 
     def __init__(self, in_channels=1, out_channels=1,
                  depth=4, initial_features=16, elu=False,
-                 final_activation=None):
+                 final_activation=None, p_dropout=0, Batch_Norm=False,
+                 Group_Norm=False):
         super().__init__()
         self.depth = depth
 
@@ -141,27 +142,41 @@ class UNet_dropout(nn.Module):
       initial_features: number of features after first encoder
     """
 
-    def _conv_block(self, in_channels, out_channels):
-        # I have personally had better experience using relu instead of elu,
-        # but this is worth confirming experimentally
+    def _conv_block_encoder(self, in_channels, out_channels):
         return nn.Sequential(
             nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Dropout(p=self.dropout),
+            nn.Dropout(p=self.encoder_dropout),
             nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Dropout(p=self.dropout))
+            nn.Dropout(p=self.encoder_dropout))
 
-    def _conv_block_elu(self, in_channels, out_channels):
-        # I have personally had better experience using relu instead of elu,
-        # but this is worth confirming experimentally
+    def _conv_block_decoder(self, in_channels, out_channels):
+        return nn.Sequential(
+            nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Dropout(p=self.decoder_dropout),
+            nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Dropout(p=self.decoder_dropout))
+
+    def _conv_block_encoder_elu(self, in_channels, out_channels):
         return nn.Sequential(
             nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.ELU(),
-            nn.Dropout(p=self.dropout),
+            nn.Dropout(p=self.encoder_dropout),
             nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1),
             nn.ELU(),
-            nn.Dropout(p=self.dropout))
+            nn.Dropout(p=self.encoder_dropout))
+
+    def _conv_block_decoder_elu(self, in_channels, out_channels):
+        return nn.Sequential(
+            nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1),
+            nn.ELU(),
+            nn.Dropout(p=self.decoder_dropout),
+            nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1),
+            nn.ELU(),
+            nn.Dropout(p=self.decoder_dropout))
 
     # upsampling via transposed 3d convolutions
     def _upsampler(self, in_channels, out_channels):
@@ -169,11 +184,13 @@ class UNet_dropout(nn.Module):
                                   kernel_size=2, stride=2)
 
     def __init__(self, in_channels=1, out_channels=1,
-                 depth=4, initial_features=16, dropout=0.1, elu=False,
+                 depth=4, initial_features=16, decoder_dropout=0.1,
+                 encoder_dropout=0.1, elu=False,
                  final_activation=None):
         super().__init__()
         self.depth = depth
-        self.dropout = dropout
+        self.decoder_dropout = decoder_dropout
+        self.encoder_dropout = encoder_dropout
 
         # the final activation must either be None or a Module
         if final_activation is not None:
@@ -187,33 +204,41 @@ class UNet_dropout(nn.Module):
         n_features_base = n_features_encode[-1] * 2
         # print("encoder:", n_features_encode)
 
-        if elu == False:
+        if not elu:
             self.encoder = nn.ModuleList(
-                [self._conv_block(n_features_encode[level],
-                                  n_features_encode[level + 1])
+                [self._conv_block_encoder(n_features_encode[level],
+                                          n_features_encode[level + 1])
                  for level in range(self.depth)])
 
             # the base convolution block
-            self.base = self._conv_block(n_features_encode[-1],
-                                         n_features_base)
+            self.base = self._conv_block_encoder(n_features_encode[-1],
+                                                 n_features_base)
         else:
             self.encoder = nn.ModuleList(
-                [self._conv_block_elu(n_features_encode[level],
-                                      n_features_encode[
-                                          level + 1])
+                [self._conv_block_encoder_elu(n_features_encode[level],
+                                              n_features_encode[
+                                                  level + 1])
                  for level in range(self.depth)])
 
             # the base convolution block
-            self.base = self._conv_block_elu(n_features_encode[-1],
-                                             n_features_base)
+            self.base = self._conv_block_encoder_elu(n_features_encode[-1],
+                                                     n_features_base)
 
         # modules of the decoder path
         n_features_decode = [n_features_base] + n_features[::-1]
         # print("decoder:", n_features_decode)
-        self.decoder = nn.ModuleList([self._conv_block(n_features_decode[level],
-                                                       n_features_decode[
-                                                           level + 1])
-                                      for level in range(self.depth)])
+        if not elu:
+            self.decoder = nn.ModuleList(
+                [self._conv_block_decoder(n_features_decode[level],
+                                          n_features_decode[
+                                              level + 1])
+                 for level in range(self.depth)])
+        else:
+            self.decoder = nn.ModuleList(
+                [self._conv_block_decoder_elu(n_features_decode[level],
+                                              n_features_decode[
+                                                  level + 1])
+                 for level in range(self.depth)])
 
         # the pooling layers; we use 2x2 MaxPooling
         self.poolers = nn.ModuleList(
@@ -277,22 +302,22 @@ class UNet_BN(nn.Module):
         # I have personally had better experience using relu instead of elu,
         # but this is worth confirming experimentally
         return nn.Sequential(
+            nn.BatchNorm3d(num_features=in_channels),
             nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.BatchNorm3d(num_features=out_channels),
             nn.ReLU(),
             nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1),
-            nn.BatchNorm3d(num_features=out_channels),
             nn.ReLU())
 
     def _conv_block_elu(self, in_channels, out_channels):
         # I have personally had better experience using relu instead of elu,
         # but this is worth confirming experimentally
         return nn.Sequential(
+            nn.BatchNorm3d(num_features=in_channels),
             nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.ELU(),
             nn.BatchNorm3d(num_features=out_channels),
             nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1),
-            nn.BatchNorm3d(num_features=out_channels),
             nn.ELU())
 
     # upsampling via transposed 3d convolutions

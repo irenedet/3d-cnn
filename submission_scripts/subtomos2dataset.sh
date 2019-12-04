@@ -62,15 +62,11 @@ TOMOS="180713/039"
 count=0
 for tomo_name in $TOMOS
 do
-    echo $count
-    export output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/$dataset_type/"$tomo_name"/"$label_name"/pr_radius_30/peak_calling/"$tomo_name
-    mkdir -p $output_dir
-    export subtomos_path="/scratch/trueba/3d-cnn/cnn_evaluation/yeast/healthy/"$tomo_name"/tomo_partition.h5"
-    export output_path=$output_dir"/prediction.hdf"
-	  echo "Reading file $subtomos_path"
-	  echo "Running python script"
-	  prediction_name=$dataset_type"_"$label_name
-    python3 runners/subtomos2dataset_new.py -subtomos_path $subtomos_path -class_number $class_number -output_path $output_path -output_shape $output_shape -box_length $box_length -overlap $box_overlap -label_name $prediction_name -cluster_labels $cluster_labels -reconstruction_type $reconstruction_type
+    export subtomos_path=$dir
+    export output_path=$output_dir"/class_"$class_number"/prediction.hdf"
+    echo "Reading file $subtomos_path"
+    echo "Running python script"
+    python3 $UPICKER_PATH/runners/subtomos2dataset_new.py -subtomos_path $subtomos_path -class_number $class_number -output_path $output_path -output_shape $output_shape -box_length $box_length -overlap $box_overlap -label_name $label_name -cluster_labels $cluster_labels
     echo "... done."
     count=$((count+1))
 done

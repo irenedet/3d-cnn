@@ -1,7 +1,6 @@
 #! /bin/bash
 
-FRACTIONS="0 1 2 3 4"
-#FRACTIONS="0 1 2 3 4"
+FRACTIONS="0 1 2 4"
 
 
 tomo_training_list0="180426_004_0_1,180426_004_0_2,180426_004_0_3,180426_004_0_4,180426_005_0_1,180426_005_0_2,180426_005_0_3,180426_005_0_4,180426_021_0_1,180426_021_0_2,180426_021_0_3,180426_021_0_4,181119_002_0_1,181119_002_0_2,181119_002_0_3,181119_002_0_4,181119_030_0_1,181119_030_0_2,181119_030_0_3,181119_030_0_4,181126_002_0_1,181126_002_0_2,181126_002_0_3,181126_002_0_4,181126_012_0_1,181126_012_0_2,181126_012_0_3,181126_012_0_4"
@@ -11,7 +10,7 @@ tomo_training_list3="180426_004_3_1,180426_004_3_2,180426_004_3_0,180426_004_3_4
 tomo_training_list4="180426_004_4_1,180426_004_4_2,180426_004_4_3,180426_004_4_0,180426_005_4_1,180426_005_4_2,180426_005_4_3,180426_005_4_0,180426_021_4_1,180426_021_4_2,180426_021_4_3,180426_021_4_0,181119_002_4_1,181119_002_4_0,181119_002_4_3,181119_002_4_2,181119_030_4_1,181119_030_4_0,181119_030_4_3,181119_030_4_2,181126_002_4_1,181126_002_4_0,181126_002_4_3,181126_002_4_2,181126_012_4_1,181126_012_4_0,181126_012_4_3,181126_012_4_2"
 
 
-export path_to_dataset_table="/struct/mahamid/Irene/cross-validation/multiclass/CV_data.csv"
+export path_to_dataset_table="/struct/mahamid/Irene/cross-validation/multiclass/DA_G1.5_E2_R180_DArounds4/DA_CV_data.csv"
 export segmentation_names='ribo,fas,memb'
 export split=0.8
 
@@ -24,11 +23,7 @@ export depth=2
 export initial_features=8
 export output_classes=3
 export shuffle=true
-export DA="none"
-export BN=false
-export encoder_dropout=0.1
-export decoder_dropout=0.1
-
+export DA="G1.5_E2_R180_DArounds4"
 
 # Data for old models for resuming training:
 export models_notebook="/struct/mahamid/Irene/cross-validation/multiclass/models_cv_fractions.csv"
@@ -51,8 +46,8 @@ do
     fi
 
     echo 'Job for fraction' $fraction
-    export retrain="false"
-    export path_to_old_model="none"
-    export model_initial_name="R_"$retrain"_encoder_dropout_"$encoder_dropout"_decoder_dropout_"$decoder_dropout"_BN_"$BN"_DA_"$DA"_shuffle_"$shuffle"_frac_"$fraction"_"
-    sbatch submission_scripts/dataset_tables/training/training_runner.sh -fraction $fraction -path_to_dataset_table $path_to_dataset_table -tomo_training_list $tomo_training_list -split $split -output_classes $output_classes -log_dir $log_dir -model_initial_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook -BN $BN -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout
+    export retrain="true"
+    export path_to_old_model="/struct/mahamid/Irene/cross-validation/multiclass/models/cross-validation/"$fractions_name"/DA_"$DA"_shuffle_"$shuffle"_frac_"$fraction"_ribo_fas_memb__D_"$depth"_IF_"$initial_features".pkl"
+    export model_initial_name="R_"$retrain"_DA_"$DA"_shuffle_"$shuffle"_frac_"$fraction"_"
+    sbatch submission_scripts/dataset_tables/training/training_runner.sh -fraction $fraction -path_to_dataset_table $path_to_dataset_table -tomo_training_list $tomo_training_list -split $split -output_classes $output_classes -log_dir $log_dir -model_initial_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook
 done

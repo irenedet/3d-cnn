@@ -2,10 +2,11 @@ import argparse
 from distutils.util import strtobool
 
 import pandas as pd
+import numpy as np
 import torch
 
 from src.python.networks.io import get_device
-from src.python.networks.unet import UNet, UNet_BN
+from src.python.networks.unet import UNet, UNet_BN, UNet_dropout
 from src.python.filewriters.h5 import segment_and_write
 
 
@@ -32,6 +33,12 @@ parser.add_argument("-depth", "--unet_depth",
 parser.add_argument("-BN", "--Batch_Normalization",
                     help="Batch_Normalization",
                     type=str, default="False")
+parser.add_argument("-encoder_dropout", "--encoder_dropout",
+                    help="encoder_dropout",
+                    type=float, default=0)
+parser.add_argument("-decoder_dropout", "--decoder_dropout",
+                    help="decoder_dropout",
+                    type=float, default=0)
 parser.add_argument("-out_classes", "--output_classes",
                     help="Integer indicating number of classes to segment",
                     type=int)
@@ -49,18 +56,27 @@ depth = args.unet_depth
 output_classes = args.output_classes
 new_loader = strtobool(args.new_loader)
 BN = strtobool(args.Batch_Normalization)
+encoder_dropout = args.encoder_dropout
+decoder_dropout = args.decoder_dropout
 print("BN = ", BN)
 
 df = pd.read_csv(dataset_table)
 df['tomo_name'] = df['tomo_name'].astype(str)
 tomo_df = df[df['tomo_name'] == tomo_name]
 data_path = tomo_df.iloc[0]['test_partition']
+print("test_partition", data_path)
 conf = {'final_activation': None, 'depth': depth,
         'initial_features': init_feat, 'out_channels': output_classes}
 if not BN:
     model = UNet(**conf)
 else:
     model = UNet_BN(**conf)
+if np.max([encoder_dropout, decoder_dropout]) > 0:
+    conf['encoder_dropout'] = encoder_dropout
+    conf['decoder_dropout'] = decoder_dropout
+    model = UNet_dropout(**conf)
+else:
+    print("No dropout")
 
 device = get_device()
 if new_loader:

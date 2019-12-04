@@ -6,23 +6,21 @@ from os import makedirs
 from random import shuffle
 
 tomos = [
-    # '180426/004',
-    # '180426/005',
-    # '180426/021',
-    # '181119/002',
-    '181119/030',
-    # '181126/002',
-    # '181126/012',
+    # "180426/004",
+    # "180426/005",
+    # "180426/021",
+    # "180426/024",
+    "181119/002",
+    # "181119/030",
+    # "181126/002",
+    # "181126/012",
+    # "181126/025",
 ]
-# /scratch/trueba/3d-cnn/cross-validation/training-data/181119/002/multi_class/strongly_labeled_0.002/full_partition.h5
-# /scratch/trueba/3d-cnn/cross-validation/training-data/181119/030/multi_class/strongly_labeled_0.002/full_partition.h5
-# /scratch/trueba/3d-cnn/cross-validation/training-data/181126/002/multi_class/strongly_labeled_0.002/full_partition.h5
-# /scratch/trueba/3d-cnn/cross-validation/training-data/181126/012/multi_class/strongly_labeled_0.002/full_partition.h5
 
 fractions_number = 5
 semantic_classes = ['ribo', 'fas', 'memb']
-base_dir = "/scratch/trueba/3d-cnn/cross-validation/training-data/"
-tail_dir = "multi_class/strongly_labeled_0.002"
+base_dir = "/scratch/trueba/3d-cnn/cross-validation/original-training-data"
+tail_dir = "strongly_labeled_0.002"
 
 copy_to_global = "/scratch/trueba/3d-cnn/cross-validation/training-fractions"
 for tomo in tomos:
@@ -41,6 +39,7 @@ for tomo in tomos:
         for fraction in range(fractions_number):
             fraction_name = "fraction_" + str(fraction) + ".h5"
             output_file = join(output_folder, fraction_name)
+            print("Writing fraction ", fraction)
             with h5py.File(output_file, "w") as f_frac:
                 for subtomo_name in subtomo_names[
                                     fraction * n:(fraction + 1) * n]:
@@ -57,11 +56,11 @@ for tomo in tomos:
             print("Now copying files to cv locations:")
             src = output_file
             print("src", src)
+            tomo_fraction_iteration = tomo[:6] + "_" + tomo[-3:] + \
+                                      "_fraction_" + str(fraction) + ".h5"
             for training_set in range(fractions_number):
                 training_fraction_name = "training_fraction_" + str(
                     training_set)
-                tomo_fraction_iteration = tomo[:6] + "_" + tomo[-3:] + \
-                                          "_fraction_" + str(fraction) + ".h5"
                 dst_tomo = join(copy_to_global, training_fraction_name)
                 makedirs(dst_tomo, exist_ok=True)
                 dst = join(dst_tomo, tomo_fraction_iteration)

@@ -175,7 +175,7 @@ def write_dataset_from_subtomos_with_overlap_multiclass(
                       internal_subtomo_data.shape)
     write_dataset_hdf(output_path, tomo_data)
     print("right before deleting the maximum is", np.max(tomo_data))
-    del tomo_data
+    return
 
 
 def write_clustering_labels_subtomos(
@@ -600,16 +600,20 @@ def segment_and_write(data_path: str, model: UNet, label_name: str):
                                               subtomo_name=subtomo_name)
         else:
             print("The segmentation", label_name, " exists already.")
+            print(h5_internal_paths.RAW_SUBTOMOGRAMS)
+            print(list(data_file[h5_internal_paths.RAW_SUBTOMOGRAMS]))
+            prediction_path = join(
+                h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS,
+                label_name)
+            predicted_subtomos_names = list(data_file[prediction_path])
             for subtomo_name in list(
                     data_file[h5_internal_paths.RAW_SUBTOMOGRAMS]):
                 subtomo_h5_internal_path = join(
                     h5_internal_paths.RAW_SUBTOMOGRAMS,
                     subtomo_name)
-                prediction_internal_path = join(
-                    h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS,
-                    label_name)
-                if subtomo_name in list(data_file[prediction_internal_path]):
-                    print(subtomo_name, "already segmented")
+
+                if subtomo_name in predicted_subtomos_names:
+                    print(subtomo_name, "was already segmented")
                 else:
                     subtomo_data = np.array(
                         [data_file[subtomo_h5_internal_path][:]])

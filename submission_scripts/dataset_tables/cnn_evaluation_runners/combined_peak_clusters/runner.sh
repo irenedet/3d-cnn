@@ -8,7 +8,7 @@
 #SBATCH -o slurm_outputs/runner_combined_evaluation.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/runner_combined_evaluation.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=irene.de.teresa@embl.de
+#SBAtCH --mail-user=irene.de.teresa@embl.de
 
 #SBAtCH -p gpu
 #SBAtCH -C gpu=1080Ti
