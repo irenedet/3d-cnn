@@ -3,7 +3,7 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 300G
+#SBATCH --mem 160G
 #SBATCH --time 1-16:00
 #SBATCH -o slurm_outputs/training.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/training.slurm.%N.%j.err
@@ -11,7 +11,7 @@
 #SBATCH --mail-user=irene.de.teresa@embl.de
 #SBATCH -p gpu
 #SBATCH -C gpu=2080Ti
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:4 -n1 -c4
 
 #-p is partition
 #-C is the card

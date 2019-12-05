@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 20G
-#SBATCH --time 0-00:45
+#SBATCH --time 0-01:45
 #SBATCH -o slurm_outputs/evaluate_dice_evaluation.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/evaluate_dice_evaluation.slurm.%N.%j.err
 #SBAtCH --mail-type=END,FAIL

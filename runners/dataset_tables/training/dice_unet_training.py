@@ -146,10 +146,14 @@ train_data, train_labels, val_data, val_labels = \
 
 print("train_data.shape", train_data.shape)
 print("val_data.shape", val_data.shape)
+preprocessed_train_data = preprocess_data(train_data)
+preprocessed_train_data = np.array(preprocessed_train_data)
+preprocessed_val_data = preprocess_data(val_data)
+preprocessed_val_data = np.array(preprocessed_val_data)
 
-train_set = du.TensorDataset(torch.from_numpy(train_data),
+train_set = du.TensorDataset(torch.from_numpy(preprocessed_train_data),
                              torch.from_numpy(train_labels))
-val_set = du.TensorDataset(torch.from_numpy(val_data),
+val_set = du.TensorDataset(torch.from_numpy(preprocessed_val_data),
                            torch.from_numpy(val_labels))
 
 train_loader = du.DataLoader(train_set, shuffle=shuffle, batch_size=5)

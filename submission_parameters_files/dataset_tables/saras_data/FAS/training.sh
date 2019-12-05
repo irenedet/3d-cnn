@@ -19,14 +19,14 @@ export fractions_name="cv_fas_fractions"
 export log_dir="/struct/mahamid/Irene/cross-validation/multiclass/DA_FAS_WT_test/log_"$fractions_name
 export model_path="/struct/mahamid/Irene/cross-validation/multiclass/models/cross-validation/"$fractions_name
 export n_epochs=300
-export depth=1
-export initial_features=16
+export depth=2
+export initial_features=8
 export output_classes=1
 export shuffle=true
 export DA="none"
 export BN=false
-export encoder_dropout=0.2
-export decoder_dropout=0.2
+export encoder_dropout=0
+export decoder_dropout=0
 
 
 # Data for old models for resuming training:
@@ -52,6 +52,6 @@ do
     echo 'Job for fraction' $fraction
     export retrain="false"
     export path_to_old_model="none"
-    export model_initial_name="R_"$retrain"_encoder_dropout_"$encoder_dropout"_decoder_dropout_"$decoder_dropout"_BN_"$BN"_DA_"$DA"_shuffle_"$shuffle"_frac_"$fraction"_"
+    export model_initial_name="Global_preprocessed_R_"$retrain"_encoder_dropout_"$encoder_dropout"_decoder_dropout_"$decoder_dropout"_BN_"$BN"_DA_"$DA"_shuffle_"$shuffle"_frac_"$fraction"_"
     sbatch $UPICKER_PATH/submission_scripts/dataset_tables/training/training_runner.sh -fraction $fraction -path_to_dataset_table $path_to_dataset_table -tomo_training_list $tomo_training_list -split $split -output_classes $output_classes -log_dir $log_dir -model_initial_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook -BN $BN -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout
 done
