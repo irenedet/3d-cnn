@@ -1,11 +1,9 @@
-import numpy as np
-import matplotlib
-from matplotlib import cm
-import h5py
 from os.path import join
-import matplotlib.pyplot as plt
-from src.python.filereaders.datasets import load_dataset
+
+import h5py
 import matplotlib.backends.backend_pdf
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def save_fig(filepath, fig=None):
@@ -293,7 +291,7 @@ pdf.close()
 #     DA_data_path = join(DA_data_path,
 #                         "G1.5_E2_R180_DArounds4/full_partition.h5")
 #
-#     from src.python.naming import h5_internal_paths
+#     from naming import h5_internal_paths
 #
 #     with h5py.File(data_path, 'r') as f:
 #         n_orig = len(list(f[h5_internal_paths.RAW_SUBTOMOGRAMS]))

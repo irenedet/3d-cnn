@@ -5,10 +5,10 @@ import h5py
 import numpy as np
 import skimage.morphology as morph
 
-from src.python.coordinates_toolbox.subtomos import \
+from coordinates_toolbox.subtomos import \
     get_subtomo_corner_side_lengths_and_zero_padding
-from src.python.naming import h5_internal_paths
-from src.python.naming.particles import create_particle_file_name
+from naming import h5_internal_paths
+from naming.particles import create_particle_file_name
 
 
 def to_tom_coordinate_system(p: list) -> np.array:

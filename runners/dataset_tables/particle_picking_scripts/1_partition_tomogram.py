@@ -1,11 +1,10 @@
-from os import makedirs
 import argparse
-import numpy as np
 from distutils.util import strtobool
+
 import pandas as pd
 
-from src.python.datasets.actions import partition_tomogram
-from src.python.filereaders.hdf import _load_hdf_dataset
+from datasets.actions import partition_tomogram
+from filereaders.hdf import _load_hdf_dataset
 
 parser = argparse.ArgumentParser()
 

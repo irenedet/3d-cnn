@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from src.python.networks.cnnets import UNet_6
+from networks.cnnets import UNet_6
 
 
 def read_data_from_h5(data_path: str) -> np.array:

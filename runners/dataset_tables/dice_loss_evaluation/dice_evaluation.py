@@ -6,10 +6,10 @@ import os
 import torch
 import torch.nn as nn
 
-from src.python.filewriters.csv import write_statistics
-from src.python.pytorch_cnn.classes.loss import DiceCoefficient
-from src.python.filereaders.datasets import load_dataset
-from src.python.filewriters.h5 import write_dataset_hdf
+from filewriters.csv import write_statistics
+from pytorch_cnn.classes.loss import DiceCoefficient
+from filereaders.datasets import load_dataset
+from filewriters.h5 import write_dataset_hdf
 
 import argparse
 

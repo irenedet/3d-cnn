@@ -2,8 +2,8 @@ from os.path import join
 
 import h5py
 
-from src.python.datasets.actions import partition_tomogram
-from src.python.naming import h5_internal_paths
+from datasets.actions import partition_tomogram
+from naming import h5_internal_paths
 
 path_to_raw = '/scratch/trueba/cnn/004/4bin/cnn/rawtomogram/001_bin4_subregion0-0-380-927-927-600.hdf'
 with h5py.File(path_to_raw, 'r') as f:

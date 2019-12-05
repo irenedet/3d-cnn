@@ -1,16 +1,16 @@
-import pandas as pd
-import numpy as np
 import argparse
 from os import makedirs
 from os.path import join
 
-from src.python.filereaders.datasets import load_dataset
-from src.python.coordinates_toolbox.utils import get_cluster_centroids
-from src.python.filewriters.h5 import write_dataset_hdf, \
-    write_dataset_from_subtomos_with_overlap_multiclass
-from src.python.naming import h5_internal_paths
+import numpy as np
+import pandas as pd
 
-from src.python.filewriters.csv import build_tom_motive_list
+from coordinates_toolbox.utils import get_cluster_centroids
+from filereaders.datasets import load_dataset
+from filewriters.csv import build_tom_motive_list
+from filewriters.h5 import write_dataset_hdf, \
+    write_dataset_from_subtomos_with_overlap_multiclass
+from naming import h5_internal_paths
 
 parser = argparse.ArgumentParser()
 
@@ -85,7 +85,6 @@ write_dataset_from_subtomos_with_overlap_multiclass(
     subtomos_internal_path,
     class_number,
     overlap)
-
 
 dataset = load_dataset(path_to_dataset=output_path)
 

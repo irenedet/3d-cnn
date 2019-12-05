@@ -1,20 +1,18 @@
-import pandas as pd
-import numpy as np
 import argparse
 from os import makedirs
 from os.path import join
+
+import numpy as np
+import pandas as pd
 import torch.nn as nn
 from scipy.spatial import distance
 
-from src.python.filereaders.datasets import load_dataset
-from src.python.coordinates_toolbox.utils import get_clusters_within_size_range
-from src.python.peak_toolbox.utils import read_motl_coordinates_and_values
-from src.python.filewriters.csv import build_tom_motive_list
-
-from src.python.coordinates_toolbox.utils import get_cluster_centroids
-from src.python.filewriters.h5 import write_dataset_hdf, \
-    write_dataset_from_subtomos_with_overlap_multiclass
-from src.python.naming import h5_internal_paths
+from coordinates_toolbox.utils import get_clusters_within_size_range
+from filereaders.datasets import load_dataset
+from filewriters.csv import build_tom_motive_list
+from filewriters.h5 import write_dataset_from_subtomos_with_overlap_multiclass
+from naming import h5_internal_paths
+from peak_toolbox.utils import read_motl_coordinates_and_values
 
 parser = argparse.ArgumentParser()
 
@@ -119,7 +117,6 @@ makedirs(name=output_dir, exist_ok=True)
 big_clusters_motl_path = join(output_dir, "big_clusters_motl.csv")
 centroids_motl_path = join(output_dir, "small_clusters_motl.csv")
 combined_motl_path = join(output_dir, "combined_motl.csv")
-
 
 labeled_clusters, labels_list_within_range, cluster_size_within_range = \
     get_clusters_within_size_range(dataset=dataset,

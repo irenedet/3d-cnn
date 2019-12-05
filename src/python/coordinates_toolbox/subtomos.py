@@ -3,7 +3,7 @@ from typing import List
 
 import numpy as np
 import h5py
-from src.python.naming import h5_internal_paths
+from naming import h5_internal_paths
 
 
 def get_coord_from_name(subtomo_name):

@@ -1,10 +1,11 @@
-from os.path import join
 from os import makedirs
-# import argparse
+from os.path import join
 
-from src.python.datasets.actions import partition_tomogram
-from src.python.filereaders.hdf import _load_hdf_dataset
-from src.python.osactions.filesystem import extract_file_name
+# from datasets.actions import partition_tomogram
+from filereaders.hdf import _load_hdf_dataset
+
+# import argparse
+# from osactions.filesystem import extract_file_name
 
 # parser = argparse.ArgumentParser()
 # parser.add_argument("-raw", "--path_to_raw",
@@ -33,7 +34,7 @@ hdf_output_path = join(output_dir, "motl_5182_ribos_mask.hdf")
 z_shift = -330  # shift between original tomogram and subtomogram of analysis
 output_shape = (321, 927, 927)
 
-# from src.python.filewriters.h5 import write_hdf_particles_from_motl
+# from filewriters.h5 import write_hdf_particles_from_motl
 #
 # write_hdf_particles_from_motl(path_to_motl=path_to_motl,
 #                               hdf_output_path=hdf_output_path,
@@ -60,7 +61,7 @@ label_name = "ribosomes"
 #
 
 # Fuctions that didn't work: ###########################################
-# from src.python.filereaders.em import load_em_dataset
+# from filereaders.em import load_em_dataset
 # header, raw_dataset = load_em_dataset(path_to_emfile=path_to_raw,
 #                                       output_shape_xyz=(928, 928, 500))
 # print("raw_dataset.shape", raw_dataset.shape)
@@ -68,7 +69,7 @@ label_name = "ribosomes"
 
 raw_dataset = _load_hdf_dataset(hdf_file_path=path_to_raw)
 labels_dataset = _load_hdf_dataset(hdf_file_path=path_to_labeled)
-from src.python.datasets.actions import partition_raw_and_labels_tomograms
+from datasets.actions import partition_raw_and_labels_tomograms
 
 partition_raw_and_labels_tomograms(raw_dataset=raw_dataset,
                                    labels_dataset=labels_dataset,
@@ -79,4 +80,3 @@ partition_raw_and_labels_tomograms(raw_dataset=raw_dataset,
                                    )
 print("The script has finished!")
 exit(output_h5_file_path)
-

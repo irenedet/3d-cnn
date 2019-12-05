@@ -1,12 +1,11 @@
-import pandas as pd
-import numpy as np
 import argparse
 from os import makedirs
 
+import numpy as np
+import pandas as pd
 
-from src.python.filewriters.csv import \
+from filewriters.csv import \
     write_global_motl_from_overlapping_subtomograms_multiclass
-
 
 parser = argparse.ArgumentParser()
 

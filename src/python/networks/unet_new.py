@@ -9,8 +9,8 @@ import torch.optim as optim
 import torchvision.utils as vutils
 import matplotlib.pyplot as plt
 
-import src.python.tensors.actions as actions
-from src.python.networks.metrics import jaccard, accuracy_metrics
+import tensors.actions as actions
+from networks.metrics import jaccard, accuracy_metrics
 
 
 # Implementation inspired from:

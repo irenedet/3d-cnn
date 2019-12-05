@@ -1,16 +1,12 @@
+import argparse
+from distutils.util import strtobool
 from os import makedirs
 from os.path import join
-import pandas as pd
-from distutils.util import strtobool
-from src.python.datasets.random_transformations import \
-    transform_data_from_h5_dice_multi_class
-from src.python.datasets.actions import \
-    partition_raw_and_labels_tomograms_dice_multiclass, \
-    generate_strongly_labeled_partition
-from src.python.filewriters.h5 import \
-    split_and_write_h5_partition_dice_multi_class
 
-import argparse
+import pandas as pd
+
+from datasets.actions import \
+    generate_strongly_labeled_partition
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-segmentation_names", "--segmentation_names",

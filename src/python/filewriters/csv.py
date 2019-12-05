@@ -12,18 +12,18 @@ import datetime
 from functools import reduce
 import torch.nn as nn
 
-from src.python.coordinates_toolbox.utils import \
+from coordinates_toolbox.utils import \
     filtering_duplicate_coords_with_values, to_tom_coordinate_system
-from src.python.naming import h5_internal_paths
-from src.python.peak_toolbox.subtomos import \
+from naming import h5_internal_paths
+from peak_toolbox.subtomos import \
     get_peaks_per_subtomo_with_overlap, \
     get_peaks_per_subtomo_with_overlap_multiclass
-from src.python.coordinates_toolbox.utils import shift_coordinates_by_vector
-from src.python.coordinates_toolbox.subtomos import \
+from coordinates_toolbox.utils import shift_coordinates_by_vector
+from coordinates_toolbox.subtomos import \
     get_subtomo_corner_and_side_lengths
-from src.python.coordinates_toolbox.utils import \
+from coordinates_toolbox.utils import \
     arrange_coordinates_list_by_score
-from src.python.peak_toolbox.utils import read_motl_data
+from peak_toolbox.utils import read_motl_data
 
 
 def motl_writer(path_to_output_folder: str, list_of_peak_scores: list,
@@ -132,7 +132,7 @@ def build_tom_motive_list(list_of_peak_coordinates: list,
     tom_rotatec.h function: where the rotation is the composition
     rot_z(psi)*rot_x(theta)*rot_z(phi) (again, where xyz are the tom coordinate
     system). For more information on the Euler convention see help from
-    src.python.datasets.transformations.rotate_ref.
+    datasets.transformations.rotate_ref.
     :param list_of_classes: list of integers of length n_particles representing
     the particle class associated to each particle coordinate.
     :return:

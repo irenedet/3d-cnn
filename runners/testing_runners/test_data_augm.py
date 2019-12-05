@@ -1,15 +1,16 @@
+import os
+from distutils.util import strtobool
+from os import makedirs
+from os.path import join
+
 import h5py
 import numpy as np
-import os
-from os.path import join
-from os import makedirs
-from distutils.util import strtobool
 import pandas as pd
 
-from src.python.naming import h5_internal_paths
-from src.python.networks.utils import data_loader
-from src.python.datasets.random_transformations import RandomRot3D, \
+from datasets.random_transformations import RandomRot3D, \
     SinusoidalElasticTransform3D, AdditiveGaussianNoise
+from naming import h5_internal_paths
+from networks.utils import data_loader
 
 
 def get_transforms(rot_range: float, elastic_alpha: int,

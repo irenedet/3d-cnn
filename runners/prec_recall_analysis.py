@@ -1,22 +1,19 @@
+import argparse
+import os
+from os import makedirs
+from os.path import join
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import argparse
-from os.path import join
-from os import makedirs
-import os
 
-from src.python.calculator.statistics import \
-    precision_recall_calculator_and_detected, \
-    pr_auc_score, \
-    F1_score_calculator
-from src.python.coordinates_toolbox.utils import \
-    extract_coordinates_from_em_motl
-from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import read_em
-from src.python.peak_toolbox.utils import \
-    extract_motl_coordinates_and_score_values
-from src.python.filewriters.csv import motl_writer
+from calculator.statistics import precision_recall_calculator_and_detected, \
+    pr_auc_score, F1_score_calculator
+from coordinates_toolbox.utils import extract_coordinates_from_em_motl
+from filereaders.csv import read_motl_from_csv
+from filereaders.em import read_em
+from filewriters.csv import motl_writer
+from peak_toolbox.utils import extract_motl_coordinates_and_score_values
 
 parser = argparse.ArgumentParser()
 
@@ -95,7 +92,8 @@ makedirs(name=path_to_detected_predicted, exist_ok=True)
 makedirs(name=path_to_undetected_predicted, exist_ok=True)
 makedirs(name=path_to_redundantly_detected, exist_ok=True)
 
-from src.python.filewriters.csv import filter_duplicate_values_by_score
+from filewriters.csv import filter_duplicate_values_by_score
+
 # ToDo: add as a parameter for filtering:
 max_peaks_distance = 8
 

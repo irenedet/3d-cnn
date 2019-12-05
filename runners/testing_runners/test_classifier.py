@@ -1,18 +1,16 @@
+import datetime
 import os
 
-import datetime
 import numpy as np
-
+import tensorboardX as tb
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as vutils
-import tensorboardX as tb
 
-from src.python.networks.unet_new import UNetEncoder3D
-from src.python.networks.utils import generate_train_val_loaders
-from src.python.networks.io import get_device
-from src.python.filereaders.h5 import load_classification_training_set
-
+from filereaders.h5 import load_classification_training_set
+from networks.io import get_device
+from networks.unet_new import UNetEncoder3D
+from networks.utils import generate_train_val_loaders
 
 
 class LinearTail(nn.Module):

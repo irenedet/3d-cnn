@@ -1,14 +1,13 @@
-import h5py
-from os.path import join
-from shutil import copyfile
 from os import makedirs
+from os.path import join
 
-from random import shuffle
+import h5py
 
 tomos = ["181126/025"]
 # tomos = ["180426/024", "181126/025"]
 # sample_types = ['healthy', 'ED']
-org_files = ["/struct/mahamid/Irene/yeast/ED/181126/025/eman_filt_eman_filt_tomo_partition.h5"]
+org_files = [
+    "/struct/mahamid/Irene/yeast/ED/181126/025/eman_filt_eman_filt_tomo_partition.h5"]
 fractions_number = 5
 src_global_dir = "/struct/mahamid/Irene/yeast"
 dst_global_dir = "/scratch/trueba/3d-cnn/cross-validation/full_test_datasets"
@@ -30,4 +29,3 @@ for tomo, input_file in zip(tomos, org_files):
                     volume_internal_path = join('volumes/raw', subtomo_name)
                     f_frac[volume_internal_path] = f[volume_internal_path][:]
     print("Done with", tomo)
-

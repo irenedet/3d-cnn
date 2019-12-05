@@ -1,11 +1,10 @@
-from os.path import join
-import pandas as pd
-from distutils.util import strtobool
-
-from src.python.filewriters.h5 import \
-    generate_classification_training_set_per_tomo
-
 import argparse
+from distutils.util import strtobool
+from os.path import join
+
+import pandas as pd
+
+from filewriters.h5 import generate_classification_training_set_per_tomo
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-dataset_table", "--dataset_table",

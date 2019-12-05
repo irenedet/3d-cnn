@@ -1,4 +1,4 @@
-from src.python.datasets.actions import load_training_dataset_list
+from datasets.actions import load_training_dataset_list
 
 training_partition_paths = [
     "/struct/mahamid/Irene/yeast/healthy/180426/004/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5"]

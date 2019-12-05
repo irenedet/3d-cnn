@@ -2,7 +2,7 @@ import os
 from os import listdir, makedirs
 from os.path import isfile, join, exists
 
-import src.python.naming.dirs as dirnames
+import naming.dirs as dirnames
 
 
 def get_txt_files(directory_path):

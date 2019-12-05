@@ -1,14 +1,13 @@
+import argparse
+from distutils.util import strtobool
 from os.path import join
+
 import pandas as pd
 
-from src.python.filewriters.h5 import \
+from filewriters.h5 import \
     write_dataset_from_subtomos_with_overlap_multiclass, \
     write_clustering_labels_subtomos
-from src.python.naming import h5_internal_paths
-from src.python.utils.cast_types import string_to_list
-from distutils.util import strtobool
-
-import argparse
+from naming import h5_internal_paths
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-box_length", "--box_length",

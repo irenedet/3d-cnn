@@ -5,8 +5,8 @@ import numpy as np
 import torch
 import torch.utils.data as du
 
-from src.python.networks.unet_new import UNet3D
-from src.python.networks.io import get_device
+from networks.io import get_device
+from networks.unet_new import UNet3D
 
 dummy_data = "/scratch/trueba/3d-cnn/training_data/dice-multi-class/180426_004/G_sigma1/train_and_test_partitions/test_partition.h5"
 

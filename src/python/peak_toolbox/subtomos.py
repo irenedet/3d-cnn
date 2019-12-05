@@ -7,13 +7,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from src.python.coordinates_toolbox.subtomos import \
+from coordinates_toolbox.subtomos import \
     get_subtomo_corner_side_lengths_and_zero_padding
-from src.python.coordinates_toolbox.subtomos import get_coord_from_name, \
+from coordinates_toolbox.subtomos import get_coord_from_name, \
     get_subtomo_corners, read_subtomo_names, get_subtomo_corner_and_side_lengths
-from src.python.coordinates_toolbox.utils import shift_coordinates_by_vector
-from src.python.naming import h5_internal_paths
-from src.python.peak_toolbox.utils import extract_peaks
+from coordinates_toolbox.utils import shift_coordinates_by_vector
+from naming import h5_internal_paths
+from peak_toolbox.utils import extract_peaks
 
 
 def _get_numb_peaks(subtomo_shape: tuple, min_peak_distance: int) -> int:

@@ -4,14 +4,14 @@ from os.path import join
 
 import numpy as np
 
-from src.python.coordinates_toolbox.utils import \
+from coordinates_toolbox.utils import \
     filtering_duplicate_coords_with_values
-from src.python.coordinates_toolbox.utils import \
+from coordinates_toolbox.utils import \
     extract_coordinates_and_values_from_em_motl
-from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.datasets import load_dataset
-from src.python.filereaders.em import read_em
-from src.python.osactions.filesystem import create_dir
+from filereaders.csv import read_motl_from_csv
+from filereaders.datasets import load_dataset
+from filereaders.em import read_em
+from osactions.filesystem import create_dir
 
 
 def _generate_unit_particle(radius: int):

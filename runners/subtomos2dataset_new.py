@@ -1,14 +1,11 @@
-from os.path import join
-from src.python.filewriters.h5 import \
-    write_dataset_from_subtomos_with_overlap, \
-    write_dataset_from_subtomos_with_overlap_multiclass, \
-    write_dataset_from_subtomos_with_overlap_multiclass_exponentiating, \
-    write_clustering_labels_subtomos
-from src.python.naming import h5_internal_paths
-from src.python.utils.cast_types import string_to_list
-from distutils.util import strtobool
-
 import argparse
+from distutils.util import strtobool
+from os.path import join
+
+from filewriters.h5 import write_clustering_labels_subtomos, \
+    write_dataset_from_subtomos_with_overlap_multiclass
+from naming import h5_internal_paths
+from utils.cast_types import string_to_list
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-output_shape", "--output_shape",

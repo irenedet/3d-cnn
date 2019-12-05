@@ -1,12 +1,13 @@
-import numpy as np
-import pandas as pd
+import argparse
 from os import makedirs
 from os.path import join
-from src.python.filereaders.datasets import load_dataset
-from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filewriters.csv import motl_writer
 
-import argparse
+import numpy as np
+import pandas as pd
+
+from filereaders.csv import read_motl_from_csv
+from filereaders.datasets import load_dataset
+from filewriters.csv import motl_writer
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-output_dir", "--output_dir",

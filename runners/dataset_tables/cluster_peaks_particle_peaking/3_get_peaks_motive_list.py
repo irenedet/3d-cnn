@@ -1,11 +1,12 @@
-import pandas as pd
-import numpy as np
 import argparse
 from os import makedirs
 from os.path import join
+
+import numpy as np
+import pandas as pd
 import torch.nn as nn
 
-from src.python.filewriters.csv import \
+from filewriters.csv import \
     write_global_motl_from_overlapping_subtomograms_multiclass
 
 parser = argparse.ArgumentParser()
@@ -64,7 +65,6 @@ print("peaks per subtomo = ", peaks_per_subtomo)
 number_peaks_uniquify = 7000
 output_dir = join(output_dir, "peaks")
 makedirs(name=output_dir, exist_ok=True)
-
 
 motl_file_name = write_global_motl_from_overlapping_subtomograms_multiclass(
     subtomograms_path=subtomo_path,

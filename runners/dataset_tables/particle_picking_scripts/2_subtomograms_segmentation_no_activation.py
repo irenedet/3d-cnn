@@ -1,14 +1,13 @@
 import argparse
 from distutils.util import strtobool
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import torch
 
-from src.python.networks.io import get_device
-from src.python.networks.unet import UNet, UNet_BN, UNet_dropout
-from src.python.filewriters.h5 import segment_and_write
-
+from filewriters.h5 import segment_and_write
+from networks.io import get_device
+from networks.unet import UNet, UNet_BN, UNet_dropout
 
 parser = argparse.ArgumentParser()
 

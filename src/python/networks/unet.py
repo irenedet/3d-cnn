@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import src.python.tensors.actions as actions
+import tensors.actions as actions
 
 
 class UNet(nn.Module):

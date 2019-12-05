@@ -9,19 +9,19 @@ import torch
 import torch.nn as nn
 import pandas as pd
 
-from src.python.filereaders.datasets import load_dataset
-from src.python.peak_toolbox.utils import read_motl_coordinates_and_values
-from src.python.networks.unet import UNet
-from src.python.coordinates_toolbox import subtomos
-from src.python.coordinates_toolbox.utils import \
+from filereaders.datasets import load_dataset
+from peak_toolbox.utils import read_motl_coordinates_and_values
+from networks.unet import UNet
+from coordinates_toolbox import subtomos
+from coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl, extract_coordinates_from_txt_shrec
-from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import read_em
-from src.python.filereaders.shrec import particle_dict
-from src.python.filereaders.shrec import read_shrec_motl
-from src.python.naming import h5_internal_paths
-from src.python.peak_toolbox.utils import paste_sphere_in_dataset
-from src.python.tensors.actions import crop_window_around_point
+from filereaders.csv import read_motl_from_csv
+from filereaders.em import read_em
+from filereaders.shrec import particle_dict
+from filereaders.shrec import read_shrec_motl
+from naming import h5_internal_paths
+from peak_toolbox.utils import paste_sphere_in_dataset
+from tensors.actions import crop_window_around_point
 
 
 def write_dataset_hdf(output_path: str, tomo_data: np.array):

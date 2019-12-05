@@ -1,6 +1,7 @@
 import h5py
 import numpy as np
-from src.python.naming import h5_internal_paths
+
+from naming import h5_internal_paths
 
 lamella_path = "/struct/mahamid/Irene/liang_data/lamella.hdf"
 shape = (928, 928, 450)

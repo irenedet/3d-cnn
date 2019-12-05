@@ -9,8 +9,8 @@ import torch.nn.functional as F
 import torchvision.utils as vutils
 from tensorboardX import SummaryWriter
 
-from src.python.networks.unet_new import UNetEncoder3D, UNetDecoder3D
-from src.python.networks.unet_new import unet_from_encoder_decoder
+from networks.unet_new import UNetEncoder3D, UNetDecoder3D
+from networks.unet_new import unet_from_encoder_decoder
 
 
 class YNet3D(nn.Module):

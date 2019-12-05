@@ -1,11 +1,12 @@
-from os import makedirs
 import argparse
+from distutils.util import strtobool
+from os import makedirs
+
 import numpy as np
 import pandas as pd
-from distutils.util import strtobool
 
-from src.python.datasets.actions import partition_raw_intersecting_mask
-from src.python.filereaders.datasets import load_dataset
+from datasets.actions import partition_raw_intersecting_mask
+from filereaders.datasets import load_dataset
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-dataset_table", "--dataset_table",

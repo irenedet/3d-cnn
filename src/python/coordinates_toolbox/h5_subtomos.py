@@ -5,13 +5,13 @@ import h5py
 import numpy as np
 from functools import reduce
 
-from src.python.filereaders.datasets import load_dataset
-from src.python.coordinates_toolbox.subtomos import \
+from filereaders.datasets import load_dataset
+from coordinates_toolbox.subtomos import \
     get_subtomo_corners_within_dataset
 
-from src.python.naming import h5_internal_paths
-from src.python.tensors.actions import crop_window
-from src.python.coordinates_toolbox.utils import invert_tom_coordinate_system
+from naming import h5_internal_paths
+from tensors.actions import crop_window
+from coordinates_toolbox.utils import invert_tom_coordinate_system
 
 
 def get_first_raw_subtomo_shape_from_h5file(f):

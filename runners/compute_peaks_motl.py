@@ -1,10 +1,10 @@
 from os.path import join
-from src.python.peak_toolbox.subtomos import \
-    get_peaks_from_subtomograms
-from src.python.filewriters import csv
+
+from filewriters import csv
+from peak_toolbox.subtomos import get_peaks_from_subtomograms
 
 data_dir = "/scratch/trueba/3d-cnn/TEST/"
-data_file = "004_in_subtomos_128side.h5" #works fine with _old version
+data_file = "004_in_subtomos_128side.h5"  # works fine with _old version
 subtomos_path = join(data_dir, data_file)
 
 list_of_maxima, list_of_maxima_coords = \
@@ -14,7 +14,7 @@ list_of_maxima, list_of_maxima_coords = \
         min_peak_distance=12)
 
 csv.motl_writer(path_to_output_folder=data_dir,
-               list_of_peak_scores=list_of_maxima,
-               list_of_peak_coords=list_of_maxima_coords)
+                list_of_peak_scores=list_of_maxima,
+                list_of_peak_coords=list_of_maxima_coords)
 
 print("Finished!")

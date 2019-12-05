@@ -4,7 +4,7 @@ from random import shuffle
 import h5py
 import numpy as np
 
-from src.python.naming import h5_internal_paths
+from naming import h5_internal_paths
 
 
 def get_subtomos_and_labels(path_to_output_h5, label):

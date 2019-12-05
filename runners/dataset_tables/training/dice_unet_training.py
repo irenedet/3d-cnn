@@ -10,19 +10,15 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as du
 
-from src.python.filewriters.csv import write_on_models_notebook
-from src.python.networks.routines import train, validate
-from src.python.networks.unet import UNet, UNet_BN, UNet_dropout
-from src.python.networks.visualizers import TensorBoard_multiclass
-from src.python.networks.utils import save_unet_model, load_unet_model
-from src.python.datasets.actions import load_training_dataset_list
-
-from src.python.networks.io import get_device
-from src.python.networks.loss import DiceCoefficientLoss
-from src.python.datasets.actions import split_and_preprocess_dataset
-from src.python.filereaders import h5
-from src.python.filewriters.txt import write_model_description
-from src.python.image.filters import preprocess_data
+from datasets.actions import load_training_dataset_list
+from filewriters.csv import write_on_models_notebook
+from image.filters import preprocess_data
+from networks.io import get_device
+from networks.loss import DiceCoefficientLoss
+from networks.routines import train, validate
+from networks.unet import UNet, UNet_BN, UNet_dropout
+from networks.utils import save_unet_model, load_unet_model
+from networks.visualizers import TensorBoard_multiclass
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-dataset_table", "--dataset_table",

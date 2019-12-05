@@ -1,6 +1,6 @@
-from src.python.filereaders.datasets import load_dataset
+from filereaders.datasets import load_dataset
+
 # import numpy as np
-import pandas as pd
 
 # path_to_dataset_table = "/struct/mahamid/Irene/yeast/npc/npc_yeast_data.csv"
 
@@ -137,7 +137,7 @@ TOMOS = [
 
 for tomo_name in TOMOS:
     print("Tomo", tomo_name)
-    path_to_raw = "/struct/mahamid/Irene/NPC/SPombe/" + tomo_name +\
+    path_to_raw = "/struct/mahamid/Irene/NPC/SPombe/" + tomo_name + \
                   "/double_eman_filtered_raw_4b.hdf"
     dataset = load_dataset(path_to_dataset=path_to_raw)
     print(dataset.shape)

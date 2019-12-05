@@ -1,9 +1,9 @@
-import h5py
-from os.path import join
-from shutil import copyfile
 from os import makedirs
-
+from os.path import join
 from random import shuffle
+from shutil import copyfile
+
+import h5py
 
 tomos = [
     # "180426/004",

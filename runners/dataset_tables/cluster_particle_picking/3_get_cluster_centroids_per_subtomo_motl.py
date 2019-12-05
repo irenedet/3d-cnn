@@ -1,12 +1,13 @@
-import pandas as pd
-import numpy as np
 import argparse
 from os import makedirs
 from os.path import join
 
-from src.python.filewriters.csv import build_tom_motive_list
-from src.python.coordinates_toolbox.utils import average_duplicated_centroids, \
+import numpy as np
+import pandas as pd
+
+from coordinates_toolbox.utils import average_duplicated_centroids, \
     get_cluster_centroids_from_partition
+from filewriters.csv import build_tom_motive_list
 
 parser = argparse.ArgumentParser()
 
@@ -79,7 +80,7 @@ full_centroids_list, full_cluster_size_list = \
 # Double-check centroids to avoid duplicates
 unique_centroids, unique_cluster_size_list = average_duplicated_centroids(
     motl_coords=full_centroids_list, cluster_size_list=full_cluster_size_list,
-    min_peak_distance=particle_radius//2)
+    min_peak_distance=particle_radius // 2)
 
 motl_name = "motl_" + str(len(unique_centroids)) + ".csv"
 motl_file_name = join(output_dir, motl_name)

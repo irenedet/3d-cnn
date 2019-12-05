@@ -2,9 +2,9 @@ import csv
 import re
 from os.path import join
 
-from src.python.filereaders.star import class3d_data_file_reader
-from src.python.osactions.filesystem import create_dir
-from src.python.relion_toolbox.utils import get_particles_list, \
+from filereaders.star import class3d_data_file_reader
+from osactions.filesystem import create_dir
+from relion_toolbox.utils import get_particles_list, \
     get_list_of_indices_and_classes
 
 

@@ -1,5 +1,5 @@
-from src.python.filewriters.csv import write_statistics
 import os
+
 import pandas as pd
 
 
@@ -22,6 +22,8 @@ def write_statistics(statistics_file: str, statistics_label: str,
         print("The statistics file does not exist, we will create it.")
         mini_stats_df.to_csv(path_or_buf=statistics_file, index=False)
     return
+
+
 # statistics_label = 'NO_DA_sigmoid_70S_50S_memb_D_2_IF_8_pr_radius_20'
 # tomo_name = ""
 # auPRC = 0

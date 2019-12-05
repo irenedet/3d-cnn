@@ -1,14 +1,16 @@
-import os
 import datetime
+import os
+
 import torch.nn as nn
 import torch.optim as optim
-import torch
-from src.python.networks.ynet import YNet3D
-from src.python.networks.unet_new import UNet3D
-from src.python.networks.utils import generate_train_val_loaders, \
+
+from networks.io import get_device
+from networks.loss import DiceCoefficientLoss
+# from networks.unet_new import UNet3D
+from networks.utils import generate_train_val_loaders, \
     data_loader
-from src.python.networks.io import get_device
-from src.python.networks.loss import DiceCoefficientLoss
+# import torch
+from networks.ynet import YNet3D
 
 src_data = "/struct/mahamid/Irene/yeast/healthy/180426/004/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5"
 trg_data = "/struct/mahamid/Irene/yeast/healthy/180426/005/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5"

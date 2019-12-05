@@ -3,18 +3,18 @@ import random
 from os.path import join
 import h5py
 
-from src.python.naming import h5_internal_paths
-from src.python.tensors.actions import crop_window_around_point
-from src.python.filereaders.datasets import load_dataset
-from src.python.filewriters.h5 import write_raw_subtomograms_intersecting_mask
-from src.python.filewriters.h5 import \
+from naming import h5_internal_paths
+from tensors.actions import crop_window_around_point
+from filereaders.datasets import load_dataset
+from filewriters.h5 import write_raw_subtomograms_intersecting_mask
+from filewriters.h5 import \
     write_joint_raw_and_labels_subtomograms_dice_multiclass
-from src.python.coordinates_toolbox.subtomos import \
+from coordinates_toolbox.subtomos import \
     get_particle_coordinates_grid_with_overlap
-from src.python.filewriters.h5 import write_subtomograms_from_dataset, \
+from filewriters.h5 import write_subtomograms_from_dataset, \
     write_joint_raw_and_labels_subtomograms, write_strongly_labeled_subtomograms
-from src.python.image.filters import preprocess_data
-from src.python.filereaders.h5 import read_training_data_dice_multi_class
+from image.filters import preprocess_data
+from filereaders.h5 import read_training_data_dice_multi_class
 
 
 def _chunkify_list(lst, n):

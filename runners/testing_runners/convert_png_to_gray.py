@@ -1,7 +1,6 @@
 from os.path import join
+
 from PIL import Image
-import numpy as np
-import h5py
 
 images = [
     "/home/papalotl/Desktop/compartments/190301/017/017.png",

@@ -1,8 +1,10 @@
+from os.path import join
+
 import h5py
 import numpy as np
-from os.path import join
-from src.python.tensors.actions import crop_window_around_point
-from src.python.naming import h5_internal_paths
+
+from naming import h5_internal_paths
+from tensors.actions import crop_window_around_point
 
 
 def pad_dataset(dataset, shape_to_crop_zyx):

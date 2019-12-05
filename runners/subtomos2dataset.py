@@ -1,10 +1,11 @@
 from os.path import join
+
 # import re
 # import numpy as np
 # import h5py
-# from src.python.coordinates_toolbox import subtomos
-from src.python.filewriters.h5 import write_dataset_from_subtomograms
-from src.python.naming import h5_internal_paths
+# from coordinates_toolbox import subtomos
+from filewriters.h5 import write_dataset_from_subtomograms
+from naming import h5_internal_paths
 
 # "/home/papalotl/courses/machine-learning-course-material-2018/exercise_2/Main/pytorch3D"
 # data_file = "subtomo_data_path.h5"  # ""tomo004_in_subtomos_128side.h5"

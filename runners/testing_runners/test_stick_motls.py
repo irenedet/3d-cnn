@@ -1,5 +1,6 @@
 import pandas as pd
-from src.python.filereaders.datasets import load_dataset
+
+from filereaders.datasets import load_dataset
 
 # motive_list_1 = "/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180711/018/TM/motl_clean_4b.em"
 # motive_list_2 = "/struct/mahamid/Shared/For_Irene/predictions/180711/018/motl_459_checked.csv"
@@ -16,5 +17,3 @@ print(motl_2.shape)
 combined_motl = motl_1.append(motl_2, sort=False)
 print(combined_motl)
 combined_motl.to_csv(output_motl_path, header=False, index=False)
-
-

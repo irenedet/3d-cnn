@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 20G
-#SBATCH --time 0-01:45
+#SBATCH --time 0-00:15
 #SBATCH -o slurm_outputs/evaluate_dice_evaluation.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/evaluate_dice_evaluation.slurm.%N.%j.err
 #SBAtCH --mail-type=END,FAIL
@@ -18,6 +18,8 @@ module load Anaconda3
 echo "activating virtual environment"
 source activate $UPICKER_VENV_PATH
 echo "... done"
+
+echo "PYTHONPATH="$PYTHONPATH
 
 export QT_QPA_PLATFORM='offscreen'
 usage()
@@ -151,14 +153,14 @@ export target_path=$output_dir"/target.hdf"
 echo "Assembling prediction.hdf from testing dataset"
 dataset_type='test'
 reconstruction_type="prediction"
-python3 $UPICKER_PATH/runners/dataset_tables/subtomos2datasets/subtomos2dataset.py -dataset_type $dataset_type -dataset_table $dataset_table -tomo_name $tomo_name -class_number $class_number -output_path $prediction_path -box_length $box_side -overlap $box_overlap -label_name $label_name -cluster_labels $cluster_labels -reconstruction_type $reconstruction_type
+#python3 $UPICKER_PATH/runners/dataset_tables/subtomos2datasets/subtomos2dataset.py -dataset_type $dataset_type -dataset_table $dataset_table -tomo_name $tomo_name -class_number $class_number -output_path $prediction_path -box_length $box_side -overlap $box_overlap -label_name $label_name -cluster_labels $cluster_labels -reconstruction_type $reconstruction_type
 echo "... done."
 
 if [ $test_partition_from_table == true ]; then
   echo "Assembling target.hdf in testing dataset"
   dataset_type='test'
   reconstruction_type='labels'
-  python3 $UPICKER_PATH/runners/dataset_tables/subtomos2datasets/subtomos2dataset.py -semantic_names $semantic_classes -dataset_type $dataset_type -dataset_table $dataset_table -tomo_name $tomo_name -class_number $class_number -output_path $target_path -box_length $box_side -overlap $box_overlap -label_name $label_name -cluster_labels $cluster_labels -reconstruction_type $reconstruction_type
+#  python3 $UPICKER_PATH/runners/dataset_tables/subtomos2datasets/subtomos2dataset.py -semantic_names $semantic_classes -dataset_type $dataset_type -dataset_table $dataset_table -tomo_name $tomo_name -class_number $class_number -output_path $target_path -box_length $box_side -overlap $box_overlap -label_name $label_name -cluster_labels $cluster_labels -reconstruction_type $reconstruction_type
   echo "... done."
 else
   echo "Using target from full original mask"

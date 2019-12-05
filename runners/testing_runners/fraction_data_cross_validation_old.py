@@ -1,6 +1,7 @@
-import h5py
 from os.path import join
 from random import shuffle
+
+import h5py
 
 tomos = [
     "181119/002",

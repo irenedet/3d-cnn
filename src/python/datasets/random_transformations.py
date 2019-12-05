@@ -7,9 +7,9 @@ from scipy.ndimage import zoom, interpolation
 from scipy.ndimage.filters import gaussian_filter
 from scipy.ndimage.interpolation import map_coordinates
 
-import src.python.python_utils_inferno as pyu
-from src.python.filereaders import h5
-from src.python.naming import h5_internal_paths
+import python_utils_inferno as pyu
+from filereaders import h5
+from naming import h5_internal_paths
 
 """
 All these functions were taken from the package Inferno:

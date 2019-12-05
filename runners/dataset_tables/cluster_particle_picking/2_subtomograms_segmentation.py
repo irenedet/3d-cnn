@@ -5,9 +5,9 @@ import pandas as pd
 import torch
 import torch.nn as nn
 
-from src.python.networks.io import get_device
-from src.python.networks.unet import UNet, UNet_dropout, UNet_BN
-from src.python.filewriters.h5 import segment_and_write
+from networks.io import get_device
+from networks.unet import UNet, UNet_dropout, UNet_BN
+from filewriters.h5 import segment_and_write
 
 
 parser = argparse.ArgumentParser()

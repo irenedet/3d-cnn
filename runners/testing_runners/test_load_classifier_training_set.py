@@ -1,11 +1,11 @@
+import argparse
 import json
-import pandas as pd
 from distutils.util import strtobool
 
-from src.python.filereaders.h5 import load_classification_training_set, \
-    fill_multiclass_labels
+import pandas as pd
 
-import argparse
+from filereaders.h5 import load_classification_training_set, \
+    fill_multiclass_labels
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-dataset_table", "--dataset_table",

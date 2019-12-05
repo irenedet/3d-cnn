@@ -1,12 +1,13 @@
-import numpy as np
 from os import makedirs
 from os.path import join
+
+import numpy as np
 from scipy.spatial import distance
 
-from src.python.filereaders.datasets import load_dataset
-from src.python.coordinates_toolbox.utils import get_clusters_within_size_range
-from src.python.peak_toolbox.utils import read_motl_coordinates_and_values
-from src.python.filewriters.csv import build_tom_motive_list
+from coordinates_toolbox.utils import get_clusters_within_size_range
+from filereaders.datasets import load_dataset
+from filewriters.csv import build_tom_motive_list
+from peak_toolbox.utils import read_motl_coordinates_and_values
 
 global_output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/liang_dataset/"
 # global_output_dir = "/home/papalotl/Desktop/"

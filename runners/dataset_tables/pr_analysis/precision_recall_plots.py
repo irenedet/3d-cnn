@@ -1,21 +1,20 @@
+import argparse
+import time
+from distutils.util import strtobool
+from os import makedirs
+from os.path import join
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import time
 
-from os import makedirs
-from os.path import join
-from distutils.util import strtobool
-
-from src.python.peak_toolbox.subtomos import select_coordinates_in_subtomos, \
-    select_coordinates_and_values_in_subtomos
-from src.python.calculator.statistics import pr_auc_score, \
+from calculator.statistics import pr_auc_score, \
     F1_score_calculator, precision_recall_calculator_and_detected
-from src.python.peak_toolbox.utils import read_motl_coordinates_and_values
-from src.python.filewriters.csv import motl_writer
-from src.python.filewriters.csv import write_statistics
-
-import argparse
+from filewriters.csv import motl_writer
+from filewriters.csv import write_statistics
+from peak_toolbox.subtomos import select_coordinates_in_subtomos, \
+    select_coordinates_and_values_in_subtomos
+from peak_toolbox.utils import read_motl_coordinates_and_values
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-dataset_table", "--dataset_table",
@@ -307,5 +306,3 @@ write_statistics(statistics_file=statistics_file,
                  statistics_label=statistics_label,
                  tomo_name=tomo_name,
                  stat_measure=auPRC)
-
-

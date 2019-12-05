@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from src.python.networks.layers import GroupNorm3d
+from networks.layers import GroupNorm3d
 
 
 # 3D convolution layer with batch normalization and ReLu activation

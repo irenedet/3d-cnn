@@ -1,16 +1,16 @@
-from src.python.calculator.statistics import precision_recall_calculator, \
-    pr_auc_score, \
-    F1_score_calculator, precision_recall_calculator_and_detected
-from src.python.coordinates_toolbox.utils import \
-    extract_coordinates_from_em_motl
-from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import read_em
+import time
+
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.python.peak_toolbox.subtomos import select_coordinates_in_subtomos, \
+from calculator.statistics import pr_auc_score, \
+    F1_score_calculator, precision_recall_calculator_and_detected
+from coordinates_toolbox.utils import \
+    extract_coordinates_from_em_motl
+from filereaders.csv import read_motl_from_csv
+from filereaders.em import read_em
+from peak_toolbox.subtomos import select_coordinates_in_subtomos, \
     select_coordinates_and_values_in_subtomos
-
 
 path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/gaussian_aug/confs_4_5_/motl_4470.csv"
 # path_to_csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/confs_4_5_bis_/motl_4623.csv"
@@ -30,7 +30,6 @@ motl_values = [row[0] for row in motl_predicted[:peaks_number]]
 del motl_predicted
 unique_peaks_number = len(motl_values)
 # from coordinates_toolbox.utils import filtering_duplicate_coords_with_values
-import time
 
 training_data_path = \
     "/scratch/trueba/3d-cnn/training_data/TEST/ribo_training.h5"

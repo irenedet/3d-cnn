@@ -1,9 +1,11 @@
-from src.python.filereaders.datasets import load_dataset
-import h5py
-from src.python.naming import h5_internal_paths
 from os.path import join
-from src.python.datasets.transformations import rotate_ref
-from src.python.calculator.math import radians2degrees
+
+import h5py
+
+from calculator.math import radians2degrees
+from datasets.transformations import rotate_ref
+from filereaders.datasets import load_dataset
+from naming import h5_internal_paths
 
 
 def create_template_catalogue(output_path: str, reference_file: str,

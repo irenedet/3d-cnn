@@ -1,8 +1,8 @@
 import os
 import numpy as np
-from src.python.filereaders.em import read_em
-from src.python.filereaders.hdf import _load_hdf_dataset
-from src.python.filereaders.csv import read_motl_from_csv
+from filereaders.em import read_em
+from filereaders.hdf import _load_hdf_dataset
+from filereaders.csv import read_motl_from_csv
 
 
 def load_dataset(path_to_dataset: str) -> np.array:

@@ -1,7 +1,7 @@
 from os.path import join
-from src.python.peak_toolbox.subtomos import \
-    get_peaks_from_subtomograms_with_overlap
-from src.python.filewriters import csv
+
+from filewriters import csv
+from peak_toolbox.subtomos import get_peaks_from_subtomograms_with_overlap
 
 data_dir = "/scratch/trueba/3d-cnn/TEST/"
 data_file = "004_in_subtomos_128side_with_overlap.h5"

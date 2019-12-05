@@ -1,8 +1,8 @@
 import torch
 
-from src.python.networks.io import get_device
-from src.python.networks.unet import UNet
-from src.python.filewriters.h5 import segment_and_write
+from filewriters.h5 import segment_and_write
+from networks.io import get_device
+from networks.unet import UNet
 
 # data to provide by user:
 data_path = "/scratch/trueba/3d-cnn/training_data/multi-class/004/G_sigma1/train_and_test_partitions/partition_training.h5"

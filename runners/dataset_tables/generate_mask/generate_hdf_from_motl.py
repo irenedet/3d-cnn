@@ -1,11 +1,11 @@
+import argparse
 import os
+from distutils.util import strtobool
 from os import makedirs
 
 import pandas as pd
 
-from distutils.util import strtobool
-from src.python.filewriters.h5 import write_hdf_particles_from_motl
-import argparse
+from filewriters.h5 import write_hdf_particles_from_motl
 
 #
 parser = argparse.ArgumentParser()
