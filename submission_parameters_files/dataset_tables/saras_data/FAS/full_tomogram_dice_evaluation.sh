@@ -1,22 +1,25 @@
 #!/usr/bin/env bash
 
-fractions="0 1 2 3 4"
+fractions="2"
 TOMOS="180426_024 181126_025"
 #TOMOS="181126/025"
-fractions_name="cv_fractions"
+fractions_name="cv_fas_fractions"
 # Tomograms data
-export path_to_dataset_table="/struct/mahamid/Irene/cross-validation/multiclass/CV_data.csv"
-DA=none
+#export path_to_dataset_table="/struct/mahamid/Irene/cross-validation/multiclass/DA_G1.5_E2_R180_DArounds4/DA_CV_data.csv"
 #DA="G1.5_E2_R180_DArounds4"
-export class_numbers="0"
-#export class_numbers="1 2"
-export semantic_classes="ribo,fas,memb"
-export statistics_file="/struct/mahamid/Irene/cross-validation/multiclass/full_tomo_dice_analysis_"$class_number".csv"
+
+export path_to_dataset_table="/struct/mahamid/Irene/cross-validation/multiclass/DA_FAS_WT_test/DA_FAS_WT_data.csv"
+DA=none
+
+export class_numbers=0
+export semantic_classes="fas"
+export statistics_file="/struct/mahamid/Irene/cross-validation/multiclass/DA_FAS_WT_test/peak_statistics.csv"
+
 
 BN=false
 depth=2
 init_feat=8
-output_classes=3
+output_classes=1
 box_side=128
 new_loader='True'
 shuffle=true
@@ -32,8 +35,8 @@ do
     for class_number in $class_numbers
       do
       echo $tomo_name
-#        DA_none_shuffle_true_frac_3_ribo_fas_memb__D_2_IF_8
-        model_nickname="DA_"$DA"_shuffle_"$shuffle"_frac_"$fraction"_ribo_fas_memb__D_"$depth"_IF_"$init_feat
+        model_nickname="R_false_encoder_dropout_0_decoder_dropout_0_BN_false_DA_none_shuffle_true_frac_2_fas__D_2_IF_8"
+#        model_nickname="DA_"$DA"_shuffle_"$shuffle"_frac_"$fraction"_ribo_fas_memb__D_"$depth"_IF_"$init_feat
 #        model_nickname="R_"$retrain"_encoder_dropout_"$encoder_dropout"_decoder_dropout_"$decoder_dropout"_BN_"$BN"_DA_"$DA"_shuffle_"$shuffle"_frac_"$fraction"_ribo_fas_memb__D_"$depth"_IF_"$init_feat
         path_to_model="/struct/mahamid/Irene/cross-validation/multiclass/models/cross-validation/"$fractions_name"/"$model_nickname".pkl"
         label_name=$fractions_name"_"$model_nickname

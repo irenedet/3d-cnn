@@ -21,8 +21,8 @@ box_side=128
 new_loader='True'
 shuffle=true
 retrain=false
-encoder_dropout=0.2
-decoder_dropout=0.2
+encoder_dropout=0.1
+decoder_dropout=0.1
 
 
 test_partition_from_table=true
@@ -33,7 +33,7 @@ do
   do
   echo $tomo_name
     #R_false_encoder_dropout_0.2_decoder_dropout_0.2_BN_false_DA_none_shuffle_true_frac_0_ribo_fas_memb__D_2_IF_8
-    model_nickname="R_"$retrain"_encoder_dropout_"$encoder_dropout"_decoder_dropout_"$decoder_dropout"_BN_"$BN"_DA_"$DA"_shuffle_"$shuffle"_frac_"$fraction"_ribo_fas_memb__D_"$depth"_IF_"$init_feat
+    model_nickname="R_false_encoder_dropout_0.1_decoder_dropout_0.1_BN_false_DA_none_shuffle_true_frac_"$fraction"_ribo_fas_memb__D_2_IF_8"
     path_to_model="/struct/mahamid/Irene/cross-validation/multiclass/models/cross-validation/"$fractions_name"/"$model_nickname".pkl"
     label_name=$fractions_name"_"$model_nickname
     global_output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/"$fractions_name"/"$fraction"/"$model_nickname"/dice_analysis/"

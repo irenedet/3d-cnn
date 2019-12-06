@@ -286,16 +286,16 @@ def load_training_dataset_list(training_partition_paths: list,
         elif raw_data.shape[0] == data_aug_rounds + 1:
             print('Single training example in ', training_data_path)
             # Normalize data
-            # raw_data = preprocess_data(raw_data)
-            # raw_data = np.array(raw_data)
+            raw_data = preprocess_data(raw_data)
+            raw_data = np.array(raw_data)
             labels = np.array(labels, dtype=np.long)
             train_data += list(raw_data)
             train_labels += list(labels)
         else:
             print("Initial unique labels", np.unique(labels))
             # Normalize data
-            # raw_data = preprocess_data(raw_data)
-            # raw_data = np.array(raw_data)
+            raw_data = preprocess_data(raw_data)
+            raw_data = np.array(raw_data)
             labels = np.array(labels, dtype=np.long)
 
             train_data_tmp, train_labels_tmp, \

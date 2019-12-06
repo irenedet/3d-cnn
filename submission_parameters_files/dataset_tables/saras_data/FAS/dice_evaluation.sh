@@ -3,7 +3,9 @@
 
 fractions="2"
 #fractions="0 1 2 3 4"
-TOMOS="180426_004 180426_005 180426_021 181119_002 181119_030 181126_002 181126_012"
+#TOMOS="181119_002 181119_030 181126_002 181126_012"
+TOMOS="180426_004 180426_005" # 180426_021"
+#TOMOS="180426_004 180426_005 180426_021 181119_002 181119_030 181126_002 181126_012"
 fractions_name="cv_fas_fractions"
 # Tomograms data
 #export path_to_dataset_table="/struct/mahamid/Irene/cross-validation/multiclass/DA_G1.5_E2_R180_DArounds4/DA_CV_data.csv"
@@ -37,7 +39,7 @@ do
     for tomo_name in $TOMOS
   do
   echo $tomo_name
-    model_nickname="Global_preprocessed_R_false_encoder_dropout_0_decoder_dropout_0_BN_false_DA_none_shuffle_true_frac_2_fas__D_2_IF_8"
+    model_nickname="R_false_encoder_dropout_0_decoder_dropout_0_BN_false_DA_none_shuffle_true_frac_2_fas__D_2_IF_8"
 #    model_nickname="Verion2_R_false_encoder_dropout_0_decoder_dropout_0_BN_false_DA_none_shuffle_true_frac_"$fraction"_fas__D_1_IF_16"
     #R_false_encoder_dropout_0.2_decoder_dropout_0.2_BN_false_DA_none_shuffle_true_frac_0_ribo_fas_memb__D_2_IF_8
 #    model_nickname="R_"$retrain"_encoder_dropout_"$encoder_dropout"_decoder_dropout_"$decoder_dropout"_BN_"$BN"_DA_"$DA"_shuffle_"$shuffle"_frac_"$fraction"_ribo_fas_memb__D_"$depth"_IF_"$init_feat
@@ -53,3 +55,6 @@ done
 
 
 #/struct/mahamid/Irene/cross-validation/multiclass/models/cross-validation/cv_fractions/DA_none_shuffle_true_frac_1_ribo_fas_memb__D_1_IF_8.pkl
+
+
+
