@@ -180,7 +180,7 @@ if len(F1_score) > 0:
     max_F1 = np.max(F1_score)
     optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
 else:
-    max_F1 = np.nan
+    max_F1 = 0
     optimal_peak_number = np.nan
 
 auPRC = pr_auc_score(precision=precision, recall=recall)
@@ -305,4 +305,4 @@ print("statistics_label =", statistics_label)
 write_statistics(statistics_file=statistics_file,
                  statistics_label=statistics_label,
                  tomo_name=tomo_name,
-                 stat_measure=auPRC)
+                 stat_measure=round(auPRC, 4))

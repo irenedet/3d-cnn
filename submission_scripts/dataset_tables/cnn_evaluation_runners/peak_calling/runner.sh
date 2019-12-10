@@ -4,9 +4,9 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 20G
-#SBATCH --time 0-00:40
-#SBATCH -o slurm_outputs/evaluate_particle_peaking_peaks.slurm.%N.%j.out
-#SBAtCH -e slurm_outputs/evaluate_particle_peaking_peaks.slurm.%N.%j.err
+#SBATCH --time 0-01:50
+#SBATCH -o evaluate_particle_peaking_peaks.slurm.%N.%j.out
+#SBAtCH -e evaluate_particle_peaking_peaks.slurm.%N.%j.err
 #SBAtCH --mail-type=END,FAIL
 #SBAtCH --mail-user=irene.de.teresa@embl.de
 
@@ -172,6 +172,6 @@ echo "...done filtering points in lamella mask."
 # 3. Precision-Recall analysis
 export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir"/"motl*.csv)
 echo "Starting to generate precision recall plots"
-python3 $UPICKER_PATH/runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_number $class_number -summary_file $summary_file -semantic_classes $semantic_classes
+python3 $UPICKER_PATH/runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_number $class_number -semantic_classes $semantic_classes
 echo "...done with precision recall plots."
 

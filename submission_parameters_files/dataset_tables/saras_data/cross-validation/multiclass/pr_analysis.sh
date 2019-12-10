@@ -2,6 +2,7 @@
 
 #fractions="0"
 fractions="0 1 2 3 4"
+#TOMOS="180426_004 180426_005 180426_021 181119_030"
 TOMOS="180426_004 180426_005 180426_021 181119_002 181119_030 181126_002 181126_012"
 fractions_name="cv_fractions"
 # Tomograms data
@@ -30,8 +31,8 @@ box_side=128
 new_loader='True'
 shuffle=true
 retrain=false
-encoder_dropout=0.2
-decoder_dropout=0
+encoder_dropout=0.1
+decoder_dropout=0.1
 
 # Evaluation and particle picking parameters:
 border_xy=10

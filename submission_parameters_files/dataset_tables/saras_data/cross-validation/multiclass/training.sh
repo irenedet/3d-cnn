@@ -21,13 +21,13 @@ export log_dir="/struct/mahamid/Irene/cross-validation/multiclass/log_"$fraction
 export model_path="/struct/mahamid/Irene/cross-validation/multiclass/models/cross-validation/"$fractions_name
 export n_epochs=300
 export depth=2
-export initial_features=8
+export initial_features=16
 export output_classes=3
 export shuffle=true
 export DA="none"
 export BN=false
-export encoder_dropout=0.1
-export decoder_dropout=0.1
+export encoder_dropout=0
+export decoder_dropout=0
 
 
 # Data for old models for resuming training:

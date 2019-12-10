@@ -468,9 +468,21 @@ def generate_strongly_labeled_partition(path_to_raw: str,
         padded_labels_dataset = pad_dataset(labels_dataset, subtomo_shape,
                                             overlap)
         padded_labels_dataset_list += [padded_labels_dataset]
+
     datasets_shapes = [padded.shape for padded in padded_labels_dataset_list]
     datasets_shapes += [padded_raw_dataset.shape]
+    min_shape = []
+    for dim in range(3):
+        shapes_list = [shape[dim] for shape in datasets_shapes]
+        min_shape.append(np.min(shapes_list))
+    min_x, min_y, min_z = min_shape
     print("padded_dataset.shapes = ", datasets_shapes)
+    padded_raw_dataset = padded_raw_dataset[:min_x, :min_y, :min_z]
+    for n, _ in enumerate(padded_labels_dataset_list):
+        dataset = padded_labels_dataset_list[n]
+        dataset = dataset[:min_x, :min_y, :min_z]
+        padded_labels_dataset_list[n] = dataset
+    padded_raw_dataset = padded_raw_dataset[:min_x, :min_y, :min_z]
     write_strongly_labeled_subtomograms(
         output_path=output_h5_file_path,
         padded_raw_dataset=padded_raw_dataset,

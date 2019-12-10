@@ -9,7 +9,7 @@ export path_to_dataset_table="/struct/mahamid/Irene/cross-validation/multiclass/
 DA=none
 #DA="G1.5_E2_R180_DArounds4"
 
-export class_number=1
+export class_number=2
 export semantic_classes="ribo,fas,memb"
 export statistics_file="/struct/mahamid/Irene/cross-validation/multiclass/dice_analysis_"$class_number".csv"
 
