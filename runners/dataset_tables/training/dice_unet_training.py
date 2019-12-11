@@ -12,7 +12,6 @@ import torch.utils.data as du
 
 from datasets.actions import load_training_dataset_list
 from filewriters.csv import write_on_models_notebook
-from image.filters import preprocess_data
 from networks.io import get_device
 from networks.loss import DiceCoefficientLoss
 from networks.routines import train, validate

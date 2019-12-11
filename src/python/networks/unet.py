@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+
 import tensors.actions as actions
 
 
@@ -299,26 +300,22 @@ class UNet_BN(nn.Module):
     """
 
     def _conv_block(self, in_channels, out_channels):
-        # I have personally had better experience using relu instead of elu,
-        # but this is worth confirming experimentally
         return nn.Sequential(
-            nn.BatchNorm3d(num_features=in_channels),
             nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1),
-            nn.BatchNorm3d(num_features=out_channels),
             nn.ReLU(),
+            nn.BatchNorm3d(num_features=out_channels),
             nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1),
-            nn.ReLU())
+            nn.ReLU(),
+            nn.BatchNorm3d(num_features=out_channels))
 
     def _conv_block_elu(self, in_channels, out_channels):
-        # I have personally had better experience using relu instead of elu,
-        # but this is worth confirming experimentally
         return nn.Sequential(
-            nn.BatchNorm3d(num_features=in_channels),
             nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.ELU(),
             nn.BatchNorm3d(num_features=out_channels),
             nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1),
-            nn.ELU())
+            nn.ELU(),
+            nn.BatchNorm3d(num_features=out_channels))
 
     # upsampling via transposed 3d convolutions
     def _upsampler(self, in_channels, out_channels):
@@ -334,8 +331,7 @@ class UNet_BN(nn.Module):
 
         # the final activation must either be None or a Module
         if final_activation is not None:
-            assert isinstance(final_activation,
-                              nn.Module), "Activation must be torch module"
+            assert isinstance(final_activation, nn.Module)
 
         n_features = [initial_features * 2 ** level
                       for level in range(self.depth)]

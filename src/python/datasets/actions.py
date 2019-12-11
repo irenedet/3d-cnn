@@ -1,20 +1,21 @@
-import numpy as np
 import random
 from os.path import join
-import h5py
 
-from naming import h5_internal_paths
-from tensors.actions import crop_window_around_point
-from filereaders.datasets import load_dataset
-from filewriters.h5 import write_raw_subtomograms_intersecting_mask
-from filewriters.h5 import \
-    write_joint_raw_and_labels_subtomograms_dice_multiclass
+import h5py
+import numpy as np
+
 from coordinates_toolbox.subtomos import \
     get_particle_coordinates_grid_with_overlap
+from filereaders.datasets import load_dataset
+from filereaders.h5 import read_training_data_dice_multi_class
+from filewriters.h5 import \
+    write_joint_raw_and_labels_subtomograms_dice_multiclass
+from filewriters.h5 import write_raw_subtomograms_intersecting_mask
 from filewriters.h5 import write_subtomograms_from_dataset, \
     write_joint_raw_and_labels_subtomograms, write_strongly_labeled_subtomograms
 from image.filters import preprocess_data
-from filereaders.h5 import read_training_data_dice_multi_class
+from naming import h5_internal_paths
+from tensors.actions import crop_window_around_point
 
 
 def _chunkify_list(lst, n):
@@ -448,41 +449,39 @@ def partition_raw_and_labels_tomograms_dice_multiclass(
 
 
 def generate_strongly_labeled_partition(path_to_raw: str,
-                                        labels_dataset_list: list,
+                                        labels_dataset_paths_list: list,
                                         segmentation_names: list,
                                         output_h5_file_path: str,
                                         subtomo_shape: tuple,
                                         overlap: int,
-                                        min_label_fraction: float = 0):
+                                        min_label_fraction: float = 0) -> None:
     raw_dataset = load_dataset(path_to_raw)
+    min_shape = raw_dataset.shape
+    print(path_to_raw, "shape", min_shape)
+    labels_dataset_list = []
+    for path_to_labeled in labels_dataset_paths_list:
+        print("loading", path_to_labeled)
+        labels_dataset = load_dataset(path_to_labeled)
+        dataset_shape = labels_dataset.shape
+        labels_dataset_list.append(labels_dataset)
+        min_shape = np.minimum(min_shape, dataset_shape)
+        print(path_to_labeled, "shape", labels_dataset.shape)
+    print("min_shape = ", min_shape)
+    min_x, min_y, min_z = min_shape
+    raw_dataset = raw_dataset[:min_x, :min_y, :min_z]
     padded_raw_dataset = pad_dataset(raw_dataset, subtomo_shape, overlap)
     padded_particles_coordinates = get_particle_coordinates_grid_with_overlap(
         padded_raw_dataset.shape,
         subtomo_shape,
         overlap)
+
     padded_labels_dataset_list = []
-    for path_to_labeled in labels_dataset_list:
-        labels_dataset = load_dataset(path_to_labeled)
-        labels_dataset = np.array(labels_dataset)
-        print(path_to_labeled, "shape", labels_dataset.shape)
+    for labels_dataset in labels_dataset_list:
+        labels_dataset = labels_dataset[:min_x, :min_y, :min_z]
         padded_labels_dataset = pad_dataset(labels_dataset, subtomo_shape,
                                             overlap)
-        padded_labels_dataset_list += [padded_labels_dataset]
+        padded_labels_dataset_list.append(padded_labels_dataset)
 
-    datasets_shapes = [padded.shape for padded in padded_labels_dataset_list]
-    datasets_shapes += [padded_raw_dataset.shape]
-    min_shape = []
-    for dim in range(3):
-        shapes_list = [shape[dim] for shape in datasets_shapes]
-        min_shape.append(np.min(shapes_list))
-    min_x, min_y, min_z = min_shape
-    print("padded_dataset.shapes = ", datasets_shapes)
-    padded_raw_dataset = padded_raw_dataset[:min_x, :min_y, :min_z]
-    for n, _ in enumerate(padded_labels_dataset_list):
-        dataset = padded_labels_dataset_list[n]
-        dataset = dataset[:min_x, :min_y, :min_z]
-        padded_labels_dataset_list[n] = dataset
-    padded_raw_dataset = padded_raw_dataset[:min_x, :min_y, :min_z]
     write_strongly_labeled_subtomograms(
         output_path=output_h5_file_path,
         padded_raw_dataset=padded_raw_dataset,
@@ -553,5 +552,3 @@ def write_strongly_labeled_subtomograms(output_path: str,
             else:
                 print("subtomo ", subtomo_name, "discarded")
     return
-
-

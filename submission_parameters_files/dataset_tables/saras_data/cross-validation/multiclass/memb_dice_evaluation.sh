@@ -14,15 +14,15 @@ export semantic_classes="ribo,fas,memb"
 export statistics_file="/struct/mahamid/Irene/cross-validation/multiclass/dice_analysis_"$class_number".csv"
 
 BN=false
-depth=2
+depth=16
 init_feat=8
 output_classes=3
 box_side=128
 new_loader='True'
 shuffle=true
 retrain=false
-encoder_dropout=0.1
-decoder_dropout=0.1
+encoder_dropout=0
+decoder_dropout=0
 
 
 test_partition_from_table=true

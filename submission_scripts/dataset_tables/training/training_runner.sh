@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 120G
-#SBATCH --time 1-00:00
+#SBATCH --mem 80G
+#SBATCH --time 0-05:00
 #SBATCH -o slurm_outputs/training.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/training.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL

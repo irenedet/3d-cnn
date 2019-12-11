@@ -7,8 +7,8 @@ def preprocess_data(data: np.array):
     print("The data mean value is", data_mean)
     print("The data std value is", data_std)
 
-    data -= data_mean
-    data /= data_std
+    data = data - data_mean
+    data = data/data_std
     # check again to double check
     print("After normalization the data has mean value", data.mean())
     print("After normalization the data has standard deviation", data.std())

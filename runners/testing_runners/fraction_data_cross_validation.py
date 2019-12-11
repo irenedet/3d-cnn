@@ -7,22 +7,22 @@ import h5py
 
 tomos = [
     "180426/004",
-    # "180426/005",
-    # "180426/021",
-    # "180426/024",
+    "180426/005",
+    "180426/021",
+    "180426/024",
     # "181119/002",
-    # "181119/030",
-    # "181126/002",
-    # "181126/012",
-    # "181126/025",
+    "181119/030",
+    "181126/002",
+    "181126/012",
+    "181126/025",
 ]
 
 fractions_number = 5
 semantic_classes = ['ribo', 'fas', 'memb']
 base_dir = "/scratch/trueba/3d-cnn/cross-validation/original-training-data"
-tail_dir = "strongly_labeled_0.002"
+tail_dir = "strongly_labeled_0.002/no_eman_filter"
 
-copy_to_global = "/scratch/trueba/3d-cnn/cross-validation/training-fractions"
+copy_to_global = "/scratch/trueba/3d-cnn/cross-validation/training-fractions/no_eman_filter"
 for tomo in tomos:
     input_dir = join(base_dir, tomo)
     input_dir = join(input_dir, tail_dir)
