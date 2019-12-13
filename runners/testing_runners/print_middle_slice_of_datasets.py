@@ -203,15 +203,7 @@ def get_image_dict(data_path, labels: list = None, iterations=0,
 # ]
 
 dataset_names = [
-    "190223/132",
-    "190223/148",
-    "190223/178",
-    "190223/183",
-    "190223/177",
-    "190223/190",
-    "190223/191",
-    "190223/192",
-    "190223/194",
+    "181126/002",
 ]
 
 # pdf = matplotlib.backends.backend_pdf.PdfPages(
@@ -236,19 +228,19 @@ dataset_names = [
 #     plt.suptitle("tomo " + tomo_name)
 #     pdf.savefig(fig)
 # pdf.close()
-
+#/scratch/trueba/3d-cnn/cross-validation/fas_cross_validation/original-training-data//181126/002/strongly_labeled_min0.002_max0.1/no_eman_filter_256pix/full_partition.h5
 pdf = matplotlib.backends.backend_pdf.PdfPages(
-    "/g/scb2/zaugg/trueba/3d-cnn/NPC_SU_strongly_labeled0.02.pdf")
+    "/g/scb2/zaugg/trueba/3d-cnn/strongly_labeled_min0.002_max0.1.pdf")
 for index, tomo_name in enumerate(dataset_names):
     print("tomo_name", tomo_name)
     data_path = join(
-        "/scratch/trueba/3d-cnn/SPombe_NPC_SU/npc_gauss_0.06_0.01_masks",
+        "/scratch/trueba/3d-cnn/cross-validation/fas_cross_validation/original-training-data",
         tomo_name)
     data_path = join(data_path,
-                     "training_data/strongly_labeled_0.02/full_partition.h5")
+                     "strongly_labeled_min0.002_max0.1/no_eman_filter_256pix/full_partition.h5")
 
     iterations = 0
-    labels = ['npc']
+    labels = ['fas']
     volumes = get_image_dict(data_path=data_path, labels=labels, iterations=0,
                              vol_numbers=10)
     names_list = list(volumes.keys())

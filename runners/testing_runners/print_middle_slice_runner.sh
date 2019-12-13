@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 20G
-#SBATCH --time 0-02:15
+#SBATCH --time 0-01:25
 #SBATCH -o slurm_outputs/print_middle_slice.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/print_middle_slice.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL

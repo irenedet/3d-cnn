@@ -454,7 +454,8 @@ def generate_strongly_labeled_partition(path_to_raw: str,
                                         output_h5_file_path: str,
                                         subtomo_shape: tuple,
                                         overlap: int,
-                                        min_label_fraction: float = 0) -> None:
+                                        min_label_fraction: float = 0,
+                                        max_label_fraction: float = 1) -> list:
     raw_dataset = load_dataset(path_to_raw)
     min_shape = raw_dataset.shape
     print(path_to_raw, "shape", min_shape)
@@ -482,15 +483,16 @@ def generate_strongly_labeled_partition(path_to_raw: str,
                                             overlap)
         padded_labels_dataset_list.append(padded_labels_dataset)
 
-    write_strongly_labeled_subtomograms(
+    label_fractions_list = write_strongly_labeled_subtomograms(
         output_path=output_h5_file_path,
         padded_raw_dataset=padded_raw_dataset,
         padded_labels_list=padded_labels_dataset_list,
         segmentation_names=segmentation_names,
         window_centers=padded_particles_coordinates,
         crop_shape=subtomo_shape,
-        min_label_fraction=min_label_fraction)
-    return
+        min_label_fraction=min_label_fraction,
+        max_label_fraction=max_label_fraction)
+    return label_fractions_list
 
 
 def write_strongly_labeled_subtomograms(output_path: str,
@@ -499,7 +501,9 @@ def write_strongly_labeled_subtomograms(output_path: str,
                                         segmentation_names: list,
                                         window_centers: list,
                                         crop_shape: tuple,
-                                        min_label_fraction: float = 0):
+                                        min_label_fraction: float = 0,
+                                        max_label_fraction: float = 1) -> list:
+    label_fractions_list = []
     with h5py.File(output_path, 'w') as f:
         for window_center in window_centers:
             print("window_center", window_center)
@@ -537,11 +541,13 @@ def write_strongly_labeled_subtomograms(output_path: str,
                 label_indicator = np.where(subtomo_label_data > 0)
                 if len(label_indicator) > 0:
                     current_fraction = len(label_indicator[0]) / volume
+                    label_fractions_list.append(current_fraction)
                     label_fraction = np.max(
                         [label_fraction, current_fraction])
             print("window_center, label_fraction", window_center,
                   label_fraction)
-            if segmentation_max > 0.5 and label_fraction > min_label_fraction:
+            if segmentation_max > 0.5 \
+                    and min_label_fraction < label_fraction < max_label_fraction:
                 print("Saving window_center, subtomo_raw_h5_internal_path",
                       window_center, subtomo_raw_h5_internal_path)
                 f[subtomo_raw_h5_internal_path] = subtomo_raw_data
@@ -551,4 +557,4 @@ def write_strongly_labeled_subtomograms(output_path: str,
                     f[subtomo_label_h5_internal_path] = subtomo_label_data
             else:
                 print("subtomo ", subtomo_name, "discarded")
-    return
+    return label_fractions_list

@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 20G
-#SBATCH --time 0-00:35
+#SBATCH --time 0-01:35
 #SBATCH -o evaluate_particle_peaking_peaks.slurm.%N.%j.out
 #SBAtCH -e evaluate_particle_peaking_peaks.slurm.%N.%j.err
 #SBAtCH --mail-type=END,FAIL
@@ -17,7 +17,7 @@
 
 module load Anaconda3
 echo "activating virtual environment"
-source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
+source activate $UPICKER_VENV_PATH
 echo "... done"
 
 export QT_QPA_PLATFORM='offscreen'

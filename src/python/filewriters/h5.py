@@ -588,11 +588,13 @@ def segment_and_write(data_path: str, model: UNet, label_name: str):
                     h5_internal_paths.RAW_SUBTOMOGRAMS,
                     subtomo_name)
                 subtomo_data = np.array(
-                    [data_file[subtomo_h5_internal_path][:]])
+                    [data_file[subtomo_h5_internal_path][:]], dtype=np.float)
                 subtomo_data = subtomo_data[:, None]
                 print("subtomo_shape ", subtomo_data.shape)
                 print("segmenting ", subtomo_name)
-                segmented_data = model(torch.from_numpy(subtomo_data))
+                subtomo_data = torch.from_numpy(subtomo_data)
+                subtomo_data = subtomo_data.type('torch.FloatTensor')
+                segmented_data = model(subtomo_data)
                 segmented_data = segmented_data.detach().numpy()
                 _write_segmented_subtomo_data(data_file=data_file,
                                               segmented_data=segmented_data,

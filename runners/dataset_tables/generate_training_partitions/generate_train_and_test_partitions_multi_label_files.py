@@ -3,6 +3,8 @@ from distutils.util import strtobool
 from os import makedirs
 from os.path import join
 
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 from datasets.actions import \
@@ -33,12 +35,16 @@ parser.add_argument("-tomo_name", "--tomo_name",
 parser.add_argument("-min_label_fraction", "--min_label_fraction",
                     help="min_label_fraction",
                     type=float)
+parser.add_argument("-max_label_fraction", "--max_label_fraction",
+                    help="max_label_fraction",
+                    type=float)
 
 args = parser.parse_args()
 tomo_name = args.tomo_name
 dataset_table = args.dataset_table
 output_dir = args.output_dir
 min_label_fraction = args.min_label_fraction
+max_label_fraction = args.max_label_fraction
 box_side = args.box_side
 number_iter = args.number_iter
 split = args.split
@@ -70,14 +76,33 @@ output_h5_file_name = "full_partition.h5"
 output_path = join(output_dir, output_h5_file_name)
 makedirs(name=output_dir, exist_ok=True)
 
-generate_strongly_labeled_partition(path_to_raw=path_to_raw,
-                                    labels_dataset_paths_list=labels_dataset_list,
-                                    segmentation_names=segmentation_names,
-                                    output_h5_file_path=output_path,
-                                    subtomo_shape=subtomogram_shape,
-                                    overlap=overlap,
-                                    min_label_fraction=min_label_fraction)
+label_fractions_list = generate_strongly_labeled_partition(
+    path_to_raw=path_to_raw,
+    labels_dataset_paths_list=labels_dataset_list,
+    segmentation_names=segmentation_names,
+    output_h5_file_path=output_path,
+    subtomo_shape=subtomogram_shape,
+    overlap=overlap,
+    min_label_fraction=min_label_fraction,
+    max_label_fraction=max_label_fraction)
+
+fig_path = join(output_dir, "label_fractions_hist.png")
 print("The training data path is ", output_path)
+zoom = np.where(np.array(label_fractions_list) < 0.01)[0]
+plt.figure(1)
+plt.hist(label_fractions_list, bins=10)
+plt.xlabel("label fraction")
+plt.ylabel("frequency")
+plt.gcf()
+plt.savefig(fname=fig_path, format="png")
+
+fig_path = join(output_dir, "zoom_label_fractions_hist.png")
+plt.figure(2)
+plt.hist(np.array(label_fractions_list)[zoom], bins=10)
+plt.xlabel("label_fraction < 0.01")
+plt.ylabel("frequency")
+plt.gcf()
+plt.savefig(fname=fig_path, format="png")
 
 if write_on_table:
     print("path to training partition written on table: ", output_path)
