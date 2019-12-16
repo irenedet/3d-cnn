@@ -4,7 +4,7 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 80G
-#SBATCH --time 0-15:00
+#SBATCH --time 0-25:00
 #SBATCH -o slurm_outputs/training.slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/training.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -95,6 +95,9 @@ while [ "$1" != "" ]; do
         -decoder_dropout | --decoder_dropout )   shift
                                 decoder_dropout=$1
                                 ;;
+        -batch_size | --batch_size )   shift
+                                batch_size=$1
+                                ;;
         -h | --help )           usage
                                 exit
                                 ;;
@@ -125,6 +128,7 @@ export path_to_old_model=$path_to_old_model
 export models_notebook=$models_notebook
 export encoder_dropout=$encoder_dropout
 export decoder_dropout=$decoder_dropout
+export batch_size=$batch_size
 
 echo tomo_training_list=$tomo_training_list
 echo path_to_dataset_table=$path_to_dataset_table
@@ -147,6 +151,6 @@ echo models_notebook=$models_notebook
 echo 'Training dice multi-label network for fraction='$fraction
 echo 'and model_name='$model_initial_name
 echo UPICKER_PATH=$UPICKER_PATH
-python3 $UPICKER_PATH/runners/dataset_tables/training/dice_unet_training.py -dataset_table $path_to_dataset_table -tomo_training_list "${tomo_training_list[@]}" -split $split -classes $output_classes -log_dir $log_dir -model_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook -shuffle $shuffle -BN $Batch_Normalization -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout
+python3 $UPICKER_PATH/runners/dataset_tables/training/dice_unet_training.py -dataset_table $path_to_dataset_table -tomo_training_list "${tomo_training_list[@]}" -split $split -classes $output_classes -log_dir $log_dir -model_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook -shuffle $shuffle -BN $Batch_Normalization -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout -batch_size $batch_size
 
 

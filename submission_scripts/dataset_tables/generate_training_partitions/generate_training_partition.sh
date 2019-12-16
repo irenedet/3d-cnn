@@ -18,17 +18,19 @@ echo '... done.'
 
 export QT_QPA_PLATFORM='offscreen'
 
-#180426/004
-#180426/005
-#180426/021
-#180426/024
-#181119/002
-#181119/030
-TOMOS="181126/002"
+TOMOS="180426/004
+180426/005
+180426/021
+180426/024
+181119/002
+181119/030
+181126/012
+181126/025"
+#TOMOS="181126/002"
 #TOMOS="181126/012"
 #TOMOS="181126/025"
 
-export path_to_dataset_table="/struct/mahamid/Irene/yeast/yeast_table_no_eman.csv"
+export path_to_dataset_table="/struct/mahamid/Irene/yeast/yeast_table_FAS_no_eman_256pix.csv"
 export global_output_dir="/scratch/trueba/3d-cnn/cross-validation/fas_cross_validation/original-training-data/"
 export write_on_table='true'
 # Training set parameters:
@@ -37,7 +39,7 @@ export split=0.7
 export box_length=256
 export number_iterations_data_aug=0
 export min_label_fraction=0.0002
-export max_label_fraction=0.005
+export max_label_fraction=0.0035
 # Data for the new model
 
 # Data for old models for resuming training:

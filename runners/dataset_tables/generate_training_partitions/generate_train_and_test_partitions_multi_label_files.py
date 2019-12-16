@@ -86,6 +86,8 @@ label_fractions_list = generate_strongly_labeled_partition(
     min_label_fraction=min_label_fraction,
     max_label_fraction=max_label_fraction)
 
+print(label_fractions_list)
+
 fig_path = join(output_dir, "label_fractions_hist.png")
 print("The training data path is ", output_path)
 zoom = np.where(np.array(label_fractions_list) < 0.01)[0]

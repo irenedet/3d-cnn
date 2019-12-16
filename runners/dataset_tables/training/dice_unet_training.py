@@ -74,6 +74,9 @@ parser.add_argument("-encoder_dropout", "--encoder_dropout",
 parser.add_argument("-decoder_dropout", "--decoder_dropout",
                     default=0,
                     type=float)
+parser.add_argument("-batch_size", "--batch_size",
+                    default=5,
+                    type=int)
 args = parser.parse_args()
 dataset_table = args.dataset_table
 tomo_training_list = args.tomo_training_list
@@ -90,6 +93,7 @@ path_to_old_model = args.path_to_old_model
 depth = args.depth
 decoder_dropout = args.decoder_dropout
 encoder_dropout = args.encoder_dropout
+batch_size = args.batch_size
 BN = strtobool(args.Batch_Normalization)
 initial_features = args.initial_features
 models_notebook_path = args.models_notebook
@@ -157,8 +161,8 @@ train_set = du.TensorDataset(torch.from_numpy(train_data),
 val_set = du.TensorDataset(torch.from_numpy(val_data),
                            torch.from_numpy(val_labels))
 
-train_loader = du.DataLoader(train_set, shuffle=shuffle, batch_size=5)
-val_loader = du.DataLoader(val_set, batch_size=5)
+train_loader = du.DataLoader(train_set, shuffle=shuffle, batch_size=batch_size)
+val_loader = du.DataLoader(val_set, batch_size=batch_size)
 
 if retrain:
     net, optimizer, old_epoch, loss = \

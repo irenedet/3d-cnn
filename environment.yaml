@@ -3,7 +3,6 @@ channels:
   - pytorch
   - conda-forge
   - default
-  - mrcfile
 dependencies:
   - python=3.6
   - jupyter

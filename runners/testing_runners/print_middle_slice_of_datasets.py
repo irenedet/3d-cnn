@@ -203,6 +203,14 @@ def get_image_dict(data_path, labels: list = None, iterations=0,
 # ]
 
 dataset_names = [
+    "180426/004",
+    "180426/005",
+    "180426/021",
+    "180426/024",
+    "181119/002",
+    "181119/030",
+    "181126/012",
+    "181126/025",
     "181126/002",
 ]
 
@@ -230,19 +238,18 @@ dataset_names = [
 # pdf.close()
 #/scratch/trueba/3d-cnn/cross-validation/fas_cross_validation/original-training-data//181126/002/strongly_labeled_min0.002_max0.1/no_eman_filter_256pix/full_partition.h5
 pdf = matplotlib.backends.backend_pdf.PdfPages(
-    "/g/scb2/zaugg/trueba/3d-cnn/strongly_labeled_min0.002_max0.1.pdf")
+    "/scratch/trueba/3d-cnn/cross-validation/fas_cross_validation/original-training-data/strongly_labeled_min0.0002_max0.0035_no_eman_filter_256pix.pdf")
 for index, tomo_name in enumerate(dataset_names):
     print("tomo_name", tomo_name)
     data_path = join(
         "/scratch/trueba/3d-cnn/cross-validation/fas_cross_validation/original-training-data",
         tomo_name)
     data_path = join(data_path,
-                     "strongly_labeled_min0.002_max0.1/no_eman_filter_256pix/full_partition.h5")
+                     "strongly_labeled_min0.0002_max0.0035/no_eman_filter_256pix/full_partition.h5")
 
     iterations = 0
     labels = ['fas']
-    volumes = get_image_dict(data_path=data_path, labels=labels, iterations=0,
-                             vol_numbers=10)
+    volumes = get_image_dict(data_path=data_path, labels=labels, iterations=0)
     names_list = list(volumes.keys())
     vol_numbers = range(len(names_list))
     matplotlib.use('Agg')
