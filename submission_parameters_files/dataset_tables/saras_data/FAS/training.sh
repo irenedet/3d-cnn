@@ -10,13 +10,13 @@ tomo_training_list3="180426_004_3_1,180426_004_3_2,180426_004_3_0,180426_004_3_4
 tomo_training_list4="180426_004_4_1,180426_004_4_2,180426_004_4_3,180426_004_4_0,180426_005_4_1,180426_005_4_2,180426_005_4_3,180426_005_4_0,180426_021_4_1,180426_021_4_2,180426_021_4_3,180426_021_4_0,181119_002_4_1,181119_002_4_0,181119_002_4_3,181119_002_4_2,181119_030_4_1,181119_030_4_0,181119_030_4_3,181119_030_4_2,181126_002_4_1,181126_002_4_0,181126_002_4_3,181126_002_4_2,181126_012_4_1,181126_012_4_0,181126_012_4_3,181126_012_4_2"
 
 
-export path_to_dataset_table="/struct/mahamid/Irene/cross-validation/multiclass/FAS_no_eman_no_aggregations_256pix/CV_data_no_eman_no_aggregations.csv"
+export path_to_dataset_table="/struct/mahamid/Irene/cross-validation/multiclass/FAS_no_eman_no_aggregations_128pix/CV_data.csv"
 export segmentation_names='fas'
 export split=0.8
 
 # Data for the new model
-export fractions_name="cv_FAS_no_eman_no_aggreg_256pix"
-export log_dir="/struct/mahamid/Irene/cross-validation/multiclass/FAS_no_eman_256pix/log_"$fractions_name
+export fractions_name="cv_FAS_no_eman_no_aggreg_128pix"
+export log_dir="/struct/mahamid/Irene/cross-validation/multiclass/FAS_no_eman_128pix/log_"$fractions_name
 export model_path="/struct/mahamid/Irene/cross-validation/multiclass/models/cross-validation/"$fractions_name
 export n_epochs=300
 export depth=2
@@ -27,10 +27,10 @@ export DA="none"
 export BN=false
 export encoder_dropout=0
 export decoder_dropout=0
-export batch_size=1
+export batch_size=5
 
 # Data for old models for resuming training:
-export models_notebook="/struct/mahamid/Irene/cross-validation/multiclass/FAS_no_eman_256pix/models_cv_fas_fractions.csv"
+export models_notebook="/struct/mahamid/Irene/cross-validation/multiclass/FAS_no_eman_128pix/models_cv_fas_fractions.csv"
 
 for fraction in $FRACTIONS
 do
@@ -53,5 +53,5 @@ do
     export retrain="false"
     export path_to_old_model="none"
     export model_initial_name="R_"$retrain"_encoder_dropout_"$encoder_dropout"_decoder_dropout_"$decoder_dropout"_BN_"$BN"_DA_"$DA"_shuffle_"$shuffle"_frac_"$fraction"_"
-    sbatch $UPICKER_PATH/submission_scripts/dataset_tables/training/training_runner.sh -fraction $fraction -path_to_dataset_table $path_to_dataset_table -tomo_training_list $tomo_training_list -split $split -output_classes $output_classes -log_dir $log_dir -model_initial_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook -BN $BN -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout -batch_size $batch_size
+    bash $UPICKER_PATH/submission_scripts/dataset_tables/training/training_runner.sh -fraction $fraction -path_to_dataset_table $path_to_dataset_table -tomo_training_list $tomo_training_list -split $split -output_classes $output_classes -log_dir $log_dir -model_initial_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook -BN $BN -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout -batch_size $batch_size
 done

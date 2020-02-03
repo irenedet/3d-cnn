@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
-fractions="0 1 2 3 4"
-TOMOS="180426/024 180426/025"
+fractions="4"
+#TOMOS="180426/024 180426/025"
+TOMOS="180426/004"
 fractions_name="cv_fractions"
 # Tomograms data
 export path_to_dataset_table="/struct/mahamid/Irene/yeast/yeast_table.csv"
-DA=none
-#DA="G1.5_E2_R180_DArounds4"
-export class_numbers="0 1 2"
+#DA=none
+DA="G1.5_E2_R180_DArounds4"
+export class_numbers="2"
 export semantic_classes="ribo,fas,memb"
 export statistics_file="/struct/mahamid/Irene/cross-validation/multiclass/full_tomo_dice_analysis_"$class_number".csv"
 
@@ -30,9 +31,8 @@ for class_number in $class_numbers
     for tomo_name in $TOMOS
     do
       echo $tomo_name
-        model_nickname="DA_none_shuffle_true_frac_"$fraction"_ribo_fas_memb__D_2_IF_8"
-  #      model_nickname="R_"$retrain"_encoder_dropout_"$encoder_dropout"_decoder_dropout_"$decoder_dropout"_BN_"$BN"_DA_"$DA"_shuffle_"$shuffle"_frac_"$fraction"_ribo_fas_memb__D_"$depth"_IF_"$init_feat
-        path_to_model="/struct/mahamid/Irene/cross-validation/multiclass/models/cross-validation/"$fractions_name"/"$model_nickname".pkl"
+        model_nickname="DA_G1.5_E2_R180_DArounds4_shuffle_true_frac_"$fraction"_ribo_fas_memb__D_2_IF_8"
+        path_to_model="/struct/mahamid/Irene/cross-validation/multiclass/models/cross-validation/cv_fractions/"$model_nickname".pkl"
         label_name=$fractions_name"_"$model_nickname
         global_output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/"$fractions_name"/"$model_nickname"/full_tomo_dice_analysis/"
         mkdir -p $global_output_dir

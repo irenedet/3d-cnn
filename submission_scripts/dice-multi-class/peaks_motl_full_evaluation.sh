@@ -97,3 +97,12 @@ echo "Save a copy of this script for future reference"
 SCRIPT=`realpath $0`
 cp $SCRIPT $output_dir"/SCRIPT.txt"
 
+
+
+
+
+
+
+
+
+

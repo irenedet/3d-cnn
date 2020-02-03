@@ -108,7 +108,7 @@ print("*******************************************")
 print("The dice_unet_training.py script is running")
 print("*******************************************")
 print("\n")
-
+# os.environ["CUDA_VISIBLE_DEVICES"] = str()
 final_activation = nn.Sigmoid()
 net_conf = {'final_activation': final_activation,
             'depth': depth,
