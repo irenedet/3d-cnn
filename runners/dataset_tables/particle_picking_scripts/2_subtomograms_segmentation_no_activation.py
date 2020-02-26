@@ -4,6 +4,7 @@ from distutils.util import strtobool
 import numpy as np
 import pandas as pd
 import torch
+import torch.nn as nn
 
 from filewriters.h5 import segment_and_write
 from networks.io import get_device
@@ -46,6 +47,7 @@ parser.add_argument("-new_loader", "--new_loader",
                     type=str, default=False)
 
 args = parser.parse_args()
+
 path_to_model = args.path_to_model
 label_name = args.label_name
 dataset_table = args.dataset_table
@@ -58,6 +60,7 @@ BN = strtobool(args.Batch_Normalization)
 encoder_dropout = args.encoder_dropout
 decoder_dropout = args.decoder_dropout
 print("BN = ", BN)
+print("encoder_dropout, decoder_dropout", encoder_dropout, decoder_dropout)
 
 df = pd.read_csv(dataset_table)
 df['tomo_name'] = df['tomo_name'].astype(str)

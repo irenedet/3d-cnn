@@ -3,14 +3,14 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 60G
-#SBATCH --time 0-15:00
-#SBATCH -o slurm_outputs/training.slurm.%N.%j.out
-#SBAtCH -e slurm_outputs/training.slurm.%N.%j.err
+#SBATCH --mem 40G
+#SBATCH --time 0-25:00
+#SBATCH -o training.slurm.%N.%j.out
+#SBAtCH -e training.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=irene.de.teresa@embl.de
 #SBATCH -p gpu
-#SBATCH -C gpu=2080Ti
+#SBAtCH -C gpu=1080Ti
 #SBATCH --gres=gpu:4 -n1 -c4
 
 #-p is partition
@@ -23,9 +23,9 @@
 module load GCC
 module load Anaconda3
 echo 'activating virtual environment'
-source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
+source activate $UPICKER_VENV_PATH
 echo '... done.'
-
+echo $PYTHONPATH
 export QT_QPA_PLATFORM='offscreen'
 usage()
 

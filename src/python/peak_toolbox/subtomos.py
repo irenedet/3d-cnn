@@ -3,14 +3,13 @@ from os.path import join
 
 import h5py
 import numpy as np
-
 import torch
 import torch.nn as nn
 
-from coordinates_toolbox.subtomos import \
-    get_subtomo_corner_side_lengths_and_zero_padding
 from coordinates_toolbox.subtomos import get_coord_from_name, \
     get_subtomo_corners, read_subtomo_names, get_subtomo_corner_and_side_lengths
+from coordinates_toolbox.subtomos import \
+    get_subtomo_corner_side_lengths_and_zero_padding
 from coordinates_toolbox.utils import shift_coordinates_by_vector
 from naming import h5_internal_paths
 from peak_toolbox.utils import extract_peaks
@@ -51,10 +50,11 @@ def _get_peaks_per_subtomo(h5file: h5py.File, subtomo_name: str,
     subtomo_h5_internal_path = join(subtomos_internal_path,
                                     subtomo_name)
 
-    data_subtomo = _extract_data_subtomo(h5file=h5file,
-                                         subtomo_h5_internal_path=subtomo_h5_internal_path,
-                                         subtomo_side_lengths=subtomo_side_lengths,
-                                         overlap=0)  # ToDo check!
+    data_subtomo = _extract_data_subtomo(
+        h5file=h5file,
+        subtomo_h5_internal_path=subtomo_h5_internal_path,
+        subtomo_side_lengths=subtomo_side_lengths,
+        overlap=0)  # ToDo check!
     long_edge_if_true = [True for length, dim in
                          zip(subtomo_side_lengths, subtomo_shape) if
                          dim - 2 * overlap]
@@ -129,14 +129,13 @@ def get_peaks_per_subtomo_with_overlap_multiclass(
 
     subtomo_h5_internal_path = join(subtomos_internal_path,
                                     subtomo_name)
-    print(subtomo_corner, subtomo_side_lengths, zero_padding)
+    # print(subtomo_corner, subtomo_side_lengths, zero_padding)
     assert np.min(subtomo_side_lengths) > 0
     data_subtomo = _extract_data_subtomo(
         h5file=h5file,
         subtomo_h5_internal_path=subtomo_h5_internal_path,
         subtomo_side_lengths=subtomo_side_lengths,
-        overlap=0,
-        class_number=class_number)
+        overlap=0, class_number=class_number)
     if final_activation is None:
         print("No final activation for peak extraction.")
     else:
@@ -148,13 +147,10 @@ def get_peaks_per_subtomo_with_overlap_multiclass(
     mask_out_overlap = np.ones(shape_minus_overlap)
     mask_out_overlap = np.pad(mask_out_overlap, zero_padding, "constant")
     data_subtomo = mask_out_overlap * data_subtomo
-    print("Extracting peaks of ", subtomo_name)
+    # print("Extracting peaks of ", subtomo_name)
     subtomo_list_of_maxima, subtomo_list_of_maxima_coords = \
         extract_peaks(dataset=data_subtomo, numb_peaks=numb_peaks,
                       radius=min_peak_distance, threshold=threshold)
-    print("len(subtomo_list_of_maxima_coords) = ",
-          len(subtomo_list_of_maxima_coords))
-
     shifted_subtomo_maxima_coords = \
         shift_coordinates_by_vector(subtomo_list_of_maxima_coords,
                                     subtomo_corner)

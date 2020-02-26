@@ -4,8 +4,8 @@ from os.path import isdir, join
 
 import numpy as np
 
-from calculator.statistics import precision_recall_calculator, pr_auc_score, \
-    F1_score_calculator
+from calculator.statistics import pr_auc_score, f1_score_calculator, \
+    precision_recall_calculator_and_detected
 from filereaders.star import class3d_data_file_reader
 
 
@@ -27,7 +27,7 @@ def _read_job_parameters(job_note_file, param):
             par = re.search('--ref(.+?) --', contents).group(1)
             par = par[-16:]
             if par == "run_class001.mrc":
-                par = "relion"
+                par = "relion_avg"
             else:
                 par = "sph"
         else:
@@ -65,55 +65,56 @@ def create_star_files_list(jobs_parameters: list, classes_dict: dict):
 
 def _extract_coordinates_per_class(data_list: list, classes: list) -> list:
     coords = [[float(line[1]), float(line[2]), float(line[3])] for line in
-                   data_list if (int(line[13]) in classes)]
+              data_list if (int(line[13]) in classes)]
     return coords
 
 
+def get_job_name_from_string(string: str):
+    return re.findall(r"job\d\d\d", string)[0]
+
+
 def generate_jobs_statistics_dict(star_files: list, motl_clean_coords,
-                                  radius: float) -> dict:
+                                  radius: float, param_name: str) -> dict:
     plots_dict = {}
     for job in star_files:
-        star_name, K, par, classes = job
+        star_name, K, parameter, classes = job
+        job_name = get_job_name_from_string(string=star_name)
+        print("Calculating statistics for", job_name)
         data_list = class3d_data_file_reader(star_name)
-
         coords = _extract_coordinates_per_class(data_list, classes=classes)
-        precision, recall, detected_clean = precision_recall_calculator(
-            coords,
-            motl_clean_coords,
-            radius=radius)
+        precision, recall, detected_true, predicted_true_positives, \
+        _, value_predicted_true_positives, \
+        _, predicted_redundant, _ = \
+            precision_recall_calculator_and_detected(
+                predicted_coordinates=coords,
+                value_predicted=list(range(len(coords))),
+                true_coordinates=motl_clean_coords, radius=radius)
 
         auPRC = pr_auc_score(precision=precision, recall=recall)
 
-        F1_score = F1_score_calculator(precision, recall)
+        F1_score = f1_score_calculator(precision, recall)
 
-        job_name = re.findall(r"job\d\d\d", star_name)[0]
-        legend_str = job_name + ' K ' + K + ', param ' + par + ', classes ' + \
-                     str(set(classes))
+        job_name = get_job_name_from_string(string=star_name)
+        legend_str = job_name + ': K=' + K + ', ' + param_name + '=' + \
+                     parameter + ', classes=' + str(classes)
 
         plots_dict[job_name] = [precision, recall, F1_score, auPRC, legend_str]
     return plots_dict
 
 
-def get_particle_index_and_class(data_row, particle_regex = r"par_(\d+).mrc"):
-    particle_path =  data_row[4]
-    particle_index = int(re.findall(particle_regex,particle_path)[0])
+def get_particle_index_and_class(data_row, particle_regex=r"par_(\d+).mrc"):
+    particle_path = data_row[4]
+    particle_index = int(re.findall(particle_regex, particle_path)[0])
     particle_class = int(data_row[13])
     return particle_index, particle_class
 
 
-def get_particle_indices_in_classes(particles_indices_and_classes: list,
-                                    classes: list):
-    particle_indices_in_classes = [particle[0] for particle in
-                                   particles_indices_and_classes if
-                                   particle[1] in classes]
-    return particle_indices_in_classes
-
-
-def get_particles_list(old_star_path:str):
+def get_particles_list(old_star_path: str):
     with open(old_star_path, 'r') as star_file:
         particles_list = [l for l in (line.strip() for line in star_file) if l]
         particles_list = [l.split() for l in particles_list]
-    return particles_list[15:]
+        text_body = slice(15, len(particles_list))
+    return particles_list[text_body]
 
 
 def get_list_of_indices_and_classes(data_list: list) -> list:

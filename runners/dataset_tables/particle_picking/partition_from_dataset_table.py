@@ -56,7 +56,7 @@ if isinstance(path_to_lamella, float):
     print("No lamella file available")
     lamella_mask = np.ones(raw_dataset.shape)
 else:
-    path_to_lamella = tomo_df.iloc[0]['lamella_file'].astype(str)
+    path_to_lamella = tomo_df.iloc[0]['lamella_file']
     lamella_mask = load_dataset(path_to_dataset=path_to_lamella)
 
 lamella_shape = lamella_mask.shape

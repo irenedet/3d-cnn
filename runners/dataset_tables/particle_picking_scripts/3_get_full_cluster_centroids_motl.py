@@ -1,12 +1,12 @@
 import argparse
 from os import makedirs
-from os.path import join
+from os.path import join, isfile
 
 import numpy as np
 import pandas as pd
 import torch.nn as nn
 
-from coordinates_toolbox.utils import get_cluster_centroids
+from coordinates_toolbox.clustering import get_cluster_centroids
 from filereaders.datasets import load_dataset
 from filewriters.csv import build_tom_motive_list
 from filewriters.h5 import write_dataset_hdf, \
@@ -74,18 +74,21 @@ makedirs(name=output_dir, exist_ok=True)
 
 output_path = join(output_dir, "prediction.hdf")
 
-subtomos_internal_path = join(
-    h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS,
-    label_name)
+clusters_output_path = join(output_dir, "clusters.hdf")
 
-write_dataset_from_subtomos_with_overlap_multiclass(
-    output_path,
-    partition,
-    output_shape,
-    subtomo_shape,
-    subtomos_internal_path,
-    class_number,
-    overlap, final_activation=nn.Sigmoid())
+if not isfile(output_path):
+    subtomos_internal_path = join(
+        h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS,
+        label_name)
+
+    write_dataset_from_subtomos_with_overlap_multiclass(
+        output_path,
+        partition,
+        output_shape,
+        subtomo_shape,
+        subtomos_internal_path,
+        class_number,
+        overlap, final_activation=nn.Sigmoid())
 
 dataset = load_dataset(path_to_dataset=output_path)
 
@@ -95,8 +98,9 @@ clustering_labels, centroids_list, cluster_size_list = \
                           max_cluster_size=max_cluster_size,
                           connectivity=1)
 
-clusters_output_path = join(output_dir, "clusters.hdf")
-write_dataset_hdf(output_path=clusters_output_path, tomo_data=clustering_labels)
+if not isfile(clusters_output_path):
+    write_dataset_hdf(output_path=clusters_output_path,
+                      tomo_data=clustering_labels)
 # # Double-check centroids to avoid duplicates
 
 motl_name = "motl_" + str(len(centroids_list)) + ".csv"

@@ -5,7 +5,7 @@ from os import makedirs
 from os.path import join
 
 from calculator.statistics import pr_auc_score, \
-    F1_score_calculator, precision_recall_calculator_and_detected
+    f1_score_calculator, precision_recall_calculator_and_detected
 from peak_toolbox.utils import read_motl_coordinates_and_values
 from filewriters.csv import motl_writer
 
@@ -77,7 +77,7 @@ if __name__ == "__main__":
             true_coordinates_test,
             radius=radius)
 
-    F1_score = F1_score_calculator(precision, recall)
+    F1_score = f1_score_calculator(precision, recall)
     if len(F1_score) > 0:
         max_F1 = np.max(F1_score)
         optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])

@@ -7,7 +7,7 @@ import pandas as pd
 import torch.nn as nn
 from scipy.spatial import distance
 
-from coordinates_toolbox.utils import get_clusters_within_size_range
+from coordinates_toolbox.clustering import get_clusters_within_size_range
 from filereaders.datasets import load_dataset
 from filewriters.csv import build_tom_motive_list
 from filewriters.h5 import write_dataset_from_subtomos_with_overlap_multiclass

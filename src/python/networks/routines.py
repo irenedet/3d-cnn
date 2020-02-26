@@ -70,7 +70,8 @@ def train_float(model, loader, optimizer, loss_function,
 
 
 def train(model, loader, optimizer, loss_function,
-          epoch, device, log_interval=20, tb_logger=None, log_image=True):
+          epoch, device, log_interval=20, tb_logger=None, log_image=True,
+          lr_scheduler=None):
     # set the model to train mode
     model.train()
     train_loss = 0
@@ -172,6 +173,7 @@ def train(model, loader, optimizer, loss_function,
                             print("the size of the target tensor isnt loggable")
                     else:
                         print("Not logging images.")
+    lr_scheduler.step(train_loss)
 
     train_loss /= len(loader)
     if tb_logger is not None:

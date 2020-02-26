@@ -48,8 +48,8 @@ def precision_recall_calculator_and_detected(
                             flag = "true_positive"
                         else:
                             flag_tmp = "redundant_candidate"
-                    else:
-                        print(point, "is already flagged as true positive")
+                    # else:
+                    # print(point, "is already flagged as true positive")
                 if flag == "true_positive":
                     predicted_true_positives.append(tuple(point))
                     value_predicted_true_positives.append(value)
@@ -60,7 +60,7 @@ def precision_recall_calculator_and_detected(
                 else:
                     print("This should never happen!")
             else:
-                print("len(close_to_point) = ", len(close_to_point))
+                # print("len(close_to_point) = ", len(close_to_point))
                 predicted_false_positives.append(tuple(point))
                 value_predicted_false_positives.append(value)
             true_positives_total = len(predicted_true_positives)
@@ -75,125 +75,25 @@ def precision_recall_calculator_and_detected(
            value_predicted_redundant
 
 
-def precision_recall_calculator_and_detected_old(
-        predicted_coordinates: np.array,
-        predicted_values: list,
-        true_coordinates: np.array,
-        radius: float):
-    total_true_points = true_coordinates.shape[0]
-    detected_true = set()
-    detected_predicted = set()
-    value_detected_predicted = []
-    undetected_predicted = set()
-    value_undetected_predicted = []
-    redundantly_detected_true = set()
-    redundantly_detected_predicted = set()
-    value_redundantly_detected_predicted = []
-    precision = []
-    recall = []
-    total_current_predicted_points = 0
-    for score_value, predicted_point in zip(predicted_values,
-                                            predicted_coordinates):
-        total_current_predicted_points += 1
-        flag = 'undetected'
-        for true_point in true_coordinates:
-            if flag == 'undetected':
-                dist = np.linalg.norm(predicted_point - true_point)
-                if ((dist <= radius) and (
-                        tuple(true_point) not in detected_true)):
-                    detected_true |= {tuple(true_point)}
-                    detected_predicted |= {tuple(predicted_point)}
-                    value_detected_predicted += [score_value]
-                    flag = 'detected'
-                if ((dist <= radius) and (
-                        tuple(true_point) in detected_true)):
-                    redundantly_detected_true |= {tuple(true_point)}
-                    redundantly_detected_predicted |= {tuple(predicted_point)}
-                    value_redundantly_detected_predicted += [score_value]
-                    flag = 'redundantly_detected'
-        if flag == "undetected":
-            undetected_predicted |= {tuple(predicted_point)}
-            value_undetected_predicted += [score_value]
-        true_positives = len(detected_true)
-        precision += [true_positives / total_current_predicted_points]
-        recall += [true_positives / total_true_points]
-    print("len(redundantly_detected_predicted) = ",
-          len(redundantly_detected_predicted))
-    return precision, recall, detected_true, detected_predicted, \
-           undetected_predicted, value_detected_predicted, \
-           value_undetected_predicted, redundantly_detected_predicted, \
-           value_redundantly_detected_predicted
-
-
-def precision_recall_calculator_and_detected_new_old(
-        predicted_coordinates: np.array,
-        predicted_values: list,
-        true_coordinates: np.array,
-        radius: float):
-    total_true_points = true_coordinates.shape[0]
-    detected_true = set()
-    detected_predicted = set()
-    value_detected_predicted = []
-    undetected_predicted = set()
-    value_undetected_predicted = []
-    redundantly_detected_true = set()
-    redundantly_detected_predicted = set()
-    value_redudndantly_detected_predicted = []
-    precision = []
-    recall = []
-    total_current_predicted_points = 0
-    for score_value, predicted_point in zip(predicted_values,
-                                            predicted_coordinates):
-        total_current_predicted_points += 1
-        flag = 'undetected'
-        for true_point in true_coordinates:
-            if flag == 'undetected':
-                dist = np.linalg.norm(predicted_point - true_point)
-                if (dist <= radius):
-                    detected_true |= {tuple(true_point)}
-                    detected_predicted |= {tuple(predicted_point)}
-                    value_detected_predicted += [score_value]
-                    flag = 'detected'
-                if ((dist <= radius) and (
-                        tuple(true_point) in detected_true)):
-                    redundantly_detected_true |= {tuple(true_point)}
-                    redundantly_detected_predicted |= {tuple(predicted_point)}
-                    value_redudndantly_detected_predicted += [score_value]
-                    flag = 'redundantly_detected'
-        if flag == "undetected":
-            undetected_predicted |= {tuple(predicted_point)}
-            value_undetected_predicted += [score_value]
-        true_positives = len(detected_true)
-        precision += [true_positives / total_current_predicted_points]
-        recall += [true_positives / total_true_points]
-    print("len(redundantly_detected_predicted) = ",
-          len(redundantly_detected_predicted))
-    return precision, recall, detected_true, detected_predicted, \
-           undetected_predicted, value_detected_predicted, \
-           value_undetected_predicted, redundantly_detected_predicted, \
-           value_redudndantly_detected_predicted
-
-
-def F1_score_calculator(prec: list, recall: list):
-    F1_score = []
-
-    for n in range(len(recall)):
-        if prec[n] + recall[n] != 0:
-            F1_score += [2.0 * prec[n] * recall[n] / float(prec[n] + recall[n])]
+def f1_score_calculator(precision: list, recall: list):
+    f1_score = []
+    for p, r in zip(precision, recall):
+        if p + r != 0:
+            f1_score.append(2 * p * r / float(p + r))
         else:
-            F1_score += [0]
-
-    return F1_score
+            f1_score.append(0)
+    return f1_score
 
 
 def quadrature_calculator(x_points: list, y_points: list) -> float:
     """
-    This function computes an approximate value of the integral of a real function f in an interval,
-    using the trapezoidal rule.
+    This function computes an approximate value of the integral of a real
+    function f in an interval, using the trapezoidal rule.
 
     Input:
-    x_points: is a list of points in the x axis (not necessarly ordered)
-    y_points: is a list of points, such that y_points[n] = f(x_points[n]) for each n.
+    x_points: is a list of points in the x axis (not necessarily ordered)
+    y_points: is a list of points, such that y_points[n] = f(x_points[n]) for
+    each n.
     """
     # sorted_y = [p for _, p in sorted(zip(x_points, y_points))]
     sorted_y = [p for _, p in
@@ -214,4 +114,3 @@ def pr_auc_score(precision: list, recall: list) -> float:
     under the precision-recall (PR) curve.
     """
     return quadrature_calculator(recall, precision)
-

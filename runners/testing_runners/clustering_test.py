@@ -4,7 +4,7 @@ from os.path import join
 import numpy as np
 from scipy.spatial import distance
 
-from coordinates_toolbox.utils import get_clusters_within_size_range
+from coordinates_toolbox.clustering import get_clusters_within_size_range
 from filereaders.datasets import load_dataset
 from filewriters.csv import build_tom_motive_list
 from peak_toolbox.utils import read_motl_coordinates_and_values

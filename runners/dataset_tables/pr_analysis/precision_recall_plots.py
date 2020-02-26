@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from calculator.statistics import pr_auc_score, \
-    F1_score_calculator, precision_recall_calculator_and_detected
+    f1_score_calculator, precision_recall_calculator_and_detected
 from filewriters.csv import motl_writer
 from filewriters.csv import write_statistics
 from peak_toolbox.subtomos import select_coordinates_in_subtomos, \
@@ -175,7 +175,7 @@ value_redudndantly_detected_predicted = \
         true_coordinates_test,
         radius=radius)
 
-F1_score = F1_score_calculator(precision, recall)
+F1_score = f1_score_calculator(precision, recall)
 if len(F1_score) > 0:
     max_F1 = np.max(F1_score)
     optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from calculator.statistics import precision_recall_calculator_and_detected, \
-    pr_auc_score, F1_score_calculator
+    pr_auc_score, f1_score_calculator
 from coordinates_toolbox.utils import extract_coordinates_from_em_motl
 from filereaders.csv import read_motl_from_csv
 from filereaders.em import read_em
@@ -152,7 +152,7 @@ figure_name = join(figures_dir, "histogram-detected-undetected.png")
 plt.savefig(fname=figure_name,
             format="png")
 
-F1_score = F1_score_calculator(precision, recall)
+F1_score = f1_score_calculator(precision, recall)
 max_F1 = np.max(F1_score)
 optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
 auPRC = pr_auc_score(precision=precision, recall=recall)

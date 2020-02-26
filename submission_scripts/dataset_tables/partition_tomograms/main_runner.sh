@@ -1,42 +1,35 @@
 #!/usr/bin/env bash
 
 #except
-TOMOS="180713/037
-180713/039
-180713/041
-180713/043
-180713/050"
-#190218/064 190218/066 190218/069 190218/071 190218/072 190218/073 190218/075 190218/081 190218/082
-#190218/095 190218/096 190218/097 190218/098 190218/099 190218/101 190218/102 190218/103 190218/104 190218/105
-#190218/108 190218/110 190218/111 190218/112 190218/114 190218/115 190218/116 190218/117 190218/118 190218/119
-#190218/120 190218/121 190218/122 190218/123 190218/124 190218/125 190223/129 190223/130 190223/131 190223/133
-#190223/135 190223/136 190223/139 190223/140 190223/141 190223/142 190223/143 190223/144 190223/145 190223/146
-#190223/149 190223/151 190223/152 190223/153 190223/154 190223/155 190223/156 190223/157 190223/159 190223/160
-#190223/162 190223/163 190223/165 190223/166 190223/168 190223/169 190223/171 190223/172 190223/173 190223/174
-#190223/175 190223/176 190223/179 190223/180 190223/181 190223/182 190223/189 190218/060 190218/063 190218/077
-#190218/100 190218/044 190218/050 190218/090"
+#TOMOS="190301/003"
+#190301/005
+#190301/009
+#190301/012
+#190301/016
+#190301/022
+#190301/028
+#190301/031
+#190301/032
+#190301/033
+#190301/035
+#190301/037
+#190301/043
+TOMOS="180426/004
+180426/005
+180426/021
+180426/024"
 
 
-#190223/132
-#190223/148
-#190223/178
-#
-#
-#
-#
-#
-#190223/193
-#"
-
-export path_to_dataset_table="/struct/mahamid/Irene/yeast/npc/npc_yeast_data.csv"
-export global_output_dir="/scratch/trueba/3d-cnn/cnn_evaluation/yeast/healthy"
-export write_on_table='True'
+export path_to_dataset_table="/struct/mahamid/Irene/yeast/yeast_64.csv"
+export global_output_dir="/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/test_partitions/64pix/"
+mkdir -p $global_output_dir
+export write_on_table='true'
 
 # Partition parameters
-export box_side=128
+export box_side=64
 
 for tomo in $TOMOS
 do
 	echo "Submitting job for tomogram $tomo"
-	sbatch submission_scripts/dataset_tables/partition_tomograms/partition_tomo_intersecting_lamella.sh -dataset_table $path_to_dataset_table -tomo_name $tomo -output_dir $global_output_dir -box_side $box_side -write_on_table $write_on_table
+	bash submission_scripts/dataset_tables/partition_tomograms/partition_tomo_intersecting_lamella.sh -dataset_table $path_to_dataset_table -tomo_name $tomo -output_dir $global_output_dir -box_side $box_side -write_on_table $write_on_table
 done

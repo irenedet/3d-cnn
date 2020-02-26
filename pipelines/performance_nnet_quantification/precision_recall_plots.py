@@ -7,7 +7,7 @@ from os.path import join
 from src.python.peak_toolbox.subtomos import select_coordinates_in_subtomos, \
     select_coordinates_and_values_in_subtomos
 from src.python.calculator.statistics import pr_auc_score, \
-    F1_score_calculator, precision_recall_calculator_and_detected
+    f1_score_calculator, precision_recall_calculator_and_detected
 from src.python.peak_toolbox.utils import read_motl_coordinates_and_values
 from src.python.filewriters.csv import motl_writer
 # unique_coordinates_motl_writer
@@ -135,7 +135,7 @@ value_redudndantly_detected_predicted = \
         true_coordinates_test,
         radius=radius)
 
-F1_score = F1_score_calculator(precision, recall)
+F1_score = f1_score_calculator(precision, recall)
 max_F1 = np.max(F1_score)
 optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
 auPRC = pr_auc_score(precision=precision, recall=recall)

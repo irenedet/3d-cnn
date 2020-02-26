@@ -4,15 +4,15 @@
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --mem 20G
-#SBATCH --time 0-04:45
+#SBATCH --time 0-00:45
 #SBATCH -o evaluate_dice_evaluation.slurm.%N.%j.out
 #SBAtCH -e evaluate_dice_evaluation.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBAtCH --mail-user=irene.de.teresa@embl.de
 
-#SBAtCH -p gpu
-#SBAtCH -C gpu=1080Ti
-#SBAtCH --gres=gpu:1
+#SBATCH -p gpu
+#SBATCH -C gpu=1080Ti
+#SBATCH --gres=gpu:1
 
 module load Anaconda3
 echo "activating virtual environment"
@@ -140,7 +140,7 @@ echo "class_number is " $class_number
 export box_overlap=12
 # 1. Segmenting test_partition:
 echo 'running python3 scripts: Segmenting raw subtomograms'
-python3 $UPICKER_PATH/runners/dataset_tables/particle_picking_scripts/2_subtomograms_segmentation_no_activation.py -model $path_to_model -label $label_name -dataset_table $dataset_table -tomo_name $tomo_name -init_feat $init_feat -depth $depth -out_classes $output_classes -new_loader $new_loader -BN $BN -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout
+#python3 $UPICKER_PATH/runners/dataset_tables/particle_picking_scripts/2_subtomograms_segmentation_no_activation.py -model $path_to_model -label $label_name -dataset_table $dataset_table -tomo_name $tomo_name -init_feat $init_feat -depth $depth -out_classes $output_classes -new_loader $new_loader -BN $BN -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout
 echo '... done.'
 
 # 2. Assemble together the full prediction dataset:

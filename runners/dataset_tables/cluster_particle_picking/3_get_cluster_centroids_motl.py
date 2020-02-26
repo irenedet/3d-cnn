@@ -5,7 +5,7 @@ from os.path import join
 import numpy as np
 import pandas as pd
 
-from coordinates_toolbox.utils import get_cluster_centroids
+from coordinates_toolbox.clustering import get_cluster_centroids
 from filereaders.datasets import load_dataset
 from filewriters.csv import build_tom_motive_list
 from filewriters.h5 import write_dataset_hdf, \

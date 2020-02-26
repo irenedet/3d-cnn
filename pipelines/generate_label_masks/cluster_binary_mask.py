@@ -2,7 +2,7 @@ from os.path import join
 import numpy as np
 
 from src.python.filereaders.datasets import load_dataset
-from src.python.coordinates_toolbox.utils import get_cluster_centroids
+from coordinates_toolbox.clustering import get_cluster_centroids
 from src.python.filewriters.h5 import write_dataset_hdf
 
 

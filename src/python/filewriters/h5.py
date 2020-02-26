@@ -114,6 +114,7 @@ def write_dataset_from_subtomos_with_overlap_multiclass(
     internal_subtomo_shape = tuple([subtomo_dim - 2 * overlap for
                                     subtomo_dim in subtomo_shape])
     with h5py.File(subtomo_path, 'r') as f:
+        print("reconstructing subtomos in", subtomos_internal_path)
         for subtomo_name in list(f[subtomos_internal_path]):
             subtomo_center = subtomos.get_coord_from_name(subtomo_name)
             start_corner, end_corner, lengths = subtomos.get_subtomo_corners(

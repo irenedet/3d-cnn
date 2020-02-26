@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from calculator.statistics import pr_auc_score, \
-    F1_score_calculator, precision_recall_calculator_and_detected
+    f1_score_calculator, precision_recall_calculator_and_detected
 from coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl
 from filereaders.csv import read_motl_from_csv
@@ -198,7 +198,7 @@ plt.savefig(
     format="png")
 plt.show()
 
-F1_score = F1_score_calculator(precision, recall)
+F1_score = f1_score_calculator(precision, recall)
 max_F1 = np.max(F1_score)
 optimal_peak_number = np.min(np.where(F1_score == max_F1)[0])
 auPRC = pr_auc_score(precision=precision, recall=recall)

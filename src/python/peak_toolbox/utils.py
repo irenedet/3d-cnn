@@ -5,9 +5,9 @@ from os.path import join
 import numpy as np
 
 from coordinates_toolbox.utils import \
-    filtering_duplicate_coords_with_values
-from coordinates_toolbox.utils import \
     extract_coordinates_and_values_from_em_motl
+from coordinates_toolbox.utils import \
+    filtering_duplicate_coords_with_values
 from filereaders.csv import read_motl_from_csv
 from filereaders.datasets import load_dataset
 from filereaders.em import read_em
@@ -26,19 +26,18 @@ def _generate_unit_particle(radius: int):
     return unit_particle
 
 
-def paste_sphere_in_dataset(dataset: np.array, radius: int, value: float,
-                            center: tuple) -> np.array:
-    dataset_dimensions = dataset.shape
-    unit_particle = _generate_unit_particle(radius)
-    particle = [
-        (center[0] + delta_p[0], center[1] + delta_p[1], center[2] + delta_p[2])
-        for delta_p in unit_particle]
-    for coord in particle:
-        if (coord[0] < dataset_dimensions[0]) and (
-                coord[1] < dataset_dimensions[1]) and (
-                coord[2] < dataset_dimensions[2]) and (0 <= coord[0]) and (
-                0 <= coord[1]) and (0 <= coord[2]):
-            dataset[coord[0], coord[1], coord[2]] = value
+def paste_sphere_in_dataset(dataset: np.array, center: tuple, radius: int,
+                            value: float = 1):
+    dataset_shape = dataset.shape
+    cx, cy, cz = center
+    ball = _generate_unit_particle(radius)
+    for point in ball:
+        i, j, k = point
+        i, j, k = int(i), int(j), int(k)
+        rel_point = np.array([i + cx, j + cy, k + cz])
+        inside_criterion = rel_point < np.array(dataset_shape)
+        if np.min(rel_point) >= 0 and np.min(inside_criterion):
+            dataset[i + cx, j + cy, k + cz] = value
     return dataset
 
 
@@ -80,13 +79,13 @@ def extract_peaks(dataset: np.array, numb_peaks: int, radius: int,
         global_min = np.ndarray.min(dataset)
     else:
         global_min = threshold
-    print("global_min =", global_min)
+    # print("global_min =", global_min)
     global_max_coords = np.where(dataset == global_max)
-    print("global_max_coords =", global_max_coords)
+    # print("global_max_coords =", global_max_coords)
     coordinates_list = [(global_max_coords[0][0],
                          global_max_coords[1][0],
                          global_max_coords[2][0])]
-    print("coordinates_list =", coordinates_list)
+    # print("coordinates_list =", coordinates_list)
     list_of_maxima = [global_max]
     list_of_maxima_coords = coordinates_list
     # for n in range(numb_peaks):
@@ -95,16 +94,15 @@ def extract_peaks(dataset: np.array, numb_peaks: int, radius: int,
         next_max, coordinates_list, flag = \
             _get_next_max(dataset, coordinates_list, radius, numb_peaks,
                           global_min)
-        print("next_max =", next_max)
-        print("len(coordinates_list) =", len(coordinates_list))
-        print("flag =", flag)
+        # print("next_max =", next_max)
+        # print("len(coordinates_list) =", len(coordinates_list))
+        # print("flag =", flag)
         if next_max < global_min:
-            print("Either reached indicator == global_min - 1 or threshold.")
+            print("Either reached indicator == global_min - 1, or threshold.")
             flag = "overloaded"
         else:
             list_of_maxima += [next_max for _ in coordinates_list]
             list_of_maxima_coords += coordinates_list
-    print("Number of peaks in subtomo =", len(list_of_maxima_coords))
     return list_of_maxima, list_of_maxima_coords
 
 

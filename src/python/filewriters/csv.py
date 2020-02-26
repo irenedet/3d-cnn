@@ -1,28 +1,28 @@
 import csv
+import datetime
+import os
 import re
 import time
-import os
-
-from os.path import join
+from functools import reduce
 from os import makedirs
+from os.path import join
+
 import h5py
 import numpy as np
 import pandas as pd
-import datetime
-from functools import reduce
 import torch.nn as nn
 
-from coordinates_toolbox.utils import \
-    filtering_duplicate_coords_with_values, to_tom_coordinate_system
-from naming import h5_internal_paths
-from peak_toolbox.subtomos import \
-    get_peaks_per_subtomo_with_overlap, \
-    get_peaks_per_subtomo_with_overlap_multiclass
-from coordinates_toolbox.utils import shift_coordinates_by_vector
 from coordinates_toolbox.subtomos import \
     get_subtomo_corner_and_side_lengths
 from coordinates_toolbox.utils import \
     arrange_coordinates_list_by_score
+from coordinates_toolbox.utils import \
+    filtering_duplicate_coords_with_values, to_tom_coordinate_system
+from coordinates_toolbox.utils import shift_coordinates_by_vector
+from naming import h5_internal_paths
+from peak_toolbox.subtomos import \
+    get_peaks_per_subtomo_with_overlap, \
+    get_peaks_per_subtomo_with_overlap_multiclass
 from peak_toolbox.utils import read_motl_data
 
 
@@ -323,10 +323,13 @@ def write_global_motl_from_overlapping_subtomograms_multiclass(
         list_of_maxima_coords = []
         overlap_shift = overlap * np.array([1, 1, 1])
         z_shift_vector = [z_shift, 0, 0]
-        print(z_shift_vector)
+        print("shift_vector [z_shift, y_shift, x_shift] =", z_shift_vector)
         start = time.time()
-        for subtomo_name in list(h5file[subtomos_internal_path]):
-            print(subtomo_name)
+        subtomo_names_list = list(h5file[subtomos_internal_path])
+        total_subtomos = len(subtomo_names_list)
+        for subtomo_indx, subtomo_name in enumerate(subtomo_names_list):
+            print("(", subtomo_indx + 1, "/",
+                  total_subtomos, ") ", subtomo_name)
             subtomo_list_of_maxima, subtomo_maxima_coords = \
                 get_peaks_per_subtomo_with_overlap_multiclass(
                     h5file=h5file,
@@ -340,8 +343,7 @@ def write_global_motl_from_overlapping_subtomograms_multiclass(
                     overlap=overlap,
                     final_activation=final_activation,
                     threshold=threshold)
-            print(len(subtomo_maxima_coords), "peaks in ", subtomo_name,
-                  " computed")
+            print(len(subtomo_maxima_coords), "peaks")
             subtomo_corner, _ = get_subtomo_corner_and_side_lengths(
                 subtomo_name,
                 subtomo_shape,

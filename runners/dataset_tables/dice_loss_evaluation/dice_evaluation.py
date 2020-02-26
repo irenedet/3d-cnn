@@ -1,17 +1,15 @@
-import pandas as pd
-import numpy as np
+import argparse
 import os
 
-
+import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 
-from filewriters.csv import write_statistics
-from pytorch_cnn.classes.loss import DiceCoefficient
 from filereaders.datasets import load_dataset
+from filewriters.csv import write_statistics
 from filewriters.h5 import write_dataset_hdf
-
-import argparse
+from pytorch_cnn.classes.loss import DiceCoefficient
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-tomo_name", "--tomo_name",
@@ -59,10 +57,10 @@ clean_mask_name = class_name + '_mask'
 df = pd.read_csv(dataset_table)
 df['tomo_name'] = df['tomo_name'].astype(str)
 tomo_df = df[df['tomo_name'] == tomo_name]
-z_shift = int(tomo_df.iloc[0]['z_shift'])
 x_dim = int(tomo_df.iloc[0]['x_dim'])
 y_dim = int(tomo_df.iloc[0]['y_dim'])
 z_dim = int(tomo_df.iloc[0]['z_dim'])
+
 lamella_file = tomo_df.iloc[0]['lamella_file']
 if target_path == "None":
     target_path = tomo_df.iloc[0][clean_mask_name]
@@ -80,6 +78,7 @@ else:
                                                                      dtype=float)
 
 target = load_dataset(path_to_dataset=target_path)
+
 sigmoid = nn.Sigmoid()
 shx, shy, shz = [np.min([shl, shp]) for shl, shp in
                  zip(target.shape, prediction.shape)]

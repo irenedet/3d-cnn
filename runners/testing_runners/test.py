@@ -1,23 +1,38 @@
-import h5py
+import os
 
-original_paths = [
-    "/struct/mahamid/Irene/yeast/ED/181126/002/raw_tomo.hdf",
-    "/struct/mahamid/Irene/yeast/ED/181126/002/clean_masks/ribo_sph_mask.hdf",
+from filereaders.datasets import load_dataset
+from filewriters.h5 import write_dataset_hdf
+
+tomos = [
+    # "190301/003",
+    "190301/005",
+    # "190301/009",
+    # "190301/012",
+    # "190301/016",
+    # "190301/022",
+    # "190301/028",
+    # "190301/031",
+    # "190301/032",
+    # "190301/033",
+    # "190301/035",
+    # "190301/037",
+    # "190301/043",
+    # "190301/045",
 ]
 
-destination_paths = [
-    "/struct/mahamid/Irene/yeast/ED/181126/002/raw_tomo.h5",
-    "/struct/mahamid/Irene/yeast/ED/181126/002/clean_masks/ribo_sph_mask.h5",
-]
-
-for hdf_path, h5_path in zip(original_paths, destination_paths):
-    print("starting with", hdf_path)
-    with h5py.File(hdf_path, 'r') as hdf_f:
-        dataset = hdf_f["MDF/images/0/image"][:]
-        # print(dataset.shape)
-
-    with h5py.File(h5_path, 'w') as h5_f:
-        h5_f.create_dataset("dataset", data=dataset)
-
+threshold = 0
+value = 1
+for tomo_name in tomos:
+    print("binarizing", tomo_name)
+    path = os.path.join(
+        "/scratch/trueba/3d-cnn/cnn_evaluation/cv_fractions/2/R_false_encoder_dropout_0.2_decoder_dropout_0.2_BN_false_DA_none_shuffle_true_frac_2_ribo_fas_memb__D_2_IF_8",
+        tomo_name)
+    input_data_path = os.path.join(path, "class_2/prediction.hdf")
+    output_path = os.path.join(path, "class_2/binary_prediction.hdf")
+    print(input_data_path)
+    print(output_path)
+    data = load_dataset(path_to_dataset=input_data_path)
+    # data = data * (data > threshold)
+    data = value * (data > threshold)
+    write_dataset_hdf(output_path=output_path, tomo_data=data)
 print("finished!")
-

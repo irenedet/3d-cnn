@@ -8,8 +8,8 @@ from os.path import join
 import numpy as np
 
 from src.python.filewriters.csv import build_tom_motive_list
-from src.python.coordinates_toolbox.utils import average_duplicated_centroids, \
-    get_cluster_centroids_from_partition
+from src.python.coordinates_toolbox.utils import average_duplicated_centroids
+from coordinates_toolbox.clustering import get_cluster_centroids_from_partition
 
 import argparse
 

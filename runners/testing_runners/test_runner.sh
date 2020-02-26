@@ -17,4 +17,4 @@ echo "activating virtual environment"
 source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
 echo "... done"
 
-python3 test.py
+python3 /struct/mahamid/Irene/3d-cnn/runners/testing_runners/test.py

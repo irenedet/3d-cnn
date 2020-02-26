@@ -215,15 +215,21 @@ write_on_models_notebook(model_name, model_path_pkl, log_model, depth,
                          training_partition_paths, split, output_classes,
                          segmentation_names, retrain, path_to_old_model,
                          models_notebook_path)
+lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.1,
+                                                    patience=10, verbose=True)
+# optimizer, mode='min', factor=0.1, patience=10,
+# verbose=False, threshold=1e-4, threshold_mode='rel',
+# cooldown=0, min_lr=0, eps=1e-8
 
 print("The neural network training is now starting")
 validation_loss = np.inf
 best_epoch = -1
+
 for epoch in range(n_epochs):
     new_epoch = epoch + old_epoch
     train(net, train_loader, optimizer=optimizer, loss_function=loss,
           epoch=new_epoch, device=device, log_interval=1, tb_logger=logger,
-          log_image=False)
+          log_image=False, lr_scheduler=lr_scheduler)
     step = new_epoch * len(train_loader.dataset)
     # run validation after training epoch
     current_validation_loss = validate(net, val_loader, loss, metric,
