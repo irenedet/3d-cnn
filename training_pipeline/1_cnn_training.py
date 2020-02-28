@@ -18,8 +18,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as du
 
-from src.python.datasets.actions import split_and_preprocess_dataset
-from src.python.filereaders import h5
+from src.python.tomogram_utils.actions import split_and_preprocess_dataset
+from file_actions.readers import h5
 from src.python.image.filters import preprocess_data
 from src.python.image.viewers import view_images_h5
 # from pytorch_cnn.classes.cnnets import UNet_4, UNet_6, UNet_7, UNet, UNet_deep

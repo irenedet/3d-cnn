@@ -4,10 +4,10 @@ from os.path import join
 
 import pandas as pd
 
-from filewriters.h5 import \
-    write_dataset_from_subtomos_with_overlap_multiclass, \
+from file_actions.writers.h5 import \
+    assemble_tomo_from_subtomos, \
     write_clustering_labels_subtomos
-from naming import h5_internal_paths
+from constants import h5_internal_paths
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-box_length", "--box_length",
@@ -93,7 +93,7 @@ else:
 
 print(subtomos_internal_path)
 if not cluster_labels:
-    write_dataset_from_subtomos_with_overlap_multiclass(
+    assemble_tomo_from_subtomos(
         output_path,
         data_partition,
         output_shape,

@@ -7,11 +7,11 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils import data as du
 
-from naming import h5_internal_paths
+from constants import h5_internal_paths
 from networks.io import get_device
 from networks.unet import UNet
-from datasets.actions import split_and_preprocess_dataset
-from filereaders.h5 import read_training_data
+from tomogram_utils.actions import split_and_preprocess_dataset
+from file_actions.readers.h5 import read_training_data
 from image.filters import preprocess_data
 
 

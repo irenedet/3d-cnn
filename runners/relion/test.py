@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
+from tomogram_utils.peak_toolbox.utils import read_motl_coordinates_and_values
 
-from peak_toolbox.utils import read_motl_coordinates_and_values
 from relion_toolbox.utils import get_job_parameters, \
     generate_jobs_statistics_dict, create_star_files_list, \
     get_job_name_from_string

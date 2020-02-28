@@ -1,8 +1,8 @@
 from os.path import join
 from os import makedirs
-from src.python.filewriters.h5 import \
+from file_actions.writers.h5 import \
     write_dataset_from_subtomos_with_overlap_dice_multiclass
-from src.python.naming import h5_internal_paths
+from src.python.constants import h5_internal_paths
 import numpy as np
 
 

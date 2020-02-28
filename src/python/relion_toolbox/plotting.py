@@ -3,7 +3,7 @@ from os.path import join
 import matplotlib.pyplot as plt
 import numpy as np
 
-from filereaders.star import class3d_data_file_reader
+from file_actions.readers.star import class3d_data_file_reader
 
 
 def _extract_classes(data_list: list) -> np.array:

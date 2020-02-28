@@ -1,8 +1,8 @@
 from os.path import join
 import numpy as np
 
-from src.python.filereaders.datasets import load_dataset
-from src.python.filewriters.h5 import write_dataset_hdf
+from file_actions.readers.tomograms import load_tomogram
+from file_actions.writers.h5 import write_dataset_hdf
 
 # tomo_names = [
 #     "190218/043",
@@ -145,10 +145,10 @@ for tomo_name in tomo_names:
     output_file_path = join(file_dir, 'memb/tomosegresult_thr_43_no_edge.hdf')
 
     print("Binarizing ", lamella_file)
-    lamella = load_dataset(path_to_dataset=lamella_file)
+    lamella = load_tomogram(path_to_dataset=lamella_file)
 
     print("Binarizing ", input_file_path)
-    tomo_data = load_dataset(path_to_dataset=input_file_path)
+    tomo_data = load_tomogram(path_to_dataset=input_file_path)
 
     tomo_data = tomo_data * lamella
     tomo_data[:, :dx, :] = np.zeros(tomo_data[:, :dx, :].shape)

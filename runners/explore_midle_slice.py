@@ -3,7 +3,7 @@
 import matplotlib.backends.backend_pdf
 import matplotlib.pyplot as plt
 
-from filereaders.datasets import load_dataset
+from file_actions.readers.tomograms import load_tomogram
 
 datasets = [
     "190301/003",
@@ -59,13 +59,13 @@ pdf = matplotlib.backends.backend_pdf.PdfPages(
 for index, tomo_name in enumerate(datasets):
     path_to_dataset = "/struct/mahamid/Irene/yeast/ED/" + tomo_name + \
                       "/eman_filtered_eman_filtered_raw_4b.hdf"
-    dataset = load_dataset(path_to_dataset)
+    motl = load_tomogram(path_to_dataset)
     matplotlib.use('Agg')
     plt.ioff()
     fig = plt.figure(index)
-    sl = dataset.shape[0] // 2
+    sl = motl.shape[0] // 2
     print(sl)
-    plt.imshow(dataset[sl, :, :], cmap=plt.cm.Greys_r)
+    plt.imshow(motl[sl, :, :], cmap=plt.cm.Greys_r)
     plt.xlabel("y-axis")
     plt.ylabel("x-axis")
     plt.title(tomo_name)

@@ -1,5 +1,5 @@
-from src.python.filereaders.shrec import read_shrec_motl
-from src.python.filewriters.h5 import write_hdf_particles_from_motl
+from file_actions.readers.shrec import read_shrec_motl
+from file_actions.writers.h5 import write_hdf_particles_from_motl
 
 path_to_motl = "/struct/mahamid/Processing/shrec_2019_cryoet_dataset/0/particle_locations_model_0.txt"
 motl = read_shrec_motl(path_to_motl)

@@ -2,15 +2,15 @@ from os.path import join
 from os import makedirs
 import numpy as np
 
-from src.python.calculator.statistics import \
+from src.python.performance.statistics_utils import \
     precision_recall_calculator_and_detected
 from src.python.coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl
-from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import read_em
+from file_actions.readers.csv import read_motl_from_csv
+from file_actions.readers.em import read_em
 from src.python.peak_toolbox.utils import \
     extract_motl_coordinates_and_score_values
-from src.python.filewriters.csv import unique_coordinates_motl_writer
+from file_actions.writers.csv import unique_coordinates_motl_writer
 
 import argparse
 

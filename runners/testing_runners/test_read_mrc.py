@@ -1,5 +1,5 @@
-from filereaders.mrc import read_mrc
-from filewriters.h5 import write_dataset_hdf
+from file_actions.readers.mrc import read_mrc
+from file_actions.writers.h5 import write_dataset_hdf
 
 mrc_files = [
     # "/struct/mahamid/Sara_Goetz/Data/Titan/Processing/181119/002/etomo/bin4/002_sq_df_sorted.rec",

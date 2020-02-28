@@ -1,10 +1,10 @@
 from os import makedirs
 from os.path import join
-from src.python.datasets.random_transformations import \
+from src.python.tomogram_utils.random_transformations import \
     transform_data_from_h5_dice_multi_class
-from src.python.datasets.actions import \
+from src.python.tomogram_utils.actions import \
     partition_raw_and_labels_tomograms_dice_multiclass
-from src.python.filewriters.h5 import \
+from file_actions.writers.h5 import \
     split_and_write_h5_partition_dice_multi_class
 
 import argparse

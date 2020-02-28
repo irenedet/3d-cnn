@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as vutils
 
-from filereaders.h5 import load_classification_training_set
+from file_actions.readers.h5 import load_classification_training_set
 from networks.io import get_device
 from networks.unet_new import UNetEncoder3D
 from networks.utils import generate_train_val_loaders

@@ -6,9 +6,9 @@ import pandas as pd
 import torch
 import torch.nn as nn
 
-from filereaders.datasets import load_dataset
-from filewriters.csv import write_statistics
-from filewriters.h5 import write_dataset_hdf
+from file_actions.readers.tomograms import load_tomogram
+from file_actions.writers.csv import write_statistics
+from file_actions.writers.h5 import write_dataset_hdf
 from pytorch_cnn.classes.loss import DiceCoefficient
 
 parser = argparse.ArgumentParser()
@@ -66,10 +66,10 @@ if target_path == "None":
     target_path = tomo_df.iloc[0][clean_mask_name]
 
 if str(lamella_file) == "nan":
-    prediction = load_dataset(prediction_path)
+    prediction = load_tomogram(prediction_path)
 else:
-    lamella_indicator = load_dataset(path_to_dataset=lamella_file)
-    prediction = load_dataset(path_to_dataset=prediction_path)
+    lamella_indicator = load_tomogram(path_to_dataset=lamella_file)
+    prediction = load_tomogram(path_to_dataset=prediction_path)
     shx, shy, shz = [np.min([shl, shp]) for shl, shp in
                      zip(lamella_indicator.shape, prediction.shape)]
     lamella_indicator = lamella_indicator[:shx, :shy, :shz]
@@ -77,7 +77,7 @@ else:
     prediction = np.array(lamella_indicator, dtype=float) * np.array(prediction,
                                                                      dtype=float)
 
-target = load_dataset(path_to_dataset=target_path)
+target = load_tomogram(path_to_dataset=target_path)
 
 sigmoid = nn.Sigmoid()
 shx, shy, shz = [np.min([shl, shp]) for shl, shp in

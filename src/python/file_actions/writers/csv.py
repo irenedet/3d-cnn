@@ -12,18 +12,16 @@ import numpy as np
 import pandas as pd
 import torch.nn as nn
 
-from coordinates_toolbox.subtomos import \
+from constants import h5_internal_paths
+from tomogram_utils.coordinates_toolbox.subtomos import \
     get_subtomo_corner_and_side_lengths
-from coordinates_toolbox.utils import \
-    arrange_coordinates_list_by_score
-from coordinates_toolbox.utils import \
-    filtering_duplicate_coords_with_values, to_tom_coordinate_system
-from coordinates_toolbox.utils import shift_coordinates_by_vector
-from naming import h5_internal_paths
-from peak_toolbox.subtomos import \
+from tomogram_utils.coordinates_toolbox.utils import \
+    arrange_coordinates_list_by_score, filtering_duplicate_coords_with_values, \
+    to_tom_coordinate_system, shift_coordinates_by_vector
+from tomogram_utils.peak_toolbox.subtomos import \
     get_peaks_per_subtomo_with_overlap, \
     get_peaks_per_subtomo_with_overlap_multiclass
-from peak_toolbox.utils import read_motl_data
+from tomogram_utils.peak_toolbox.utils import read_motl_data
 
 
 def motl_writer(path_to_output_folder: str, list_of_peak_scores: list,

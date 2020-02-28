@@ -6,12 +6,12 @@ import numpy as np
 import pandas as pd
 import torch.nn as nn
 
-from coordinates_toolbox.clustering import get_cluster_centroids
-from filereaders.datasets import load_dataset
-from filewriters.csv import build_tom_motive_list
-from filewriters.h5 import write_dataset_hdf, \
-    write_dataset_from_subtomos_with_overlap_multiclass
-from naming import h5_internal_paths
+from tomogram_utils.coordinates_toolbox.clustering import get_cluster_centroids
+from file_actions.readers.tomograms import load_tomogram
+from file_actions.writers.csv import build_tom_motive_list
+from file_actions.writers.h5 import write_dataset_hdf, \
+    assemble_tomo_from_subtomos
+from constants import h5_internal_paths
 
 parser = argparse.ArgumentParser()
 
@@ -81,7 +81,7 @@ if not isfile(output_path):
         h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS,
         label_name)
 
-    write_dataset_from_subtomos_with_overlap_multiclass(
+    assemble_tomo_from_subtomos(
         output_path,
         partition,
         output_shape,
@@ -90,10 +90,10 @@ if not isfile(output_path):
         class_number,
         overlap, final_activation=nn.Sigmoid())
 
-dataset = load_dataset(path_to_dataset=output_path)
+motl = load_tomogram(path_to_dataset=output_path)
 
 clustering_labels, centroids_list, cluster_size_list = \
-    get_cluster_centroids(dataset=dataset,
+    get_cluster_centroids(dataset=motl,
                           min_cluster_size=min_cluster_size,
                           max_cluster_size=max_cluster_size,
                           connectivity=1)

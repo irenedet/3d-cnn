@@ -92,8 +92,8 @@ dataset_names = [
 #     data_label = join(data_path, "NPC_SU_mask_gauss_0.06_0.01_bin.hdf")
 #     data_raw = join(data_path, "double_eman_filtered_raw_4b.hdf")
 #
-#     dataset_label = load_dataset(data_label)
-#     dataset_raw = load_dataset(data_raw)
+#     dataset_label = load_tomogram(data_label)
+#     dataset_raw = load_tomogram(data_raw)
 #     image_label = dataset_label[175, :, :]
 #     image_raw = dataset_raw[175, :, :]
 #     matplotlib.use('Agg')

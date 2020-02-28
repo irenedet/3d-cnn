@@ -1,4 +1,4 @@
-from filereaders.datasets import load_dataset
+from file_actions.readers.tomograms import load_tomogram
 
 # import numpy as np
 
@@ -139,12 +139,12 @@ for tomo_name in TOMOS:
     print("Tomo", tomo_name)
     path_to_raw = "/struct/mahamid/Irene/NPC/SPombe/" + tomo_name + \
                   "/double_eman_filtered_raw_4b.hdf"
-    dataset = load_dataset(path_to_dataset=path_to_raw)
-    print(dataset.shape)
+    motl = load_tomogram(path_to_dataset=path_to_raw)
+    print(motl.shape)
     # df = pd.read_csv(path_to_dataset_table)
     # tomo_df = df.loc[df['tomo_name'] == tomo_name].iloc[0]
     # path_to_raw = tomo_df['eman2_filetered_tomo']
-    # z_dim, y_dim, x_dim = load_dataset(path_to_raw).shape
+    # z_dim, y_dim, x_dim = load_tomogram(path_to_raw).shape
     # df.loc[df['tomo_name'] == tomo_name, 'x_dim'] = x_dim
     # df.loc[df['tomo_name'] == tomo_name, 'y_dim'] = y_dim
     # df.loc[df['tomo_name'] == tomo_name, 'z_dim'] = z_dim
@@ -156,7 +156,7 @@ for tomo_name in TOMOS:
 #     tomo_df = tomos_df[tomos_df['tomo_name'] == tomo_name]
 #     path_to_raw = tomo_df.iloc[0]['eman2_filetered_tomo']
 #
-#     z_dim, y_dim, x_dim = load_dataset(path_to_raw).shape
+#     z_dim, y_dim, x_dim = load_tomogram(path_to_raw).shape
 #     df.loc[df['tomo_name'] == tomo_name, 'x_dim'] = x_dim
 #     df.loc[df['tomo_name'] == tomo_name, 'y_dim'] = y_dim
 #     df.loc[df['tomo_name'] == tomo_name, 'z_dim'] = z_dim

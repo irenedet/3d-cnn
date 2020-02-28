@@ -7,7 +7,7 @@ from os.path import basename, join
 
 from src.python.coordinates_toolbox.h5_subtomos import \
     compute_list_best_cross_correlation_angles
-from src.python.calculator.math import radians2degrees
+from src.python.performance.math_utils import radians2degrees
 
 import argparse
 

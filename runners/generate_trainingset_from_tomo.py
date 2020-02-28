@@ -2,7 +2,7 @@ from os import makedirs
 from os.path import join
 
 # from datasets.actions import partition_tomogram
-from filereaders.hdf import _load_hdf_dataset
+from file_actions.readers.hdf import _load_hdf_dataset
 
 # import argparse
 # from osactions.filesystem import extract_file_name
@@ -69,7 +69,7 @@ label_name = "ribosomes"
 
 raw_dataset = _load_hdf_dataset(hdf_file_path=path_to_raw)
 labels_dataset = _load_hdf_dataset(hdf_file_path=path_to_labeled)
-from datasets.actions import partition_raw_and_labels_tomograms
+from tomogram_utils.actions import partition_raw_and_labels_tomograms
 
 partition_raw_and_labels_tomograms(raw_dataset=raw_dataset,
                                    labels_dataset=labels_dataset,

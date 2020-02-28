@@ -5,8 +5,9 @@ from os import makedirs
 import numpy as np
 import pandas as pd
 
-from datasets.actions import partition_raw_intersecting_mask
-from filereaders.datasets import load_dataset
+from file_actions.readers.tomograms import load_tomogram
+from tomogram_utils.volume_actions.actions import \
+    partition_raw_intersecting_mask
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-dataset_table", "--dataset_table",
@@ -51,13 +52,13 @@ path_to_raw = tomo_df.iloc[0]['eman2_filetered_tomo']
 path_to_lamella = tomo_df.iloc[0]['lamella_file']
 print("lamella_file =", path_to_lamella)
 
-raw_dataset = load_dataset(path_to_dataset=path_to_raw)
+raw_dataset = load_tomogram(path_to_dataset=path_to_raw)
 if isinstance(path_to_lamella, float):
     print("No lamella file available")
     lamella_mask = np.ones(raw_dataset.shape)
 else:
     path_to_lamella = tomo_df.iloc[0]['lamella_file']
-    lamella_mask = load_dataset(path_to_dataset=path_to_lamella)
+    lamella_mask = load_tomogram(path_to_dataset=path_to_lamella)
 
 lamella_shape = lamella_mask.shape
 dataset_shape = raw_dataset.shape

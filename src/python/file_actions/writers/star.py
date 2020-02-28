@@ -2,7 +2,7 @@ import csv
 import re
 from os.path import join
 
-from filereaders.star import class3d_data_file_reader
+from file_actions.readers.star import class3d_data_file_reader
 from osactions.filesystem import create_dir
 from relion_toolbox.utils import get_particles_list, \
     get_list_of_indices_and_classes

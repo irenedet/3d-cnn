@@ -3,15 +3,15 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 40G
-#SBATCH --time 0-5:50
+#SBATCH --mem 50G
+#SBATCH --time 0-12:15
 #SBATCH -o cluster_centroids_evaluation.slurm.%N.%j.out
 #SBAtCH -e cluster_centroids_evaluation.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBAtCH --mail-user=irene.de.teresa@embl.de
 
-#SBATCH -p gpu
-#SBATCH --gres=gpu:4
+#SBAtCH -p gpu
+#SBAtCH --gres=gpu:1
 
 module load Anaconda3
 echo "activating virtual environment"
@@ -155,26 +155,26 @@ export box_overlap=12
 
 
 echo 'running python3 scripts: Segmenting raw subtomograms'
-python3 $UPICKER_PATH/runners/dataset_tables/particle_picking_scripts/2_subtomograms_segmentation_no_activation.py -model $path_to_model -label $label_name -dataset_table $dataset_table -tomo_name $tomo_name -init_feat $init_feat -depth $depth -out_classes $output_classes -new_loader $new_loader -BN $BN -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout
+#python3 $UPICKER_PATH/runners/dataset_tables/particle_picking_scripts/2_subtomograms_segmentation_no_activation.py -model $path_to_model -label $label_name -dataset_table $dataset_table -tomo_name $tomo_name -init_feat $init_feat -depth $depth -out_classes $output_classes -new_loader $new_loader -BN $BN -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout
 echo '... done.'
 
-#echo 'running python3 scripts: getting particles motive list'
-#python3 $UPICKER_PATH/runners/dataset_tables/particle_picking_scripts/3_get_full_cluster_centroids_motl.py -dataset_table $dataset_table -min_cluster_size $min_cluster_size -max_cluster_size $max_cluster_size -tomo_name $tomo_name -output $output_dir -label $label_name -box $box_side -class_number $class_number -particle_radius $minimum_peak_distance -overlap $box_overlap
-#echo '... done.'
-#
-#
-## 3. Filter coordinate points with lamella mask
-#export path_to_csv_motl=$(ls $output_dir/motl*)
-#export lamella_output_dir=$output_dir"/in_lamella"
-#
-#echo "Now filtering points in lamella mask"
-#python3 $UPICKER_PATH/runners/dataset_tables/pr_analysis/filter_with_lamella_mask.py -dataset_table $dataset_table -tomo_name $tomo_name -csv_motl $path_to_csv_motl -output_dir $output_dir -border_xy $border_xy -lamella_extension $lamella_extension
-#echo "...done filtering points in lamella mask."
-#
-#
-## 3. Precision-Recall analysis
-#export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir/motl*)
-#echo "Starting to generate precision recall plots"
-#python3 $UPICKER_PATH/runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_number $class_number -semantic_classes $semantic_classes
-#echo "...done with precision recall plots."
+echo 'running python3 scripts: getting particles motive list'
+python3 $UPICKER_PATH/runners/dataset_tables/particle_picking_scripts/3_get_full_cluster_centroids_motl.py -dataset_table $dataset_table -min_cluster_size $min_cluster_size -max_cluster_size $max_cluster_size -tomo_name $tomo_name -output $output_dir -label $label_name -box $box_side -class_number $class_number -particle_radius $minimum_peak_distance -overlap $box_overlap
+echo '... done.'
+
+
+# 3. Filter coordinate points with lamella mask
+export path_to_csv_motl=$(ls $output_dir/motl*)
+export lamella_output_dir=$output_dir"/in_lamella"
+
+echo "Now filtering points in lamella mask"
+python3 $UPICKER_PATH/runners/dataset_tables/pr_analysis/filter_with_lamella_mask.py -dataset_table $dataset_table -tomo_name $tomo_name -csv_motl $path_to_csv_motl -output_dir $output_dir -border_xy $border_xy -lamella_extension $lamella_extension
+echo "...done filtering points in lamella mask."
+
+
+# 3. Precision-Recall analysis
+export path_to_csv_motl_in_lamella=$(ls $lamella_output_dir/motl*)
+echo "Starting to generate precision recall plots"
+python3 $UPICKER_PATH/runners/dataset_tables/pr_analysis/precision_recall_plots.py -dataset_table $dataset_table -tomo_name $tomo_name -statistics_file $statistics_file -label_name $label_name -motl $path_to_csv_motl_in_lamella -output $lamella_output_dir -radius $same_peak_distance -box $box_side -threshold $threshold -class_number $class_number -semantic_classes $semantic_classes
+echo "...done with precision recall plots."
 

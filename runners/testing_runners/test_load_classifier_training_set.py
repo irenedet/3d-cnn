@@ -4,7 +4,7 @@ from distutils.util import strtobool
 
 import pandas as pd
 
-from filereaders.h5 import load_classification_training_set, \
+from file_actions.readers.h5 import load_classification_training_set, \
     fill_multiclass_labels
 
 parser = argparse.ArgumentParser()

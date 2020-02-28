@@ -2,8 +2,8 @@ from os import makedirs
 import argparse
 import numpy as np
 
-from datasets.actions import partition_tomogram
-from filereaders.hdf import _load_hdf_dataset
+from tomogram_utils.volume_actions.actions import partition_tomogram
+from file_actions.readers.hdf import _load_hdf_dataset
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-raw", "--path_to_raw",

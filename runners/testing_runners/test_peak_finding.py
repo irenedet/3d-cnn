@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 
-from calculator.statistics import precision_recall_calculator_and_detected
+from performance.statistics_utils import precision_recall_calculator_and_detected
 from coordinates_toolbox.utils import extract_coordinates_from_em_motl
-from filereaders.csv import read_motl_from_csv
-from filereaders.em import read_em
+from file_actions.readers.csv import read_motl_from_csv
+from file_actions.readers.em import read_em
 
 path_to_csv_motl = '/home/papalotl/Sara_Goetz/180426/004/FAS/boxlength64/motl/motl_6000_emformat.csv'
 path_to_motl_clean = '/home/papalotl/Sara_Goetz/180426/004/FAS/motl_clean_fas_4b.em'

@@ -4,13 +4,13 @@ from os.path import join
 
 import numpy as np
 
-from coordinates_toolbox.utils import \
+from tomogram_utils.coordinates_toolbox.utils import \
     extract_coordinates_and_values_from_em_motl
-from coordinates_toolbox.utils import \
+from tomogram_utils.coordinates_toolbox.utils import \
     filtering_duplicate_coords_with_values
-from filereaders.csv import read_motl_from_csv
-from filereaders.datasets import load_dataset
-from filereaders.em import read_em
+from file_actions.readers.csv import read_motl_from_csv
+from file_actions.readers.tomograms import load_tomogram
+from file_actions.readers.em import read_em
 from osactions.filesystem import create_dir
 
 
@@ -26,8 +26,8 @@ def _generate_unit_particle(radius: int):
     return unit_particle
 
 
-def paste_sphere_in_dataset(dataset: np.array, center: tuple, radius: int,
-                            value: float = 1):
+def paste_sphere_in_dataset(dataset: np.array, center: tuple or list,
+                            radius: int, value: float = 1):
     dataset_shape = dataset.shape
     cx, cy, cz = center
     ball = _generate_unit_particle(radius)
@@ -210,7 +210,7 @@ def read_motl_coordinates_and_values(path_to_motl: str) -> tuple:
 
 
 def read_motl_data(path_to_motl: str):
-    motl = load_dataset(path_to_dataset=path_to_motl)
+    motl = load_tomogram(path_to_dataset=path_to_motl)
     motl_values, motl_coords = read_motl_coordinates_and_values(
         path_to_motl)
     motl_coords = np.array(motl_coords)

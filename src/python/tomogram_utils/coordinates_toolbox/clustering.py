@@ -3,11 +3,12 @@ from os.path import join
 import h5py
 import numpy as np
 from skimage import morphology as morph
+from tqdm import tqdm
 
-from coordinates_toolbox.subtomos import \
+from tomogram_utils.coordinates_toolbox.subtomos import \
     get_subtomo_corner_side_lengths_and_zero_padding
-from coordinates_toolbox.utils import shift_coordinates_by_vector
-from naming import h5_internal_paths
+from tomogram_utils.coordinates_toolbox.utils import shift_coordinates_by_vector
+from constants import h5_internal_paths
 
 
 def get_clusters_within_size_range(dataset: np.array, min_cluster_size: int,
@@ -35,11 +36,13 @@ def get_cluster_centroids(dataset: np.array, min_cluster_size: int,
                                        max_cluster_size=max_cluster_size,
                                        connectivity=connectivity)
     centroids_list = list()
-    for label in labels_list_within_range:
+    total_clusters = len(labels_list_within_range)
+    print("Computing cluster centroids:")
+    for index, label in zip(tqdm(range(total_clusters)),
+                            labels_list_within_range):
         cluster = np.where(labeled_clusters == label)
         centroid = np.rint(np.mean(cluster, axis=1))
         centroids_list.append(centroid)
-    print("Clusters in subtomo after size filtering =", len(centroids_list))
     return labeled_clusters, centroids_list, cluster_size_within_range
 
 

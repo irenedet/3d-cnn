@@ -1,6 +1,6 @@
 import h5py
 import numpy as np
-from naming import h5_internal_paths
+from constants import h5_internal_paths
 
 
 def _load_hdf_dataset(hdf_file_path: str) -> np.array:

@@ -1,8 +1,8 @@
 from os.path import join
 from os import makedirs
-from src.python.filewriters.h5 import \
-    write_dataset_from_subtomos_with_overlap_multiclass
-from src.python.naming import h5_internal_paths
+from file_actions.writers.h5 import \
+    assemble_tomo_from_subtomos
+from src.python.constants import h5_internal_paths
 
 subtomos_path = "/scratch/trueba/3d-cnn/training_data/multi-class/004/G_sigma1/train_and_test_partitions/partition_training.h5"
 
@@ -24,7 +24,7 @@ for n in range(output_classes):
     output_file = segmentation_name + ".hdf"
     output_path = join(output_dir, output_file)
     class_number = n
-    write_dataset_from_subtomos_with_overlap_multiclass(
+    assemble_tomo_from_subtomos(
         output_path,
         subtomos_path,
         output_shape,

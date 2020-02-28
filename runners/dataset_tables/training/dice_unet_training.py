@@ -10,8 +10,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as du
 
-from datasets.actions import load_training_dataset_list
-from filewriters.csv import write_on_models_notebook
+from tomogram_utils.volume_actions.actions import load_training_dataset_list
+from file_actions.writers.csv import write_on_models_notebook
 from networks.io import get_device
 from networks.loss import DiceCoefficientLoss
 from networks.routines import train, validate

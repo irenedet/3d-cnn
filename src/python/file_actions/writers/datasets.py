@@ -2,8 +2,8 @@ import os
 
 import numpy as np
 
-from filewriters.h5 import write_dataset_hdf
-from filewriters.mrc import write_mrc_dataset
+from file_actions.writers.h5 import write_dataset_hdf
+from file_actions.writers.mrc import write_mrc_dataset
 
 
 def write_dataset(output_path: str, array: np.array):

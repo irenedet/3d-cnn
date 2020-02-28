@@ -2,10 +2,10 @@ from os import makedirs
 import numpy as np
 
 import matplotlib.pyplot as plt
-from src.python.filereaders.csv import read_motl_from_csv
+from file_actions.readers.csv import read_motl_from_csv
 from src.python.peak_toolbox.utils import \
     extract_motl_coordinates_and_score_values
-from src.python.filewriters.csv import unique_coordinates_motl_writer
+from file_actions.writers.csv import unique_coordinates_motl_writer
 
 # output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/mixed_trainset/no_shuffle/G1_confs_4_5_/peaks_in_training_partition/undetected/chosen/"
 <<<<<<< HEAD

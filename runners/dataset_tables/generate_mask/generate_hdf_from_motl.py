@@ -5,7 +5,7 @@ from os import makedirs
 
 import pandas as pd
 
-from filewriters.h5 import write_hdf_particles_from_motl
+from file_actions.writers.h5 import write_hdf_particles_from_motl
 
 #
 parser = argparse.ArgumentParser()

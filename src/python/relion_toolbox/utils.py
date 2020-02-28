@@ -4,9 +4,9 @@ from os.path import isdir, join
 
 import numpy as np
 
-from calculator.statistics import pr_auc_score, f1_score_calculator, \
+from performance.statistics_utils import pr_auc_score, f1_score_calculator, \
     precision_recall_calculator_and_detected
-from filereaders.star import class3d_data_file_reader
+from file_actions.readers.star import class3d_data_file_reader
 
 
 def get_jobs_list(directory_path: str):

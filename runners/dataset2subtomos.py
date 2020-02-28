@@ -3,7 +3,7 @@ from os.path import join
 import h5py
 import numpy as np
 
-from naming import h5_internal_paths
+from constants import h5_internal_paths
 from tensors.actions import crop_window_around_point
 
 

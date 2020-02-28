@@ -1,12 +1,12 @@
 from os import makedirs
 
-from src.python.filereaders.datasets import load_dataset
-from src.python.filewriters.h5 import write_joint_raw_and_labels_subtomograms
-from src.python.filewriters.h5 import write_classification_dataset
+from file_actions.readers.tomograms import load_tomogram
+from file_actions.writers.h5 import write_joint_raw_and_labels_subtomograms
+from file_actions.writers.h5 import write_classification_dataset
 
 import argparse
 from os.path import join
-from src.python.filereaders.csv import read_motl_from_csv
+from file_actions.readers.csv import read_motl_from_csv
 import numpy as np
 from src.python.peak_toolbox.utils import read_motl_coordinates_and_values
 
@@ -129,7 +129,7 @@ h5_train_partition_path = join(output_dir, "training_set.h5")
 h5_test_partition_path = join(output_dir, "testing_set.h5")
 makedirs(name=output_dir, exist_ok=True)
 
-raw_dataset = load_dataset(path_to_raw)
+raw_dataset = load_tomogram(path_to_raw)
 raw_dataset = np.array(raw_dataset)
 
 raw_dataset_shape = np.array(raw_dataset.shape)

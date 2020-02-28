@@ -5,7 +5,7 @@ import torch.nn as nn
 
 from networks.io import get_device
 from networks.unet import UNet
-from src.python.filewriters.h5 import segment_and_write
+from file_actions.writers.h5 import segment_and_write
 
 parser = argparse.ArgumentParser()
 

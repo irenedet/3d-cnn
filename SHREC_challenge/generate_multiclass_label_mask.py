@@ -1,7 +1,7 @@
 from os.path import join
 import numpy as np
-from src.python.filereaders.hdf import _load_hdf_dataset
-from src.python.filewriters.h5 import write_dataset_hdf
+from file_actions.readers.hdf import _load_hdf_dataset
+from file_actions.writers.h5 import write_dataset_hdf
 
 
 output_path = "/struct/mahamid/Irene/yeast/180426/004/training/multi_class"

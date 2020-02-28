@@ -1,12 +1,12 @@
-from src.python.datasets.random_transformations import ElasticTransform, \
-    RandomRot3D, RandomFlip3D, AdditiveGaussianNoise
+from src.python.tomogram_utils.random_transformations import ElasticTransform, \
+    RandomRot3D, AdditiveGaussianNoise
 # import h5py
 from os.path import join
 import numpy as np
-from src.python.filereaders import h5
-# from src.python.image.viewers import view_slice
+from file_actions.readers import h5
 
-from src.python.naming import h5_internal_paths
+
+# from src.python.image.viewers import view_slice
 
 
 def transform_data_from_h5(training_data_path: str, label_name: str,
@@ -82,7 +82,7 @@ def transform_data(raw_data: np.array, labeled_data: np.array,
 
 
 import h5py
-from src.python.naming import h5_internal_paths
+from src.python.constants import h5_internal_paths
 
 
 def write_transformed_data(training_data_path: str, transformed_raw: np.array,

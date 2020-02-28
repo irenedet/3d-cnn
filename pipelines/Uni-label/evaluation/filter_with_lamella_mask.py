@@ -1,9 +1,9 @@
 import numpy as np
 from os import makedirs
 from os.path import join
-from src.python.filereaders.hdf import _load_hdf_dataset
-from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filewriters.csv import motl_writer
+from file_actions.readers.hdf import _load_hdf_dataset
+from file_actions.readers.csv import read_motl_from_csv
+from file_actions.writers.csv import motl_writer
 
 # lamella_file = "/scratch/trueba/3d-cnn/clean/180426_004/004_lamellamask_subtomo.hdf"
 # csv_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/multi-class/G_s1_D4_IF8_w_1_64_1200_250/motl_3266_class_2.csv"

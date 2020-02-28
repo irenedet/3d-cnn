@@ -7,9 +7,9 @@ import h5py
 import numpy as np
 import pandas as pd
 
-from datasets.random_transformations import RandomRot3D, \
+from tomogram_utils.random_transformations import RandomRot3D, \
     SinusoidalElasticTransform3D, AdditiveGaussianNoise
-from naming import h5_internal_paths
+from constants import h5_internal_paths
 from networks.utils import data_loader
 
 

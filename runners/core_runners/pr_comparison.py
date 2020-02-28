@@ -4,10 +4,10 @@ import numpy as np
 from os import makedirs
 from os.path import join
 
-from calculator.statistics import pr_auc_score, \
+from performance.statistics_utils import pr_auc_score, \
     f1_score_calculator, precision_recall_calculator_and_detected
 from peak_toolbox.utils import read_motl_coordinates_and_values
-from filewriters.csv import motl_writer
+from file_actions.writers.csv import motl_writer
 
 if __name__ == "__main__":
     import argparse

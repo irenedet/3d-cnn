@@ -4,7 +4,7 @@ from os.path import join
 
 import pandas as pd
 
-from filewriters.h5 import generate_classification_training_set_per_tomo
+from file_actions.writers.h5 import generate_classification_training_set_per_tomo
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-dataset_table", "--dataset_table",

@@ -2,7 +2,7 @@ import os
 from os import makedirs
 from distutils.util import strtobool
 
-from src.python.filewriters.h5 import write_hdf_particles_from_motl
+from file_actions.writers.h5 import write_hdf_particles_from_motl
 import argparse
 
 #

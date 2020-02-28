@@ -5,9 +5,11 @@ from os.path import join
 import numpy as np
 import pandas as pd
 
-from coordinates_toolbox.utils import average_duplicated_centroids
-from coordinates_toolbox.clustering import get_cluster_centroids_from_partition
-from filewriters.csv import build_tom_motive_list
+from file_actions.writers.csv import build_tom_motive_list
+from tomogram_utils.coordinates_toolbox.clustering import \
+    get_cluster_centroids_from_partition
+from tomogram_utils.coordinates_toolbox.utils import \
+    average_duplicated_centroids
 
 parser = argparse.ArgumentParser()
 

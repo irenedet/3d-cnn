@@ -1,8 +1,7 @@
 from os.path import join
 from os import makedirs
 
-from src.python.filereaders.hdf import _load_hdf_dataset
-from src.python.datasets.random_transformations import transform_data_from_h5
+from file_actions.readers.hdf import _load_hdf_dataset
 
 path_to_raw = "/scratch/trueba/shrec/0/reconstruction_model_0.hdf"
 # path_to_labeled = "/struct/mahamid/Irene/shrec/0/all_classes_differentiated_mask_0.hdf"
@@ -21,7 +20,7 @@ label_name = "all_particles"
 
 raw_dataset = _load_hdf_dataset(hdf_file_path=path_to_raw)
 labels_dataset = _load_hdf_dataset(hdf_file_path=path_to_labeled)
-from src.python.datasets.actions import partition_raw_and_labels_tomograms
+from src.python.tomogram_utils.actions import partition_raw_and_labels_tomograms
 
 partition_raw_and_labels_tomograms(raw_dataset=raw_dataset,
                                    labels_dataset=labels_dataset,

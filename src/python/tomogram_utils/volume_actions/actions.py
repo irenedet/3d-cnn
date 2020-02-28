@@ -4,17 +4,17 @@ from os.path import join
 import h5py
 import numpy as np
 
-from coordinates_toolbox.subtomos import \
+from tomogram_utils.coordinates_toolbox.subtomos import \
     get_particle_coordinates_grid_with_overlap
-from filereaders.datasets import load_dataset
-from filereaders.h5 import read_training_data_dice_multi_class
-from filewriters.h5 import \
+from file_actions.readers.tomograms import load_tomogram
+from file_actions.readers.h5 import read_training_data_dice_multi_class
+from file_actions.writers.h5 import \
     write_joint_raw_and_labels_subtomograms_dice_multiclass
-from filewriters.h5 import write_raw_subtomograms_intersecting_mask
-from filewriters.h5 import write_subtomograms_from_dataset, \
+from file_actions.writers.h5 import write_raw_subtomograms_intersecting_mask
+from file_actions.writers.h5 import write_subtomograms_from_dataset, \
     write_joint_raw_and_labels_subtomograms, write_strongly_labeled_subtomograms
 from image.filters import preprocess_data
-from naming import h5_internal_paths
+from constants import h5_internal_paths
 from tensors.actions import crop_window_around_point
 
 
@@ -421,7 +421,7 @@ def partition_raw_and_labels_tomograms_dice_multiclass(
         subtomo_shape: tuple,
         overlap: int
 ):
-    raw_dataset = load_dataset(path_to_raw)
+    raw_dataset = load_tomogram(path_to_raw)
     padded_raw_dataset = pad_dataset(raw_dataset, subtomo_shape, overlap)
     padded_particles_coordinates = get_particle_coordinates_grid_with_overlap(
         padded_raw_dataset.shape,
@@ -429,7 +429,7 @@ def partition_raw_and_labels_tomograms_dice_multiclass(
         overlap)
     padded_labels_dataset_list = []
     for path_to_labeled in labels_dataset_list:
-        labels_dataset = load_dataset(path_to_labeled)
+        labels_dataset = load_tomogram(path_to_labeled)
         labels_dataset = np.array(labels_dataset)
         print(path_to_labeled, "shape", labels_dataset.shape)
         padded_labels_dataset = pad_dataset(labels_dataset, subtomo_shape,
@@ -456,13 +456,13 @@ def generate_strongly_labeled_partition(path_to_raw: str,
                                         overlap: int,
                                         min_label_fraction: float = 0,
                                         max_label_fraction: float = 1) -> list:
-    raw_dataset = load_dataset(path_to_raw)
+    raw_dataset = load_tomogram(path_to_raw)
     min_shape = raw_dataset.shape
     print(path_to_raw, "shape", min_shape)
     labels_dataset_list = []
     for path_to_labeled in labels_dataset_paths_list:
         print("loading", path_to_labeled)
-        labels_dataset = load_dataset(path_to_labeled)
+        labels_dataset = load_tomogram(path_to_labeled)
         dataset_shape = labels_dataset.shape
         labels_dataset_list.append(labels_dataset)
         min_shape = np.minimum(min_shape, dataset_shape)

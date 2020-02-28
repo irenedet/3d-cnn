@@ -5,13 +5,13 @@ import h5py
 import numpy as np
 from functools import reduce
 
-from filereaders.datasets import load_dataset
-from coordinates_toolbox.subtomos import \
+from file_actions.readers.tomograms import load_tomogram
+from tomogram_utils.coordinates_toolbox.subtomos import \
     get_subtomo_corners_within_dataset
 
-from naming import h5_internal_paths
+from constants import h5_internal_paths
 from tensors.actions import crop_window
-from coordinates_toolbox.utils import invert_tom_coordinate_system
+from tomogram_utils.coordinates_toolbox.utils import invert_tom_coordinate_system
 
 
 def get_first_raw_subtomo_shape_from_h5file(f):
@@ -58,8 +58,8 @@ def compute_list_best_cross_correlation_angles(
         path_to_dataset: str,
         reference_rotation_angles_file: str,
         in_tom_format=True) -> tuple:
-    dataset = load_dataset(path_to_dataset=path_to_dataset)
-    mask = load_dataset(path_to_dataset=path_to_mask)
+    dataset = load_tomogram(path_to_dataset=path_to_dataset)
+    mask = load_tomogram(path_to_dataset=path_to_mask)
     dataset_shape = dataset.shape
     with h5py.File(catalogue_path, 'r') as h5file:
         subtomo_shape = get_first_raw_subtomo_shape_from_h5file(h5file)
@@ -95,7 +95,7 @@ def compute_list_best_cross_correlation_angles(
 
             list_best_cross_correlations.append(best_cross_correlation)
             list_best_angle_indices.append(best_angle_index)
-    angles_reference = load_dataset(
+    angles_reference = load_tomogram(
         path_to_dataset=reference_rotation_angles_file)
 
     list_best_angles = list()

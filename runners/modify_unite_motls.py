@@ -1,6 +1,6 @@
 from os import makedirs
 
-from filewriters.csv import unite_motls
+from file_actions.writers.csv import unite_motls
 
 min_peak_distance = 16
 output_dir = "/struct/mahamid/Irene/yeast/vpp/180426_004/fas/motl"

@@ -1,9 +1,8 @@
 # from os.path import join
 from os import makedirs
 
-from src.python.filereaders.hdf import _load_hdf_dataset
-from src.python.datasets.random_transformations import transform_data_from_h5
-from src.python.datasets.actions import partition_raw_and_labels_tomograms
+from file_actions.readers.hdf import _load_hdf_dataset
+from src.python.tomogram_utils.random_transformations import transform_data_from_h5
 
 import argparse
 

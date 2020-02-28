@@ -7,12 +7,12 @@ from os.path import join
 
 from src.python.peak_toolbox.subtomos import select_coordinates_in_subtomos, \
     select_coordinates_and_values_in_subtomos
-from src.python.calculator.statistics import pr_auc_score, \
+from src.python.performance.statistics_utils import pr_auc_score, \
     f1_score_calculator, precision_recall_calculator_and_detected
 from src.python.coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl
-from src.python.filereaders.csv import read_motl_from_csv
-from src.python.filereaders.em import read_em
+from file_actions.readers.csv import read_motl_from_csv
+from file_actions.readers.em import read_em
 from src.python.peak_toolbox.utils import \
     extract_motl_coordinates_and_score_values
 

@@ -2,16 +2,16 @@ from os.path import join
 
 import h5py
 
-from calculator.math import radians2degrees
-from datasets.transformations import rotate_ref
-from filereaders.datasets import load_dataset
-from naming import h5_internal_paths
+from performance.math_utils import radians2degrees
+from tomogram_utils.transformations import rotate_ref
+from file_actions.readers.tomograms import load_tomogram
+from constants import h5_internal_paths
 
 
 def create_template_catalogue(output_path: str, reference_file: str,
                               angles_file: str, in_degrees=False):
-    reference = load_dataset(reference_file)
-    angles = load_dataset(angles_file)
+    reference = load_tomogram(reference_file)
+    angles = load_tomogram(angles_file)
     if in_degrees:
         zxz_angles_in_degrees = angles
     else:

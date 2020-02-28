@@ -8,13 +8,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from calculator.statistics import pr_auc_score, \
+from file_actions.writers.csv import motl_writer
+from file_actions.writers.csv import write_statistics
+from performance.statistics_utils import pr_auc_score, \
     f1_score_calculator, precision_recall_calculator_and_detected
-from filewriters.csv import motl_writer
-from filewriters.csv import write_statistics
-from peak_toolbox.subtomos import select_coordinates_in_subtomos, \
-    select_coordinates_and_values_in_subtomos
-from peak_toolbox.utils import read_motl_coordinates_and_values
+from tomogram_utils.peak_toolbox.subtomos import \
+    select_coordinates_in_subtomos, select_coordinates_and_values_in_subtomos
+from tomogram_utils.peak_toolbox.utils import read_motl_coordinates_and_values
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-dataset_table", "--dataset_table",

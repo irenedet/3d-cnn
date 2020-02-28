@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from datasets.actions import \
+from tomogram_utils.volume_actions.actions import \
     generate_strongly_labeled_partition
 
 parser = argparse.ArgumentParser()

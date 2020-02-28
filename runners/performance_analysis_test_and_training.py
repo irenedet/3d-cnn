@@ -3,12 +3,12 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 
-from calculator.statistics import pr_auc_score, \
+from performance.statistics_utils import pr_auc_score, \
     f1_score_calculator, precision_recall_calculator_and_detected
 from coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl
-from filereaders.csv import read_motl_from_csv
-from filereaders.em import read_em
+from file_actions.readers.csv import read_motl_from_csv
+from file_actions.readers.em import read_em
 from peak_toolbox.subtomos import select_coordinates_in_subtomos, \
     select_coordinates_and_values_in_subtomos
 

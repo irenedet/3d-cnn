@@ -1,12 +1,11 @@
 from os import makedirs
 
-from src.python.filereaders.hdf import _load_hdf_dataset
-from src.python.datasets.random_transformations import transform_data_from_h5
-from src.python.filewriters.h5 import split_and_write_h5_partition
+from file_actions.readers.hdf import _load_hdf_dataset
+from src.python.tomogram_utils.random_transformations import transform_data_from_h5
 
 import argparse
 from os.path import join
-from src.python.filereaders.csv import read_motl_from_csv
+from file_actions.readers.csv import read_motl_from_csv
 import numpy as np
 
 
@@ -46,7 +45,7 @@ def compute_padding(coordinates_zyx, dataset_shape, subtomo_shape) -> list:
     return padding
 
 
-from src.python.filewriters.h5 import write_joint_raw_and_labels_subtomograms
+from file_actions.writers.h5 import write_joint_raw_and_labels_subtomograms
 
 
 def partition_raw_and_labels_from_centers(padded_raw_dataset: np.array,

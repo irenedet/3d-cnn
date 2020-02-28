@@ -3,8 +3,8 @@ from distutils.util import strtobool
 
 import pandas as pd
 
-from datasets.actions import partition_tomogram
-from filereaders.hdf import _load_hdf_dataset
+from tomogram_utils.volume_actions.actions import partition_tomogram
+from file_actions.readers.hdf import _load_hdf_dataset
 
 parser = argparse.ArgumentParser()
 

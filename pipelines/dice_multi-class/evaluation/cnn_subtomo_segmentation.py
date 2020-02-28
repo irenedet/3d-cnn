@@ -2,7 +2,7 @@ import torch
 
 from src.python.networks.io import get_device
 from src.python.networks.unet import UNet
-from src.python.filewriters.h5 import segment_and_write
+from file_actions.writers.h5 import segment_and_write
 
 # data to provide by user:
 data_path = "/scratch/trueba/3d-cnn/cnn_evaluation/dice-multi-class/ED_DEFOCUS/190301/009/tomo_partition.h5"

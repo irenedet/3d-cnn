@@ -6,10 +6,10 @@ from os.path import join
 
 from src.python.peak_toolbox.subtomos import select_coordinates_in_subtomos, \
     select_coordinates_and_values_in_subtomos
-from src.python.calculator.statistics import pr_auc_score, \
+from src.python.performance.statistics_utils import pr_auc_score, \
     f1_score_calculator, precision_recall_calculator_and_detected
 from src.python.peak_toolbox.utils import read_motl_coordinates_and_values
-from src.python.filewriters.csv import motl_writer
+from file_actions.writers.csv import motl_writer
 # unique_coordinates_motl_writer
 
 import argparse

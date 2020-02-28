@@ -4,7 +4,7 @@ from os import makedirs
 import numpy as np
 import pandas as pd
 
-from filewriters.csv import \
+from file_actions.writers.csv import \
     write_global_motl_from_overlapping_subtomograms_multiclass
 
 parser = argparse.ArgumentParser()

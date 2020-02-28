@@ -5,8 +5,8 @@ import numpy as np
 from scipy.spatial import distance
 
 from coordinates_toolbox.clustering import get_clusters_within_size_range
-from filereaders.datasets import load_dataset
-from filewriters.csv import build_tom_motive_list
+from file_actions.readers.tomograms import load_tomogram
+from file_actions.writers.csv import build_tom_motive_list
 from peak_toolbox.utils import read_motl_coordinates_and_values
 
 global_output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/liang_dataset/"
@@ -38,14 +38,14 @@ big_clusters_motl_path = join(output_dir, "big_clusters_motl.csv")
 centroids_motl_path = join(output_dir, "small_clusters_motl.csv")
 combined_motl_path = join(output_dir, "combined_motl.csv")
 
-# dataset = load_dataset(path_to_dataset=output_path)
+# dataset = load_tomogram(path_to_dataset=output_path)
 # print(dataset.shape)
-dataset = load_dataset(path_to_dataset=output_path)
+motl = load_tomogram(path_to_dataset=output_path)
 print("loaded dataset")
-print(dataset.shape)
+print(motl.shape)
 
 labeled_clusters, labels_list_within_range, cluster_size_within_range = \
-    get_clusters_within_size_range(dataset=dataset,
+    get_clusters_within_size_range(dataset=motl,
                                    min_cluster_size=min_cluster_size,
                                    max_cluster_size=max_cluster_size,
                                    connectivity=connectivity)

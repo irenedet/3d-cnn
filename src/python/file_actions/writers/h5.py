@@ -1,26 +1,28 @@
 import os
-import random
 import os.path
+import random
 from os import makedirs
 from os.path import join
+
 import h5py
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
-import pandas as pd
+from tqdm import tqdm
 
-from filereaders.datasets import load_dataset
-from peak_toolbox.utils import read_motl_coordinates_and_values
-from networks.unet import UNet
-from coordinates_toolbox import subtomos
-from coordinates_toolbox.utils import \
+from tomogram_utils.coordinates_toolbox import subtomos
+from tomogram_utils.coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl, extract_coordinates_from_txt_shrec
-from filereaders.csv import read_motl_from_csv
-from filereaders.em import read_em
-from filereaders.shrec import particle_dict
-from filereaders.shrec import read_shrec_motl
-from naming import h5_internal_paths
-from peak_toolbox.utils import paste_sphere_in_dataset
+from file_actions.readers.csv import read_motl_from_csv
+from file_actions.readers.tomograms import load_tomogram
+from file_actions.readers.em import read_em
+from file_actions.readers.shrec import particle_dict
+from file_actions.readers.shrec import read_shrec_motl
+from constants import h5_internal_paths
+from networks.unet_new import UNet3D
+from tomogram_utils.peak_toolbox.utils import paste_sphere_in_dataset
+from tomogram_utils.peak_toolbox.utils import read_motl_coordinates_and_values
 from tensors.actions import crop_window_around_point
 
 
@@ -44,150 +46,70 @@ def write_dataset_from_subtomograms(output_path, subtomo_path, output_shape,
             print(init_points, end_points, lengths)
             subtomo_h5_internal_path = join(subtomos_internal_path,
                                             subtomo_name)
-            tomo_data[init_points[0]: end_points[0],
-            init_points[1]: end_points[1], init_points[2]: end_points[2]] = \
-                f[subtomo_h5_internal_path][0, 0:lengths[0], 0:lengths[1],
-                0:lengths[2]]
+            data_slices = [slice(i, e) for i, e in zip(init_points, end_points)]
+            data_slices = tuple(data_slices)
+            subtomo_slices = tuple([slice(0, l) for l in lengths])
+            tomo_data[data_slices] = f[subtomo_h5_internal_path][subtomo_slices]
     write_dataset_hdf(output_path, tomo_data)
-    print("right before deleting", np.max(tomo_data))
     del tomo_data
 
 
-def write_dataset_from_subtomos_with_overlap(output_path,
-                                             subtomo_path,
-                                             output_shape,
-                                             subtomo_shape,
-                                             subtomos_internal_path,
-                                             overlap):
-    output_shape_with_overlap = output_shape  # [dim + overlap_thickness for
-    # dim in
-    # output_shape]
-    print("The actual output shape is", output_shape_with_overlap)
-    tomo_data = np.zeros(output_shape_with_overlap)
-
+def assemble_tomo_from_subtomos(output_path: str, partition_file_path: str,
+                                output_shape: tuple, subtomo_shape: tuple,
+                                subtomos_internal_path: str,
+                                class_number: int, overlap: int,
+                                final_activation: None or nn.Module = None,
+                                reconstruction_type: str = "prediction"):
+    print("Assembling data from", partition_file_path, ":")
+    tomo_data = np.zeros(output_shape)
     internal_subtomo_shape = tuple([subtomo_dim - 2 * overlap for
                                     subtomo_dim in subtomo_shape])
-    with h5py.File(subtomo_path, 'r') as f:
-        for subtomo_name in list(f[subtomos_internal_path]):
+    with h5py.File(partition_file_path, 'r') as f:
+        subtomo_names = list(f[subtomos_internal_path])
+        total_subtomos = len(subtomo_names)
+        for index, subtomo_name in zip(tqdm(range(total_subtomos)),
+                                       subtomo_names):
             subtomo_center = subtomos.get_coord_from_name(subtomo_name)
-            start_corner, end_corner, lengths = subtomos.get_subtomo_corners(
-                output_shape,
-                internal_subtomo_shape,
-                subtomo_center)
-            overlap_shift = overlap * np.array([1, 1, 1])
-            start_corner -= overlap_shift
-            end_corner -= overlap_shift
-            subtomo_h5_internal_path = join(subtomos_internal_path,
-                                            subtomo_name)
-
-            internal_subtomo_data = f[subtomo_h5_internal_path][0,
-                                    overlap:lengths[0] + overlap,
-                                    overlap:lengths[1] + overlap,
-                                    overlap:lengths[2] + overlap]
-
-            tomo_data[start_corner[0]: end_corner[0],
-            start_corner[1]: end_corner[1],
-            start_corner[2]: end_corner[2]] = internal_subtomo_data
-            print("internal_subtomo_data = ",
-                  internal_subtomo_data.shape)
-    write_dataset_hdf(output_path, tomo_data)
-    print("right before deleting the maximum is", np.max(tomo_data))
-    del tomo_data
-
-
-def write_dataset_from_subtomos_with_overlap_multiclass(
-        output_path: str,
-        subtomo_path: str,
-        output_shape: tuple,
-        subtomo_shape: tuple,
-        subtomos_internal_path: str,
-        class_number: int,
-        overlap: int,
-        final_activation: None or nn.Module = None,
-        reconstruction_type: str = "prediction"):
-    output_shape_with_overlap = output_shape  # [dim + overlap_thickness for
-    # dim in
-    # output_shape]
-    print("The output shape is", output_shape_with_overlap)
-    tomo_data = np.zeros(output_shape_with_overlap)
-
-    internal_subtomo_shape = tuple([subtomo_dim - 2 * overlap for
-                                    subtomo_dim in subtomo_shape])
-    with h5py.File(subtomo_path, 'r') as f:
-        print("reconstructing subtomos in", subtomos_internal_path)
-        for subtomo_name in list(f[subtomos_internal_path]):
-            subtomo_center = subtomos.get_coord_from_name(subtomo_name)
-            start_corner, end_corner, lengths = subtomos.get_subtomo_corners(
-                output_shape,
-                internal_subtomo_shape,
-                subtomo_center)
-            if np.min(lengths) < 0:
-                print("Internal data of", subtomo_name)
-                print("totally out from original input. "
-                      "Calculated lengths of internal dataset =", lengths)
-            else:
+            start_corner, end_corner, lengths = \
+                subtomos.get_subtomo_corners(output_shape,
+                                             internal_subtomo_shape,
+                                             subtomo_center)
+            volume_slices = [slice(overlap, overlap + l) for l in lengths]
+            if np.min(lengths) > 0:
                 overlap_shift = overlap * np.array([1, 1, 1])
                 start_corner -= overlap_shift
                 end_corner -= overlap_shift
                 subtomo_h5_internal_path = join(subtomos_internal_path,
                                                 subtomo_name)
-                channels = f[subtomo_h5_internal_path][:].shape[0]
-                internal_subtomo_data = np.zeros(lengths)
-                if channels > 1:
-                    assert class_number < channels
-                    # ToDo: define if we want this to plot only one
-                    # class at a time (delete for loop... not needed)
-                    if reconstruction_type == "prediction":
-                        for n in range(1):  # leave out the background class
-                            channel_data = f[subtomo_h5_internal_path][
-                                           n + class_number,
-                                           overlap:lengths[0] + overlap,
-                                           overlap:lengths[1] + overlap,
-                                           overlap:lengths[2] + overlap]
-                            if final_activation is not None:
-                                channel_data = np.array(final_activation(
-                                    torch.from_numpy(channel_data).double()))
-                            else:
-                                print("No final activation.")
-                            print("channel ", n, ", min, max = ",
-                                  np.min(channel_data),
-                                  np.max(channel_data))
-                            internal_subtomo_data += channel_data
-                    else:
-                        channel_data = f[subtomo_h5_internal_path][
-                                       overlap:lengths[0] + overlap,
-                                       overlap:lengths[1] + overlap,
-                                       overlap:lengths[2] + overlap]
-                        internal_subtomo_data += channel_data
-                else:
-                    internal_subtomo_data = f[subtomo_h5_internal_path][0,
-                                            overlap:lengths[0] + overlap,
-                                            overlap:lengths[1] + overlap,
-                                            overlap:lengths[2] + overlap]
+                channels, *rest = f[subtomo_h5_internal_path][:].shape
+                assert class_number < channels
+                if reconstruction_type == "prediction":
+                    volume_slices = [slice(overlap, overlap + l) for l in
+                                     lengths]
+                    channel_slices = [class_number] + volume_slices
+                    channel_slices = tuple(channel_slices)
+                    subtomo_data = f[subtomo_h5_internal_path][:]
+                    internal_subtomo_data = subtomo_data[channel_slices]
                     if final_activation is not None:
                         internal_subtomo_data = np.array(final_activation(
                             torch.from_numpy(internal_subtomo_data).double()))
-                    else:
-                        print("No final activation.")
-                tomo_data[start_corner[0]: end_corner[0],
-                start_corner[1]: end_corner[1],
-                start_corner[2]: end_corner[2]] = internal_subtomo_data
-                print("internal_subtomo_data = ",
-                      internal_subtomo_data.shape)
+                else:
+                    volume_slices = tuple(volume_slices)
+                    internal_subtomo_data = f[subtomo_h5_internal_path][
+                        volume_slices]
+                tomo_slices = tuple(
+                    [slice(s, e) for s, e in zip(start_corner, end_corner)])
+                tomo_data[tomo_slices] = internal_subtomo_data
+
     write_dataset_hdf(output_path, tomo_data)
-    print("right before deleting the maximum is", np.max(tomo_data))
     return
 
 
-def write_clustering_labels_subtomos(
-        output_path: str,
-        subtomo_path: str,
-        output_shape: tuple,
-        subtomo_shape: tuple,
-        subtomos_internal_path: str,
-        label_name: str,
-        class_number: int,
-        overlap: int):
+def write_clustering_labels_subtomos(output_path: str, subtomo_path: str,
+                                     output_shape: tuple, subtomo_shape: tuple,
+                                     subtomos_internal_path: str,
+                                     label_name: str, class_number: int,
+                                     overlap: int):
     output_shape_with_overlap = output_shape  # [dim + overlap_thickness for
     # dim in
     # output_shape]
@@ -434,7 +356,7 @@ def generate_classification_training_set(path_to_output_h5: str,
         crop_shape = subtomo_size
 
     _, coordinates = read_motl_coordinates_and_values(motl_path)
-    dataset = load_dataset(path_to_dataset)
+    dataset = load_tomogram(path_to_dataset)
 
     if os.path.isfile(path_to_output_h5):
         mode = 'a'
@@ -566,69 +488,57 @@ def write_segmented_data(data_path: str, output_segmentation: np.array,
                                           :, :, :]
 
 
-def segment_and_write(data_path: str, model: UNet, label_name: str):
-    with h5py.File(data_path, 'a') as data_file:
-        if 'predictions' in list(data_file['volumes']):
-            predictions = list(
-                data_file[
-                    h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS])
-            print("Predictions list", predictions)
-            if label_name in predictions:
-                flag = 'segmentation_exists'
-            else:
-                flag = 'segmentation_nonexistent'
+def _check_segmentation_existence(data_file: h5py.File, label_name: str):
+    if 'predictions' in list(data_file['volumes']):
+        predictions = list(
+            data_file[h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS])
+        if label_name in predictions:
+            flag = 'segmentation_exists'
         else:
             flag = 'segmentation_nonexistent'
+    else:
+        flag = 'segmentation_nonexistent'
+    return flag
 
-        if 'segmentation_nonexistent' == flag:
-            print(h5_internal_paths.RAW_SUBTOMOGRAMS)
-            print(list(data_file[h5_internal_paths.RAW_SUBTOMOGRAMS]))
-            for subtomo_name in list(
-                    data_file[h5_internal_paths.RAW_SUBTOMOGRAMS]):
-                subtomo_h5_internal_path = join(
-                    h5_internal_paths.RAW_SUBTOMOGRAMS,
-                    subtomo_name)
+
+def _get_subtomos_names_to_segment(file: h5py.File, label_name: str, flag: str):
+    if 'segmentation_nonexistent' == flag:
+        print("The segmentation", label_name, " does not exist yet.")
+        subtomo_names = list(file[h5_internal_paths.RAW_SUBTOMOGRAMS])
+        total_subtomos = len(subtomo_names)
+        predicted_subtomos_names = []
+    else:
+        print("The segmentation", label_name, " exists already.")
+        prediction_path = join(
+            h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS,
+            label_name)
+        predicted_subtomos_names = list(file[prediction_path])
+        subtomo_names = list(file[h5_internal_paths.RAW_SUBTOMOGRAMS])
+        total_subtomos = len(subtomo_names)
+    return predicted_subtomos_names, subtomo_names, total_subtomos
+
+
+def segment_and_write(data_path: str, model: UNet3D, label_name: str):
+    with h5py.File(data_path, 'a') as data_file:
+        flag = _check_segmentation_existence(data_file, label_name)
+        predicted_subtomos_names, subtomo_names, total_subtomos = \
+            _get_subtomos_names_to_segment(data_file, label_name, flag)
+        for index, subtomo_name in zip(tqdm(range(total_subtomos)),
+                                       subtomo_names):
+            subtomo_h5_internal_path = join(
+                h5_internal_paths.RAW_SUBTOMOGRAMS,
+                subtomo_name)
+
+            if subtomo_name not in predicted_subtomos_names:
                 subtomo_data = np.array(
-                    [data_file[subtomo_h5_internal_path][:]], dtype=np.float)
+                    [data_file[subtomo_h5_internal_path][:]])
                 subtomo_data = subtomo_data[:, None]
-                print("subtomo_shape ", subtomo_data.shape)
-                print("segmenting ", subtomo_name)
-                subtomo_data = torch.from_numpy(subtomo_data)
-                subtomo_data = subtomo_data.type('torch.FloatTensor')
-                segmented_data = model(subtomo_data)
+                segmented_data = model(torch.from_numpy(subtomo_data))
                 segmented_data = segmented_data.detach().numpy()
                 _write_segmented_subtomo_data(data_file=data_file,
                                               segmented_data=segmented_data,
                                               label_name=label_name,
                                               subtomo_name=subtomo_name)
-        else:
-            print("The segmentation", label_name, " exists already.")
-            print(h5_internal_paths.RAW_SUBTOMOGRAMS)
-            print(list(data_file[h5_internal_paths.RAW_SUBTOMOGRAMS]))
-            prediction_path = join(
-                h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS,
-                label_name)
-            predicted_subtomos_names = list(data_file[prediction_path])
-            for subtomo_name in list(
-                    data_file[h5_internal_paths.RAW_SUBTOMOGRAMS]):
-                subtomo_h5_internal_path = join(
-                    h5_internal_paths.RAW_SUBTOMOGRAMS,
-                    subtomo_name)
-
-                if subtomo_name in predicted_subtomos_names:
-                    print(subtomo_name, "was already segmented")
-                else:
-                    subtomo_data = np.array(
-                        [data_file[subtomo_h5_internal_path][:]])
-                    subtomo_data = subtomo_data[:, None]
-                    print("subtomo_shape ", subtomo_data.shape)
-                    print("segmenting ", subtomo_name)
-                    segmented_data = model(torch.from_numpy(subtomo_data))
-                    segmented_data = segmented_data.detach().numpy()
-                    _write_segmented_subtomo_data(data_file=data_file,
-                                                  segmented_data=segmented_data,
-                                                  label_name=label_name,
-                                                  subtomo_name=subtomo_name)
     return
 
 
@@ -641,9 +551,8 @@ def _write_segmented_subtomo_data(data_file: h5py.File,
         label_name)
     subtomo_h5_internal_path = join(subtomo_h5_internal_path,
                                     subtomo_name)
-    print(subtomo_h5_internal_path)
     data_file[subtomo_h5_internal_path] = segmented_data[0, :, :, :, :]
-    print("data shape =", segmented_data[0, :, :, :, :].shape)
+    return
 
 
 def write_hdf_particles_from_motl(path_to_motl: str,
@@ -710,8 +619,8 @@ def write_hdf_particles_from_motl(path_to_motl: str,
         predicted_dataset = np.zeros(output_shape)
         for center, value in zip(coordinates, score_values):
             paste_sphere_in_dataset(dataset=predicted_dataset,
-                                    radius=sphere_radius,
-                                    value=value, center=center)
+                                    center=center, radius=sphere_radius,
+                                    value=value)
 
         write_dataset_hdf(output_path=hdf_output_path,
                           tomo_data=predicted_dataset)

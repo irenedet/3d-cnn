@@ -1,6 +1,6 @@
 import numpy as np
 # import torchvision.transforms as transforms
-from src.python.datasets.random_transformations import AdditiveGaussianNoise, \
+from src.python.tomogram_utils.random_transformations import AdditiveGaussianNoise, \
     SinusoidalElasticTransform3D, RandomRot3D
 
 

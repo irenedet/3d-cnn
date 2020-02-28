@@ -12,8 +12,8 @@ radius = 10
 
 coords_in_tom_format = 'True'
 
-from src.python.filereaders.hdf import _load_hdf_dataset
-from src.python.filewriters.h5 import write_dataset_hdf
+from file_actions.readers.hdf import _load_hdf_dataset
+from file_actions.writers.h5 import write_dataset_hdf
 import numpy as np
 
 mask = _load_hdf_dataset(hdf_file_path=path_to_hdf)

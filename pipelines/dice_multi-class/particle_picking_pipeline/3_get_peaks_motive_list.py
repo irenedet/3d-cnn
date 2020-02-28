@@ -5,7 +5,7 @@ import numpy as np
 import argparse
 from os import makedirs
 
-from src.python.filewriters.csv import \
+from file_actions.writers.csv import \
     write_global_motl_from_overlapping_subtomograms_multiclass
 
 # from os.path import join

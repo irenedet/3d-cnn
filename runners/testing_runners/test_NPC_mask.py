@@ -23,7 +23,7 @@ import csv
 
 import numpy as np
 
-from filewriters.h5 import write_dataset_hdf
+from file_actions.writers.h5 import write_dataset_hdf
 from peak_toolbox.utils import paste_rotated_disk
 
 # thickness = 35
@@ -55,7 +55,7 @@ from peak_toolbox.utils import paste_rotated_disk
 # psi = 0
 # theta = 90
 # sigma = 90
-dataset = np.zeros((300, 928, 928))
+motl = np.zeros((300, 928, 928))
 motl = []
 with open("/scratch/trueba/data/NPC/allmotl_bin4.txt", "r") as f:
     reader = csv.reader(f, delimiter=',')
@@ -73,7 +73,7 @@ for n in range(motl.shape[0] - 1):
     ZXZ_angles = tuple(motl[2:5, n])
     print(center)
     print(ZXZ_angles)
-    dataset = paste_rotated_disk(dataset, center, radius, thickness, ZXZ_angles)
+    motl = paste_rotated_disk(motl, center, radius, thickness, ZXZ_angles)
 
 # thickness = 35
 # radius = 65
@@ -100,4 +100,4 @@ for n in range(motl.shape[0] - 1):
 # dataset = paste_rotated_disk(dataset, center, radius, thickness, ZXZ_angles)
 #
 write_dataset_hdf(output_path="/home/papalotl/npc_test002_bis_1.hdf",
-                  tomo_data=dataset)
+                  tomo_data=motl)

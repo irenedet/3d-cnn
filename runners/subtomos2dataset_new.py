@@ -2,9 +2,9 @@ import argparse
 from distutils.util import strtobool
 from os.path import join
 
-from filewriters.h5 import write_clustering_labels_subtomos, \
-    write_dataset_from_subtomos_with_overlap_multiclass
-from naming import h5_internal_paths
+from file_actions.writers.h5 import write_clustering_labels_subtomos, \
+    assemble_tomo_from_subtomos
+from constants import h5_internal_paths
 from utils.cast_types import string_to_list
 
 parser = argparse.ArgumentParser()
@@ -68,7 +68,7 @@ else:
 
 print(subtomos_internal_path)
 if not cluster_labels:
-    write_dataset_from_subtomos_with_overlap_multiclass(
+    assemble_tomo_from_subtomos(
         output_path,
         subtomos_path,
         output_shape,

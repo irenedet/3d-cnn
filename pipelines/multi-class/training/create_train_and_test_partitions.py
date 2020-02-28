@@ -1,10 +1,10 @@
 # from os.path import join
 from os import makedirs
 from os.path import join
-from src.python.filereaders.hdf import _load_hdf_dataset
-from src.python.datasets.random_transformations import transform_data_from_h5
-from src.python.datasets.actions import partition_raw_and_labels_tomograms
-from src.python.filewriters.h5 import split_and_write_h5_partition
+from file_actions.readers.hdf import _load_hdf_dataset
+from src.python.tomogram_utils.random_transformations import transform_data_from_h5
+from src.python.tomogram_utils.actions import partition_raw_and_labels_tomograms
+from file_actions.writers.h5 import split_and_write_h5_partition
 
 import argparse
 

@@ -1,15 +1,14 @@
 import numpy as np
-import scipy
 import h5py
 from os.path import join
 
-from scipy.ndimage import zoom, interpolation
+from scipy.ndimage import interpolation
 from scipy.ndimage.filters import gaussian_filter
 from scipy.ndimage.interpolation import map_coordinates
 
 import python_utils_inferno as pyu
-from filereaders import h5
-from naming import h5_internal_paths
+from file_actions.readers import h5
+from constants import h5_internal_paths
 
 """
 All these functions were taken from the package Inferno:

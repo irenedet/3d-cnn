@@ -2,14 +2,14 @@ from typing import Tuple
 
 import numpy as np
 
-from naming.particles import create_particle_file_name
+from constants.particles import create_particle_file_name
 
 
 def to_tom_coordinate_system(p: list) -> np.array:
     """
     Function that rearranges a list of coordinates from the python hdf load
     coordinates system into the tom coordinate system.
-    :param p: a point coming from hdf.load_dataset with format [z, y, x]
+    :param p: a point coming from hdf.load_tomogram with format [z, y, x]
     :return: [x, y, z]
     """
     return np.array([p[2], p[1], p[0]])
@@ -19,7 +19,7 @@ def invert_tom_coordinate_system(p: list) -> np.array:
     """
     Function that rearranges a list of coordinates from the python hdf load
     coordinates system into the tom coordinate system.
-    :param p: a point coming from hdf.load_dataset with format [z, y, x]
+    :param p: a point coming from hdf.load_tomogram with format [z, y, x]
     :return: [x, y, z]
     """
     return np.array([p[2], p[1], p[0]])

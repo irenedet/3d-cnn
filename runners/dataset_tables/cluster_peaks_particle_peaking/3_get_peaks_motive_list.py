@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import torch.nn as nn
 
-from filewriters.csv import \
+from file_actions.writers.csv import \
     write_global_motl_from_overlapping_subtomograms_multiclass
 
 parser = argparse.ArgumentParser()

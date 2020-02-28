@@ -7,12 +7,13 @@ import pandas as pd
 import torch.nn as nn
 from scipy.spatial import distance
 
-from coordinates_toolbox.clustering import get_clusters_within_size_range
-from filereaders.datasets import load_dataset
-from filewriters.csv import build_tom_motive_list
-from filewriters.h5 import write_dataset_from_subtomos_with_overlap_multiclass
-from naming import h5_internal_paths
-from peak_toolbox.utils import read_motl_coordinates_and_values
+from constants import h5_internal_paths
+from file_actions.readers.tomograms import load_tomogram
+from file_actions.writers.csv import build_tom_motive_list
+from file_actions.writers.h5 import assemble_tomo_from_subtomos
+from tomogram_utils.coordinates_toolbox.clustering import \
+    get_clusters_within_size_range
+from tomogram_utils.peak_toolbox.utils import read_motl_coordinates_and_values
 
 parser = argparse.ArgumentParser()
 
@@ -89,7 +90,7 @@ subtomos_internal_path = join(
     h5_internal_paths.PREDICTED_SEGMENTATION_SUBTOMOGRAMS,
     label_name)
 
-write_dataset_from_subtomos_with_overlap_multiclass(
+assemble_tomo_from_subtomos(
     output_path,
     partition,
     output_shape,
@@ -99,9 +100,9 @@ write_dataset_from_subtomos_with_overlap_multiclass(
     overlap,
     nn.Sigmoid())
 
-dataset = load_dataset(path_to_dataset=output_path)
+motl = load_tomogram(path_to_dataset=output_path)
 print("loaded dataset")
-print(dataset.shape)
+print(motl.shape)
 ############################
 
 connectivity = 1  # to be checked
@@ -119,7 +120,7 @@ centroids_motl_path = join(output_dir, "small_clusters_motl.csv")
 combined_motl_path = join(output_dir, "combined_motl.csv")
 
 labeled_clusters, labels_list_within_range, cluster_size_within_range = \
-    get_clusters_within_size_range(dataset=dataset,
+    get_clusters_within_size_range(dataset=motl,
                                    min_cluster_size=min_cluster_size,
                                    max_cluster_size=max_cluster_size,
                                    connectivity=connectivity)
