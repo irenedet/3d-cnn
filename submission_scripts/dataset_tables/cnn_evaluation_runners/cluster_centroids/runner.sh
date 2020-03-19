@@ -1,17 +1,17 @@
 #! /bin/bash
 
-#SBATCH -A mahamid
-#SBATCH --nodes 1
-#SBATCH --ntasks 1
-#SBATCH --mem 50G
-#SBATCH --time 0-12:15
-#SBATCH -o cluster_centroids_evaluation.slurm.%N.%j.out
-#SBAtCH -e cluster_centroids_evaluation.slurm.%N.%j.err
-#SBATCH --mail-type=END,FAIL
-#SBAtCH --mail-user=irene.de.teresa@embl.de
+# SBATCH -A mahamid
+# SBATCH --nodes 1
+# SBATCH --ntasks 1
+# SBATCH --mem 50G
+# SBATCH --time 0-12:15
+# SBATCH -o cluster_centroids_evaluation.slurm.%N.%j.out
+# SBAtCH -e cluster_centroids_evaluation.slurm.%N.%j.err
+# SBATCH --mail-type=END,FAIL
+# SBAtCH --mail-user=irene.de.teresa@embl.de
 
-#SBAtCH -p gpu
-#SBAtCH --gres=gpu:1
+# SBAtCH -p gpu
+# SBAtCH --gres=gpu:1
 
 module load Anaconda3
 echo "activating virtual environment"
@@ -143,20 +143,20 @@ export output_dir=$output_dir
 export BN=$Batch_Normalization
 export semantic_classes=$semantic_classes
 
-export output_dir=$output_dir/$label_name/$tomo_name/"class_"$class_number
+export output_dir=$output_dir/$label_name/$tomo_name/"class_"$class_number/"pr_radius_"$same_peak_distance
 
 echo tomo_name = $tomo_name
 echo output_dir = $output_dir
 
-
+echo "tomo_name" $tomo_name
 echo "class_number is " $class_number
 
 export box_overlap=12
 
 
-echo 'running python3 scripts: Segmenting raw subtomograms'
+#echo 'running python3 scripts: Segmenting raw subtomograms'
 #python3 $UPICKER_PATH/runners/dataset_tables/particle_picking_scripts/2_subtomograms_segmentation_no_activation.py -model $path_to_model -label $label_name -dataset_table $dataset_table -tomo_name $tomo_name -init_feat $init_feat -depth $depth -out_classes $output_classes -new_loader $new_loader -BN $BN -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout
-echo '... done.'
+#echo '... done.'
 
 echo 'running python3 scripts: getting particles motive list'
 python3 $UPICKER_PATH/runners/dataset_tables/particle_picking_scripts/3_get_full_cluster_centroids_motl.py -dataset_table $dataset_table -min_cluster_size $min_cluster_size -max_cluster_size $max_cluster_size -tomo_name $tomo_name -output $output_dir -label $label_name -box $box_side -class_number $class_number -particle_radius $minimum_peak_distance -overlap $box_overlap

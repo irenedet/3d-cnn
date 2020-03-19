@@ -1,0 +1,20 @@
+dataset_table : "datasets.csv"
+partition_name : "train_partition"
+box_shape : 64
+semantic_classes: ['fas']
+
+unet_hyperparameters:
+  models_table : "/struct/mahamid/Irene/test_3d_cnn/models.csv"
+  label_name : "test_experiment"
+  log_dir : "/struct/mahamid/Irene/test_3d_cnn/logging"
+  model_path : "/struct/mahamid/Irene/test_3d_cnn/models"
+  epochs : 1
+  split: 0.7
+  depth : 1
+  initial_features : 1
+  output_classes : 1
+  DA_tag : "none"
+  BatchNorm : False
+  encoder_dropout : 0
+  decoder_dropout : 0
+  batch_size : 4

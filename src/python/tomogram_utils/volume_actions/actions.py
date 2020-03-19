@@ -3,19 +3,20 @@ from os.path import join
 
 import h5py
 import numpy as np
+from tqdm import tqdm
 
-from tomogram_utils.coordinates_toolbox.subtomos import \
-    get_particle_coordinates_grid_with_overlap
-from file_actions.readers.tomograms import load_tomogram
+from constants import h5_internal_paths
 from file_actions.readers.h5 import read_training_data_dice_multi_class
+from file_actions.readers.tomograms import load_tomogram
 from file_actions.writers.h5 import \
     write_joint_raw_and_labels_subtomograms_dice_multiclass
 from file_actions.writers.h5 import write_raw_subtomograms_intersecting_mask
 from file_actions.writers.h5 import write_subtomograms_from_dataset, \
-    write_joint_raw_and_labels_subtomograms, write_strongly_labeled_subtomograms
+    write_joint_raw_and_labels_subtomograms
 from image.filters import preprocess_data
-from constants import h5_internal_paths
 from tensors.actions import crop_window_around_point
+from tomogram_utils.coordinates_toolbox.subtomos import \
+    get_particle_coordinates_grid_with_overlap, get_random_particle_coordinates
 
 
 def _chunkify_list(lst, n):
@@ -50,7 +51,6 @@ def _define_splitting(split: int or float, n_total: int) -> int:
     if isinstance(split, float):
         assert 0 < split < 1
         split = int(np.max([split * n_total, 1]))
-    print("split = ", split)
     return split
 
 
@@ -90,15 +90,16 @@ def _split_data_augmentation_chunks(raw_data_chunks: list,
     :param split:
     :return:
     """
-    print("len(labels_data_chunks[0])", len(labels_data_chunks[0]))
+    print("Length of each DA chunk =", len(labels_data_chunks[0]))
     assert len(labels_data_chunks[0]) == len(raw_data_chunks[0]), \
         "raw and label data chunks are not compatible"
     original_volumes_number = len(raw_data_chunks[0])
     data_order = list(range(original_volumes_number))
     combined_list = [data_order] + raw_data_chunks + labels_data_chunks
-    print("len(combined_list)", len(combined_list))
+    print("1 (data_order) + raw_data chunk number + label_data_chunk_number =",
+          len(combined_list))
     zipped = list(zip(*combined_list))
-    print("len(zipped)", len(zipped))
+    print("Number of images per DA chunk =", len(zipped))
     if shuffle:
         print("shuffling data augmentation chunk")
         random.shuffle(zipped)
@@ -173,8 +174,7 @@ def _unchunkify_data(raw_data_chunks: list, labels_data_chunks: list):
 
 
 def split_and_preprocess_dataset(data: np.array, labels: np.array, split: float,
-                                 data_aug_rounds: int = 0,
-                                 shuffle=True) -> tuple:
+                                 DA_rounds: int = 0, shuffle=True) -> tuple:
     """
     Splits a h5 partition into training and validation set, TrainSet and
     ValidationSet.
@@ -190,13 +190,13 @@ def split_and_preprocess_dataset(data: np.array, labels: np.array, split: float,
     :param data: array of shape N x 1 x Dx x Dy x Dz
     :param labels: array of shape N x S x Dx x Dy x Dz
     :param split: integer or float in (0, 1)
-    :param data_aug_rounds: d
+    :param DA_rounds: d
     :param shuffle: if True, the training examples are shuffled before loading
     """
     data = list(data)
     labels = list(labels)
 
-    n_chunks = data_aug_rounds + 1
+    n_chunks = DA_rounds + 1
     original_volumes_number = len(data) // n_chunks
     print("volumes number before data augmentation", original_volumes_number)
     print("volumes number after data augmentation", len(data))
@@ -215,8 +215,8 @@ def split_and_preprocess_dataset(data: np.array, labels: np.array, split: float,
         for data_chunk in raw_data_chunks:
             data_chunk = preprocess_data(data=data_chunk)
             preprocessed_raw_data_chunks.append(data_chunk)
-        print("data_chunks_shape", np.array(raw_data_chunks).shape,
-              "preprocessed_chunks.shape",
+        print("DA chunks shape", np.array(raw_data_chunks).shape)
+        print("preprocessed_chunks.shape",
               np.array(preprocessed_raw_data_chunks).shape)
         if split > 1:
             zipped_train, zipped_val = \
@@ -248,10 +248,10 @@ def split_and_preprocess_dataset(data: np.array, labels: np.array, split: float,
     return train_data, train_labels, val_data, val_labels, final_data_order
 
 
-def load_training_dataset_list(training_partition_paths: list,
-                               data_aug_rounds_list: list,
-                               segmentation_names: list,
-                               split: int or float) -> tuple:
+def load_and_normalize_dataset_list(training_partition_paths: list,
+                                    data_aug_rounds_list: list,
+                                    segmentation_names: list,
+                                    split: int or float) -> tuple:
     """
     Loads raw and labels volume sets from a list of partition .h5 files. It
     outputs a split between train and validation sets for a neural network,
@@ -273,18 +273,18 @@ def load_training_dataset_list(training_partition_paths: list,
     val_data = list()
     val_labels = list()
 
-    for data_aug_rounds, training_data_path in zip(data_aug_rounds_list,
-                                                   training_partition_paths):
+    for DA_rounds, training_data_path in zip(data_aug_rounds_list,
+                                             training_partition_paths):
         print("\n")
         print("Loading training set from ", training_data_path)
-        print("data_aug_rounds", data_aug_rounds)
+        print("DA_rounds", DA_rounds)
         raw_data, labels = read_training_data_dice_multi_class(
             training_data_path=training_data_path,
             segmentation_names=segmentation_names)
-
+        print("Initial unique labels", np.unique(labels))
         if raw_data.shape[0] == 0:
             print('Empty training set in ', training_data_path)
-        elif raw_data.shape[0] == data_aug_rounds + 1:
+        elif raw_data.shape[0] == DA_rounds + 1:
             print('Single training example in ', training_data_path)
             # Normalize data
             raw_data = preprocess_data(raw_data)
@@ -293,21 +293,17 @@ def load_training_dataset_list(training_partition_paths: list,
             train_data += list(raw_data)
             train_labels += list(labels)
         else:
-            print("Initial unique labels", np.unique(labels))
             # Normalize data
-            raw_data = preprocess_data(raw_data)
+            # raw_data = preprocess_data(raw_data)
             raw_data = np.array(raw_data)
             labels = np.array(labels, dtype=np.long)
 
             train_data_tmp, train_labels_tmp, \
             val_data_tmp, val_labels_tmp, _ = \
                 split_and_preprocess_dataset(data=raw_data, labels=labels,
-                                             split=split,
-                                             data_aug_rounds=data_aug_rounds)
-
+                                             split=split, DA_rounds=DA_rounds)
             train_data += list(train_data_tmp)
             train_labels += list(train_labels_tmp)
-
             not_empty = len(val_labels_tmp) > 0
             if not_empty:
                 val_data += list(val_data_tmp)
@@ -321,8 +317,9 @@ def load_training_dataset_list(training_partition_paths: list,
 
 
 def get_right_padding_lengths(tomo_shape, shape_to_crop_zyx):
-    padding = [box_size - (tomo_size % box_size) for tomo_size, box_size
+    padding = [tomo_size % box_size for tomo_size, box_size
                in zip(tomo_shape, shape_to_crop_zyx)]
+    print("padding", padding)
     return padding
 
 
@@ -347,16 +344,17 @@ def pad_dataset(dataset: np.array, cubes_with_border_shape: tuple,
                                               internal_cube_shape)
     right_padding = [[overlap_thickness, padding + overlap_thickness] for
                      padding in right_padding]
-
-    padded_dataset = np.pad(array=dataset, pad_width=right_padding,
-                            mode="reflect")
+    if np.min(right_padding) > 0:
+        padded_dataset = np.pad(array=dataset, pad_width=right_padding,
+                                mode="reflect")
+    else:
+        padded_dataset = dataset
     return padded_dataset
 
 
-def partition_tomogram(dataset, output_h5_file_path: str,
+def partition_tomogram(dataset: np.array, output_h5_file_path: str,
                        subtomo_shape: tuple,
-                       overlap: int
-                       ):
+                       overlap: int):
     padded_dataset = pad_dataset(dataset, subtomo_shape, overlap)
     padded_particles_coordinates = get_particle_coordinates_grid_with_overlap(
         padded_dataset.shape,
@@ -455,7 +453,8 @@ def generate_strongly_labeled_partition(path_to_raw: str,
                                         subtomo_shape: tuple,
                                         overlap: int,
                                         min_label_fraction: float = 0,
-                                        max_label_fraction: float = 1) -> list:
+                                        max_label_fraction: float = 1,
+                                        edge_tolerance: int = 0) -> list:
     raw_dataset = load_tomogram(path_to_raw)
     min_shape = raw_dataset.shape
     print(path_to_raw, "shape", min_shape)
@@ -491,22 +490,76 @@ def generate_strongly_labeled_partition(path_to_raw: str,
         window_centers=padded_particles_coordinates,
         crop_shape=subtomo_shape,
         min_label_fraction=min_label_fraction,
-        max_label_fraction=max_label_fraction)
+        max_label_fraction=max_label_fraction,
+        edge_tolerance=edge_tolerance,
+        unpadded_dataset_shape=min_shape)
     return label_fractions_list
 
 
-def write_strongly_labeled_subtomograms(output_path: str,
-                                        padded_raw_dataset: np.array,
-                                        padded_labels_list: list,
-                                        segmentation_names: list,
-                                        window_centers: list,
-                                        crop_shape: tuple,
-                                        min_label_fraction: float = 0,
-                                        max_label_fraction: float = 1) -> list:
+def generate_random_labeled_partition(path_to_raw: str,
+                                      labels_dataset_paths_list: list,
+                                      segmentation_names: list,
+                                      output_h5_file_path: str,
+                                      subtomo_shape: tuple,
+                                      n_total: int,
+                                      min_label_fraction: float = 0,
+                                      max_label_fraction: float = 1,
+                                      edge_tolerance: int = 0) -> list:
+    raw_dataset = load_tomogram(path_to_raw)
+    min_shape = raw_dataset.shape
+    print(path_to_raw, "shape", min_shape)
+    labels_dataset_list = []
+    for path_to_labeled in labels_dataset_paths_list:
+        print("loading", path_to_labeled)
+        labels_dataset = load_tomogram(path_to_labeled)
+        dataset_shape = labels_dataset.shape
+        labels_dataset_list.append(labels_dataset)
+        min_shape = np.minimum(min_shape, dataset_shape)
+        print(path_to_labeled, "shape", labels_dataset.shape)
+    print("min_shape = ", min_shape)
+    min_x, min_y, min_z = min_shape
+    raw_dataset = raw_dataset[:min_x, :min_y, :min_z]
+    particles_coordinates = get_random_particle_coordinates(
+        dataset_shape=min_shape,
+        shape_to_crop_zyx=subtomo_shape,
+        n_total=n_total)
+
+    label_datasets = []
+    for labels_dataset in labels_dataset_list:
+        labels_dataset = labels_dataset[:min_x, :min_y, :min_z]
+        label_datasets.append(labels_dataset)
+
+    label_fractions_list = write_strongly_labeled_subtomograms(
+        output_path=output_h5_file_path,
+        padded_raw_dataset=raw_dataset,
+        padded_labels_list=labels_dataset_list,
+        segmentation_names=segmentation_names,
+        window_centers=particles_coordinates,
+        crop_shape=subtomo_shape,
+        min_label_fraction=min_label_fraction,
+        max_label_fraction=max_label_fraction,
+        edge_tolerance=edge_tolerance,
+        unpadded_dataset_shape=min_shape)
+    return label_fractions_list
+
+
+def write_strongly_labeled_subtomograms(
+        output_path: str,
+        padded_raw_dataset: np.array,
+        padded_labels_list: list,
+        segmentation_names: list,
+        window_centers: list,
+        crop_shape: tuple,
+        min_label_fraction: float = 0,
+        max_label_fraction: float = 1,
+        edge_tolerance: int = 0,
+        unpadded_dataset_shape: tuple = None) -> list:
     label_fractions_list = []
     with h5py.File(output_path, 'w') as f:
-        for window_center in window_centers:
-            print("window_center", window_center)
+        total_points = len(window_centers)
+        for index, window_center in zip(tqdm(range(total_points)),
+                                        window_centers):
+            # print("window_center", window_center)
             subtomo_name = "subtomo_{0}".format(str(window_center))
             subtomo_raw_h5_internal_path = join(
                 h5_internal_paths.RAW_SUBTOMOGRAMS,
@@ -516,19 +569,34 @@ def write_strongly_labeled_subtomograms(output_path: str,
                 crop_shape=crop_shape,
                 window_center=window_center)
             volume = crop_shape[0] * crop_shape[1] * crop_shape[2]
+            # print("Subtomo volume", volume)
             subtomo_label_data_list = []
             subtomo_label_h5_internal_path_list = []
             segmentation_max = 0
             label_fraction = 0
             # Getting label channels for our current raw subtomo
+            # for index, subtomo_name in zip(tqdm(range(total_subtomos)),
+            #                                        subtomo_names):
             for label_name, padded_label in zip(segmentation_names,
                                                 padded_labels_list):
                 subtomo_label_data = crop_window_around_point(
                     input_array=padded_label,
                     crop_shape=crop_shape,
                     window_center=window_center)
+                if edge_tolerance > 0:
+                    assert unpadded_dataset_shape is not None
+                    corner_distance = np.array(
+                        unpadded_dataset_shape) - np.array(window_center)
+                    distance_to_reflecting_area = [
+                        (0.5 * shape) - np.abs(elem) for elem, shape in
+                        zip(corner_distance, crop_shape)]
+                    if np.min(distance_to_reflecting_area) < edge_tolerance:
+                        dx, dy, dz = distance_to_reflecting_area
+                        subtomo_label_data[int(dx):, int(dy):, int(dz):] *= 0
+                    else:
+                        print("edge tolerance requirement met.")
+
                 subtomo_label_data_list += [subtomo_label_data]
-                print("subtomo_max = ", np.max(subtomo_label_data))
                 subtomo_label_h5_internal_path = join(
                     h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
                 subtomo_label_h5_internal_path = join(
@@ -544,17 +612,11 @@ def write_strongly_labeled_subtomograms(output_path: str,
                     label_fractions_list.append(current_fraction)
                     label_fraction = np.max(
                         [label_fraction, current_fraction])
-            print("window_center, label_fraction", window_center,
-                  label_fraction)
             if segmentation_max > 0.5 \
                     and min_label_fraction < label_fraction < max_label_fraction:
-                print("Saving window_center, subtomo_raw_h5_internal_path",
-                      window_center, subtomo_raw_h5_internal_path)
                 f[subtomo_raw_h5_internal_path] = subtomo_raw_data
                 for subtomo_label_h5_internal_path, subtomo_label_data in zip(
                         subtomo_label_h5_internal_path_list,
                         subtomo_label_data_list):
                     f[subtomo_label_h5_internal_path] = subtomo_label_data
-            else:
-                print("subtomo ", subtomo_name, "discarded")
     return label_fractions_list

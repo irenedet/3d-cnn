@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as du
 
-from tomogram_utils.volume_actions.actions import load_training_dataset_list
+from constants.dataset_tables import DatasetTableHeader
 from file_actions.writers.csv import write_on_models_notebook
 from networks.io import get_device
 from networks.loss import DiceCoefficientLoss
@@ -18,11 +18,17 @@ from networks.routines import train, validate
 from networks.unet import UNet, UNet_BN, UNet_dropout
 from networks.utils import save_unet_model, load_unet_model
 from networks.visualizers import TensorBoard_multiclass
+from tomogram_utils.volume_actions.actions import \
+    load_and_normalize_dataset_list
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-dataset_table", "--dataset_table",
                     help="path to db (dataset_table) in .csv format",
                     type=str)
+parser.add_argument("-training_partition", "--training_partition",
+                    help="column name of training partition in the dataset "
+                         "table",
+                    type=str, default='train_partition')
 parser.add_argument("-log_dir", "--log_dir",
                     help="logs directory where training losses will be stored",
                     type=str)
@@ -79,6 +85,7 @@ parser.add_argument("-batch_size", "--batch_size",
                     type=int)
 args = parser.parse_args()
 dataset_table = args.dataset_table
+training_partition = args.training_partition
 tomo_training_list = args.tomo_training_list
 tomo_training_list = tomo_training_list.split(',')
 shuffle = strtobool(args.shuffle)
@@ -105,7 +112,7 @@ for semantic_class in segmentation_names:
 
 print("\n")
 print("*******************************************")
-print("The dice_unet_training.py script is running")
+print("The unet training script is running")
 print("*******************************************")
 print("\n")
 # os.environ["CUDA_VISIBLE_DEVICES"] = str()
@@ -115,14 +122,16 @@ net_conf = {'final_activation': final_activation,
             'initial_features': initial_features,
             "out_channels": output_classes}
 
+DTHeader = DatasetTableHeader(partition_name=training_partition,
+                              semantic_classes=segmentation_names)
 df = pd.read_csv(dataset_table)
-df['tomo_name'] = df['tomo_name'].astype(str)
+df[DTHeader.tomo_name] = df[DTHeader.tomo_name].astype(str)
 
 training_partition_paths = list()
 data_aug_rounds_list = list()
 for tomo_name in tomo_training_list:
-    tomo_df = df[df['tomo_name'] == tomo_name]
-    training_partition_paths += [tomo_df.iloc[0]['train_partition']]
+    tomo_df = df[df[DTHeader.tomo_name] == tomo_name]
+    training_partition_paths += [tomo_df.iloc[0][DTHeader.partition_name]]
     if 'data_aug_rounds' in tomo_df.keys():
         tomo_df = tomo_df.fillna(0)
         d = tomo_df.iloc[0]['data_aug_rounds']
@@ -140,8 +149,9 @@ makedirs(model_path, exist_ok=True)
 # check if we have  a gpu
 device = get_device()
 train_data, train_labels, val_data, val_labels = \
-    load_training_dataset_list(training_partition_paths, data_aug_rounds_list,
-                               segmentation_names, split)
+    load_and_normalize_dataset_list(training_partition_paths,
+                                    data_aug_rounds_list,
+                                    segmentation_names, split)
 
 print("train_data.shape", train_data.shape)
 print("val_data.shape", val_data.shape)
@@ -201,25 +211,22 @@ model_name = model_initial_name + label_name + "_D_" + \
              str(net_conf['initial_features'])
 model_name_pkl = model_name + ".pkl"
 model_path_pkl = join(model_path, model_name_pkl)
-model_name_txt = model_name + ".txt"
-# data_txt_path = join(model_path, model_name_txt)
-# write_model_description(file_path=data_txt_path,
-#                         training_data_path=str(training_partition_paths),
-#                         label_name=label_name, split=split,
-#                         model_name_pkl=model_path_pkl, conf=net_conf)
 log_model = join(log_dir, model_name)
 logger = TensorBoard_multiclass(log_dir=log_model, log_image_interval=1)
 
-write_on_models_notebook(model_name, model_path_pkl, log_model, depth,
-                         initial_features, n_epochs,
-                         training_partition_paths, split, output_classes,
-                         segmentation_names, retrain, path_to_old_model,
-                         models_notebook_path)
+write_on_models_notebook(model_name=model_name, model_path=model_path,
+                         log_dir=log_model, depth=depth,
+                         initial_features=initial_features, n_epochs=n_epochs,
+                         training_paths_list=training_partition_paths,
+                         split=split, output_classes=output_classes,
+                         segmentation_names=segmentation_names, retrain=retrain,
+                         path_to_old_model=path_to_old_model,
+                         models_notebook_path=models_notebook_path,
+                         encoder_dropout=encoder_dropout,
+                         decoder_dropout=decoder_dropout,
+                         BN=BN)
 lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.1,
                                                     patience=10, verbose=True)
-# optimizer, mode='min', factor=0.1, patience=10,
-# verbose=False, threshold=1e-4, threshold_mode='rel',
-# cooldown=0, min_lr=0, eps=1e-8
 
 print("The neural network training is now starting")
 validation_loss = np.inf

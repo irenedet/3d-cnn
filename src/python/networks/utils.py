@@ -1,3 +1,4 @@
+import os
 from os.path import join
 
 import h5py
@@ -8,11 +9,11 @@ import torch.optim as optim
 from torch.utils import data as du
 
 from constants import h5_internal_paths
-from networks.io import get_device
-from networks.unet import UNet
-from tomogram_utils.actions import split_and_preprocess_dataset
 from file_actions.readers.h5 import read_training_data
 from image.filters import preprocess_data
+from networks.io import get_device
+from networks.unet import UNet
+from tomogram_utils.volume_actions.actions import split_and_preprocess_dataset
 
 
 def load_unet_model(path_to_model: str, confs: dict, net: nn.Module = UNet,
@@ -113,3 +114,31 @@ def data_loader(data_path: str, semantic_class: str,
         raw_array, label_array = np.array(raw_array)[:, None], np.array(
             label_array)[:, None]
     return raw_array, label_array
+
+
+def generate_model_name(box_shape: tuple or list, semantic_classes: list,
+                        DA_tag: str, net_conf: dict) -> str:
+    if np.max(box_shape) == np.min(box_shape):
+        box_size = str(np.min(box_shape))
+    else:
+        bz, by, bx = box_shape
+        box_size = str(bx) + "_" + str(by) + "_" + str(bz)
+    classes_string = "_"
+    for semantic_class in semantic_classes:
+        classes_string += semantic_class + "_"
+
+    net_name = box_size + "pix_encoder_dropout" + str(
+        net_conf['encoder_dropout']) + "_decoder_dropout" + str(
+        net_conf['decoder_dropout']) + "_DA_" + DA_tag + "_BN_" + str(
+        net_conf['BN']) + classes_string + "_D_" + str(
+        net_conf['depth']) + "_IF_" + str(net_conf['initial_features'])
+    return net_name
+
+
+def build_prediction_output_dir(base_output_dir: str, label_name: str, model_name: str,
+                     tomo_name: str, semantic_class: str):
+    output_dir = os.path.join(base_output_dir, label_name)
+    output_dir = os.path.join(output_dir, model_name)
+    output_dir = os.path.join(output_dir, tomo_name)
+    output_dir = os.path.join(output_dir, semantic_class)
+    return output_dir

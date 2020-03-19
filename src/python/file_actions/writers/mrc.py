@@ -2,8 +2,8 @@ import mrcfile
 import numpy as np
 
 
-def write_mrc_dataset(mrc_path: str, array: np.array):
-    array = np.array(array, dtype=np.float32)
+def write_mrc_dataset(mrc_path: str, array: np.array, dtype=np.float32):
+    array = np.array(array, dtype=dtype)
     with mrcfile.new(mrc_path, overwrite=True) as mrc:
         mrc.set_data(array)
     return

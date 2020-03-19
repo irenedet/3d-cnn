@@ -5,7 +5,7 @@ from os.path import join
 import numpy as np
 import pandas as pd
 
-from file_actions.readers.csv import read_motl_from_csv
+from file_actions.readers.motl import read_motl_from_csv
 from file_actions.readers.tomograms import load_tomogram
 from file_actions.writers.csv import motl_writer
 

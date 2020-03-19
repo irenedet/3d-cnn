@@ -11,19 +11,19 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 
+from constants import h5_internal_paths
+from file_actions.readers.em import read_em
+from file_actions.readers.motl import read_motl_from_csv
+from file_actions.readers.shrec import particle_dict
+from file_actions.readers.shrec import read_shrec_motl
+from file_actions.readers.tomograms import load_tomogram
+from networks.unet_new import UNet3D
+from tensors.actions import crop_window_around_point
 from tomogram_utils.coordinates_toolbox import subtomos
 from tomogram_utils.coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl, extract_coordinates_from_txt_shrec
-from file_actions.readers.csv import read_motl_from_csv
-from file_actions.readers.tomograms import load_tomogram
-from file_actions.readers.em import read_em
-from file_actions.readers.shrec import particle_dict
-from file_actions.readers.shrec import read_shrec_motl
-from constants import h5_internal_paths
-from networks.unet_new import UNet3D
 from tomogram_utils.peak_toolbox.utils import paste_sphere_in_dataset
 from tomogram_utils.peak_toolbox.utils import read_motl_coordinates_and_values
-from tensors.actions import crop_window_around_point
 
 
 def write_dataset_hdf(output_path: str, tomo_data: np.array):
@@ -298,8 +298,8 @@ def write_dataset_from_subtomos_with_overlap_multiclass_exponentiating(
 
 def write_subtomograms_from_dataset(output_path, padded_dataset,
                                     window_centers, crop_shape):
-    with h5py.File(output_path, 'w') as f:
-        for window_center in window_centers:
+    for window_center in window_centers:
+        with h5py.File(output_path, 'a') as f:
             subtomo_name = "subtomo_{0}".format(str(window_center))
             subtomo_h5_internal_path = join(h5_internal_paths.RAW_SUBTOMOGRAMS,
                                             subtomo_name)
@@ -403,7 +403,8 @@ def write_raw_subtomograms_intersecting_mask(output_path: str,
                                              window_centers: list,
                                              crop_shape: tuple):
     with h5py.File(output_path, 'w') as f:
-        for window_center in window_centers:
+        n = len(window_centers)
+        for index, window_center in zip(tqdm(range(n)), window_centers):
             subtomo_name = "subtomo_{0}".format(str(window_center))
             subtomo_raw_h5_internal_path = join(
                 h5_internal_paths.RAW_SUBTOMOGRAMS,
@@ -419,8 +420,6 @@ def write_raw_subtomograms_intersecting_mask(output_path: str,
                 window_center=window_center)
             if np.max(subtomo_label_data) > 0:
                 f[subtomo_raw_h5_internal_path] = subtomo_raw_data
-            else:
-                print("subtomo ", subtomo_name, "discarded")
     return
 
 

@@ -7,10 +7,10 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-from performance.statistics_utils import precision_recall_calculator_and_detected, \
+from performance.statistics_utils import precision_recall_calculator, \
     pr_auc_score, f1_score_calculator
 from coordinates_toolbox.utils import extract_coordinates_from_em_motl
-from file_actions.readers.csv import read_motl_from_csv
+from file_actions.readers.motl import read_motl_from_csv
 from file_actions.readers.em import read_em
 from file_actions.writers.csv import motl_writer
 from peak_toolbox.utils import extract_motl_coordinates_and_score_values
@@ -77,7 +77,7 @@ precision, recall, detected_true, detected_predicted, \
 undetected_predicted, value_detected_predicted, \
 value_undetected_predicted, redundantly_detected_predicted, \
 value_redudndantly_detected_predicted = \
-    precision_recall_calculator_and_detected(
+    precision_recall_calculator(
         motl_coordinates,
         motl_values,
         motl_clean_coords,

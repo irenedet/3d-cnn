@@ -13,6 +13,7 @@ import pandas as pd
 import torch.nn as nn
 
 from constants import h5_internal_paths
+from constants.dataset_tables import ModelsTableHeader
 from tomogram_utils.coordinates_toolbox.subtomos import \
     get_subtomo_corner_and_side_lengths
 from tomogram_utils.coordinates_toolbox.utils import \
@@ -182,8 +183,8 @@ def build_tom_motive_list(list_of_peak_coordinates: list,
 
 def new_motl_writer(path_to_output_folder: str, list_of_peak_coordinates: list,
                     list_of_peak_scores=None, list_of_angles_in_degrees=None,
-                    list_of_classes=1, in_tom_format=False, order_by_score=True,
-                    motl_name=None) -> str:
+                    list_of_classes: int or list = 1, in_tom_format=False,
+                    order_by_score=True, motl_name=None) -> str:
     n_particles = len(list_of_peak_coordinates)
     if order_by_score:
         assert list_of_peak_scores is not None
@@ -506,40 +507,61 @@ def write_on_models_notebook(model_name: str, model_path: str,
                              retrain: str or bool,
                              path_to_old_model: str, models_notebook_path: str,
                              dropout: np.nan or float = np.nan,
+                             encoder_dropout: float = np.nan,
+                             decoder_dropout: float = np.nan,
                              BN: bool = False):
     """
 
-    :type segmentation_names: a list of semantic classes names that the model
-    predicts, e.g. ["ribo", "memb"]
-    :type model_path: pkl file that stores model parameters.
+    :param model_name:
+    :param model_path:
+    :param log_dir:
+    :param depth:
+    :param initial_features:
+    :param n_epochs:
+    :param training_paths_list:
+    :param split:
+    :param output_classes:
+    :param segmentation_names:
+    :param retrain:
+    :param path_to_old_model:
+    :param models_notebook_path:
+    :param dropout:
+    :param encoder_dropout:
+    :param decoder_dropout:
+    :param BN:
+    :return:
     """
+    ModelsHeader = ModelsTableHeader()
     training_paths = reduce(lambda x, y: x + ", " + y, training_paths_list)
     segmentation_names = reduce(lambda x, y: x + ", " + y, segmentation_names)
     print(training_paths, segmentation_names)
 
     now = datetime.datetime.now()
     date = str(now.day) + "/" + str(now.month) + "/" + str(now.year)
-    mini_notebook_df = pd.DataFrame({'model_name': model_name}, index=[0])
-    mini_notebook_df['model_name'] = model_name
-    mini_notebook_df['model_path'] = model_path
-    mini_notebook_df['log_path'] = log_dir
-    mini_notebook_df['depth'] = depth
-    mini_notebook_df['if'] = initial_features
-    mini_notebook_df['dropout'] = dropout
-    mini_notebook_df['n_epochs'] = n_epochs
-    mini_notebook_df['training_set'] = training_paths
-    mini_notebook_df['train_split'] = split
-    mini_notebook_df['output_classes'] = output_classes
-    mini_notebook_df['segmentation_names'] = segmentation_names
-    mini_notebook_df['retrain'] = str(retrain)
-    mini_notebook_df['old_model'] = path_to_old_model
-    mini_notebook_df['date'] = date
-    mini_notebook_df['BN'] = str(BN)
+    mini_notebook_df = pd.DataFrame({ModelsHeader.model_name: model_name},
+                                    index=[0])
+    mini_notebook_df[ModelsHeader.model_name] = model_name
+    mini_notebook_df[ModelsHeader.model_path] = model_path
+    mini_notebook_df[ModelsHeader.logging_path] = log_dir
+    mini_notebook_df[ModelsHeader.depth] = depth
+    mini_notebook_df[ModelsHeader.initial_features] = initial_features
+    mini_notebook_df[ModelsHeader.dropout] = dropout
+    mini_notebook_df[ModelsHeader.epochs] = n_epochs
+    mini_notebook_df[ModelsHeader.training_set] = training_paths
+    mini_notebook_df[ModelsHeader.train_split] = split
+    mini_notebook_df[ModelsHeader.output_classes] = output_classes
+    mini_notebook_df[ModelsHeader.semantic_classes] = segmentation_names
+    mini_notebook_df[ModelsHeader.retrain] = str(retrain)
+    mini_notebook_df[ModelsHeader.old_model] = path_to_old_model
+    mini_notebook_df[ModelsHeader.date] = date
+    mini_notebook_df[ModelsHeader.batch_normalization] = str(BN)
+    mini_notebook_df[ModelsHeader.encoder_dropout] = encoder_dropout
+    mini_notebook_df[ModelsHeader.decoder_dropout] = decoder_dropout
     models_notebook_dir = os.path.dirname(models_notebook_path)
     makedirs(models_notebook_dir, exist_ok=True)
     if os.path.isfile(models_notebook_path):
-        models_notebook_df = pd.read_csv(models_notebook_path)
-
+        models_notebook_df = pd.read_csv(models_notebook_path,
+                                         dtype={ModelsHeader.model_name: str})
         models_notebook_df = models_notebook_df.append(mini_notebook_df,
                                                        sort="False")
         models_notebook_df.to_csv(path_or_buf=models_notebook_path, index=False)

@@ -151,12 +151,12 @@ def read_training_data_dice_multi_class(training_data_path: str,
                 data += [[f[raw_subtomo_h5_internal_path][:]]]
                 labels += [np.array(labels_current_subtomo)]
             else:
-                print("Discard subtomo", subtomo_name)
+                print("Due to lack of annotations, discarding", subtomo_name)
 
     data = np.array(data)
     labels = np.array(labels)
-    print("Loaded data of shape from the reader", data.shape)
-    print("Loaded labels of shape from the reader", labels.shape)
+    print("Data shape from the reader", data.shape)
+    print("Labels shape from the reader", labels.shape)
     return data, labels
 
 

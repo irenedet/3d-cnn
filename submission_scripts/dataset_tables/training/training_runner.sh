@@ -1,24 +1,3 @@
-#! /bin/bash
-
-#SBATCH -A mahamid
-#SBATCH --nodes 1
-#SBATCH --ntasks 1
-#SBATCH --mem 40G
-#SBATCH --time 0-25:00
-#SBATCH -o training.slurm.%N.%j.out
-#SBAtCH -e training.slurm.%N.%j.err
-#SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=irene.de.teresa@embl.de
-#SBATCH -p gpu
-#SBAtCH -C gpu=1080Ti
-#SBATCH --gres=gpu:4 -n1 -c4
-
-#-p is partition
-#-C is the card
-#--gres means generic resources per node (gpus per node)
-# in format name[:type:count]
-#--gpus-per-socket
-#--gpus-per-task
 
 module load GCC
 module load Anaconda3
@@ -43,6 +22,9 @@ while [ "$1" != "" ]; do
                                 ;;
         -path_to_dataset_table | --path_to_dataset_table )   shift
                                 path_to_dataset_table=$1
+                                ;;
+        -training_partition | --training_partition )   shift
+                                training_partition=$1
                                 ;;
         -segmentation_names | --segmentation_names )   shift
                                 segmentation_names=$1
@@ -107,7 +89,7 @@ while [ "$1" != "" ]; do
     shift
 done
 
-
+export training_partition=$training_partition
 export tomo_training_list=$tomo_training_list
 export path_to_dataset_table=$path_to_dataset_table
 export segmentation_names=$segmentation_names
@@ -151,6 +133,6 @@ echo models_notebook=$models_notebook
 echo 'Training dice multi-label network for fraction='$fraction
 echo 'and model_name='$model_initial_name
 echo UPICKER_PATH=$UPICKER_PATH
-python3 $UPICKER_PATH/runners/dataset_tables/training/dice_unet_training.py -dataset_table $path_to_dataset_table -tomo_training_list "${tomo_training_list[@]}" -split $split -classes $output_classes -log_dir $log_dir -model_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook -shuffle $shuffle -BN $Batch_Normalization -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout -batch_size $batch_size
+python3 $UPICKER_PATH/runners/dataset_tables/training/dice_unet_training.py -dataset_table $path_to_dataset_table -tomo_training_list "${tomo_training_list[@]}" -split $split -classes $output_classes -log_dir $log_dir -model_name $model_initial_name -model_path $model_path -n_epochs $n_epochs -segmentation_names $segmentation_names -retrain $retrain -path_to_old_model $path_to_old_model -depth $depth -initial_features $initial_features -models_notebook $models_notebook -shuffle $shuffle -BN $Batch_Normalization -encoder_dropout $encoder_dropout -decoder_dropout $decoder_dropout -batch_size $batch_size -training_partition $training_partition
 
 

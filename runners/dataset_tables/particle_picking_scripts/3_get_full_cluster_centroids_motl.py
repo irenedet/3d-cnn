@@ -106,8 +106,11 @@ if not isfile(clusters_output_path):
 motl_name = "motl_" + str(len(centroids_list)) + ".csv"
 motl_file_name = join(output_dir, motl_name)
 
-motive_list_df = build_tom_motive_list(
-    list_of_peak_coordinates=centroids_list,
-    list_of_peak_scores=cluster_size_list, in_tom_format=False)
-motive_list_df.to_csv(motl_file_name, index=False, header=False)
-print("Motive list saved in", motl_file_name)
+if len(centroids_list) > 0:
+    motive_list_df = build_tom_motive_list(
+        list_of_peak_coordinates=centroids_list,
+        list_of_peak_scores=cluster_size_list, in_tom_format=False)
+    motive_list_df.to_csv(motl_file_name, index=False, header=False)
+    print("Motive list saved in", motl_file_name)
+else:
+    print("empty list!")

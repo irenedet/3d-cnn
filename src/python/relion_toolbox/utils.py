@@ -5,7 +5,7 @@ from os.path import isdir, join
 import numpy as np
 
 from performance.statistics_utils import pr_auc_score, f1_score_calculator, \
-    precision_recall_calculator_and_detected
+    precision_recall_calculator
 from file_actions.readers.star import class3d_data_file_reader
 
 
@@ -85,7 +85,7 @@ def generate_jobs_statistics_dict(star_files: list, motl_clean_coords,
         precision, recall, detected_true, predicted_true_positives, \
         _, value_predicted_true_positives, \
         _, predicted_redundant, _ = \
-            precision_recall_calculator_and_detected(
+            precision_recall_calculator(
                 predicted_coordinates=coords,
                 value_predicted=list(range(len(coords))),
                 true_coordinates=motl_clean_coords, radius=radius)

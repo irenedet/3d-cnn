@@ -6,21 +6,21 @@ from skimage import morphology as morph
 from tqdm import tqdm
 
 from tomogram_utils.coordinates_toolbox.subtomos import \
-    get_subtomo_corner_side_lengths_and_zero_padding
+    get_subtomo_corner_side_lengths_and_padding
 from tomogram_utils.coordinates_toolbox.utils import shift_coordinates_by_vector
 from constants import h5_internal_paths
 
 
 def get_clusters_within_size_range(dataset: np.array, min_cluster_size: int,
                                    max_cluster_size: int, connectivity=1):
-    assert min_cluster_size < max_cluster_size
+    assert min_cluster_size <= max_cluster_size
 
     labeled_clusters, num = morph.label(input=dataset, background=0,
                                         return_num=True,
                                         connectivity=connectivity)
     labels_list, cluster_size = np.unique(labeled_clusters, return_counts=True)
     labels_list_within_range = labels_list[(cluster_size > min_cluster_size) & (
-            cluster_size < max_cluster_size)]
+            cluster_size <= max_cluster_size)]
     cluster_size_within_range = list(
         cluster_size[(cluster_size > min_cluster_size) & (
                 cluster_size < max_cluster_size)])
@@ -71,10 +71,10 @@ def get_cluster_centroids_from_partition(partition: str, label_name: str,
             # extract the subtomo data in the internal subtomo plus a bit more
             # (overlap//2), instead of extracting sharply
             subtomo_corner, subtomo_side_lengths, zero_border_thickness = \
-                get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name,
-                                                                 subtomo_shape,
-                                                                 output_shape,
-                                                                 overlap // 2)
+                get_subtomo_corner_side_lengths_and_padding(subtomo_name,
+                                                            subtomo_shape,
+                                                            output_shape,
+                                                            overlap // 2)
 
             shape_minus_overlap = tuple([dim - pad[0] - pad[1] for pad, dim in
                                          zip(zero_border_thickness,
@@ -138,10 +138,10 @@ def get_cluster_centroids_from_full_dataset(partition: str, label_name: str,
             # extract the subtomo data in the internal subtomo plus a bit more
             # (overlap//2), instead of extracting sharply
             subtomo_corner, subtomo_side_lengths, zero_border_thickness = \
-                get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name,
-                                                                 subtomo_shape,
-                                                                 output_shape,
-                                                                 overlap // 2)
+                get_subtomo_corner_side_lengths_and_padding(subtomo_name,
+                                                            subtomo_shape,
+                                                            output_shape,
+                                                            overlap // 2)
 
             shape_minus_overlap = tuple([dim - pad[0] - pad[1] for pad, dim in
                                          zip(zero_border_thickness,

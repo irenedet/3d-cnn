@@ -1,0 +1,26 @@
+dataset_table : "datasets.csv"
+overlap : 12
+write_on_table : True
+partition_name : "test_partition"
+processing_tomo : "original_tomo"
+box_shape : 64
+
+unet_hyperparameters:
+  models_table: "/struct/mahamid/Irene/test_3d_cnn/models.csv"
+  model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_Falsefas__D_1_IF_1"
+  label_name : "test_experiment"
+
+reconstruction:
+  reconstruction_path : "/struct/mahamid/Irene/test_3d_cnn/evaluation"
+  class_number : 0
+
+motl_parameters:
+  min_cluster_size: 10
+  max_cluster_size: 600000000
+  ignore_border_thickness : 10
+  filtering_mask : 'lamella_file'
+
+performance_parameters:
+  clean_motl : 'path_to_motl_clean_fas'
+  pr_tolerance_radius : 12
+  statistics_file : "/struct/mahamid/Irene/test_3d_cnn/models_fas.csv"

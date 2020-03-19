@@ -1,14 +1,14 @@
-import numpy as np
-import h5py
 from os.path import join
 
+import h5py
+import numpy as np
 from scipy.ndimage import interpolation
 from scipy.ndimage.filters import gaussian_filter
 from scipy.ndimage.interpolation import map_coordinates
 
 import python_utils_inferno as pyu
-from file_actions.readers import h5
 from constants import h5_internal_paths
+from file_actions.readers import h5
 
 """
 All these functions were taken from the package Inferno:
@@ -117,7 +117,7 @@ class Transform(object):
             return np.array([np.array(
                 [self.image_function(image, **transform_function_kwargs)
                  for image in channel_image])
-                             for channel_image in tensor])
+                for channel_image in tensor])
         # 3D case
         elif tensor.ndim == 5:
             return np.array([np.array([np.array([self.image_function(image,
@@ -246,7 +246,7 @@ class ElasticTransform(Transform):
         _inverter = 1. if not self.invert else -1.
         # Distort meshgrid indices (invert if required)
         flow_y, flow_x = (y + _inverter * sdy).reshape(-1, 1), (
-            x + _inverter * sdx).reshape(-1, 1)
+                x + _inverter * sdx).reshape(-1, 1)
         # Set random states
         self.set_random_variable('flow_x', flow_x)
         self.set_random_variable('flow_y', flow_y)
@@ -370,7 +370,6 @@ class SinusoidalElasticTransform3D(Transform):
         return image
 
     def build_random_variables(self, **kwargs):
-        # All this is done just once per batch (i.e. until `clear_random_variables` is called)
         np.random.seed()
         imshape = kwargs.get('imshape')
         nz, ny, nx = [sh // self.interp_factor for sh in imshape]
@@ -445,10 +444,37 @@ class AdditiveGaussianNoise(Transform):
 
     def build_random_variables(self, **kwargs):
         np.random.seed()
-        noise_level = np.random.uniform(0, self.sigma, 1)[0]
-        self.set_random_variable('noise',
-                                 np.random.normal(loc=0, scale=noise_level,
-                                                  size=kwargs.get('imshape')))
+        noise_radius = np.random.uniform(low=0, high=self.sigma, size=1)[0]
+        gaussian_noise = np.random.normal(loc=0, scale=noise_radius,
+                                          size=kwargs.get('imshape'))
+        self.set_random_variable('noise', gaussian_noise)
+
+    def image_function(self, image):
+        image = image + self.get_random_variable('noise', imshape=image.shape)
+        return image
+
+    def volume_function(self, volume):
+        volume = volume + self.get_random_variable('noise',
+                                                   imshape=volume.shape)
+        return volume
+
+
+class AdditiveSaltAndPepperNoise(Transform):
+    """Add salt-and-pepper noise to the input."""
+
+    def __init__(self, p=0.04, amplitude=1, **super_kwargs):
+        super(AdditiveSaltAndPepperNoise, self).__init__(**super_kwargs)
+        self.p = p
+        self.amplitude = amplitude
+
+    def build_random_variables(self, **kwargs):
+        np.random.seed()
+        noise_p = np.random.uniform(low=0, high=self.p, size=1)[0]
+        noise_ampl = np.random.uniform(low=0, high=self.amplitude, size=1)[0]
+        salt = np.random.binomial(n=1, p=noise_p, size=kwargs.get('imshape'))
+        pepper = np.random.binomial(n=1, p=noise_p, size=kwargs.get('imshape'))
+        salt_pepper = noise_ampl * (salt - pepper)
+        self.set_random_variable('noise', salt_pepper)
 
     def image_function(self, image):
         image = image + self.get_random_variable('noise', imshape=image.shape)

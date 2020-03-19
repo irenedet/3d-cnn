@@ -10,11 +10,10 @@ def get_clean_points_close2point(point, clean, radius):
     return close_to_point
 
 
-def precision_recall_calculator_and_detected(
-        predicted_coordinates: np.array or list,
-        value_predicted: list,
-        true_coordinates: np.array or list,
-        radius: float):
+def precision_recall_calculator(predicted_coordinates: np.array or list,
+                                value_predicted: list,
+                                true_coordinates: np.array or list,
+                                radius: float):
     true_coordinates = list(true_coordinates)
     predicted_coordinates = list(predicted_coordinates)
     detected_true = list()

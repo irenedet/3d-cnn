@@ -1,3 +1,4 @@
+import argparse
 import os
 from distutils.util import strtobool
 from os import makedirs
@@ -7,26 +8,40 @@ import h5py
 import numpy as np
 import pandas as pd
 
-from tomogram_utils.random_transformations import RandomRot3D, \
-    SinusoidalElasticTransform3D, AdditiveGaussianNoise
 from constants import h5_internal_paths
 from networks.utils import data_loader
+from tomogram_utils.volume_actions.random_transformations import RandomRot3D, \
+    SinusoidalElasticTransform3D, AdditiveGaussianNoise, \
+    AdditiveSaltAndPepperNoise
 
 
 def get_transforms(rot_range: float, elastic_alpha: int,
-                   sigma_noise: float) -> tuple:
+                   sigma_noise: float, epsilon: float,
+                   salt_pepper_p: float = 0.04,
+                   salt_pepper_ampl: float = 0.8) -> tuple:
+    """
+    sigma_noise: radius (std)
+    epsilon: modulation of the noise (amplitude)
+    """
     rotation_transform = RandomRot3D(rot_range=rot_range, p=1)
-    elastic_transform = SinusoidalElasticTransform3D(alpha=elastic_alpha,
-                                                     interp_step=32)
+
     gaussian_transform = AdditiveGaussianNoise(sigma=sigma_noise)
+    salt_pepper_noise = AdditiveSaltAndPepperNoise(p=salt_pepper_p,
+                                                   amplitude=salt_pepper_ampl)
+    if elastic_alpha >= 1:
+        elastic_transform = SinusoidalElasticTransform3D(alpha=elastic_alpha,
+                                                         interp_step=32)
+        raw_transforms = [rotation_transform, elastic_transform,
+                          gaussian_transform, salt_pepper_noise]
+        label_transforms = [rotation_transform, elastic_transform]
 
-    raw_transforms = [rotation_transform, elastic_transform, gaussian_transform]
-    label_transforms = [rotation_transform, elastic_transform]
+    else:
+        raw_transforms = [rotation_transform, gaussian_transform,
+                          salt_pepper_noise]
+        label_transforms = [rotation_transform]
 
-    # raw_transforms = [rotation_transform, gaussian_transform]
-    # label_transforms = [rotation_transform]
-
-    # raw_transforms = [elastic_transform, gaussian_transform]
+    # raw_transforms = [elastic_transform, gaussian_transform,
+    # salt_pepper_noise]
     # label_transforms = [elastic_transform]
 
     return raw_transforms, label_transforms
@@ -48,14 +63,18 @@ def apply_transforms_to_batch(tensor, volume_transforms):
 
 
 def get_transform_list(volumes_number: int, rot_range: float,
-                       elastic_alpha: int, sigma_noise: float):
+                       elastic_alpha: int, sigma_noise: float, epsilon: float,
+                       salt_pepper_p: float, salt_pepper_ampl: float):
     raw_volume_transforms, label_volume_transforms = [], []
 
     for _ in range(volumes_number):
         raw_transforms, label_transforms = \
             get_transforms(rot_range=rot_range,
                            elastic_alpha=elastic_alpha,
-                           sigma_noise=sigma_noise)
+                           sigma_noise=sigma_noise,
+                           epsilon=epsilon,
+                           salt_pepper_p=salt_pepper_p,
+                           salt_pepper_ampl=salt_pepper_ampl)
 
         raw_volume_transforms += [raw_transforms]
         label_volume_transforms += [label_transforms]
@@ -128,13 +147,17 @@ def write_raw_and_labels_vols(dst_data_path, src_raw, src_label_data,
 
 
 def apply_transformation_iteration(src_raw, src_label_data, rot_range,
-                                   elastic_alpha, sigma_noise):
+                                   elastic_alpha, sigma_noise, epsilon,
+                                   salt_pepper_p, salt_pepper_ampl):
     volumes_number = src_raw.shape[0]
     raw_volume_transforms, label_volume_transforms = \
         get_transform_list(volumes_number=volumes_number,
                            rot_range=rot_range,
                            elastic_alpha=elastic_alpha,
-                           sigma_noise=sigma_noise)
+                           sigma_noise=sigma_noise,
+                           epsilon=epsilon,
+                           salt_pepper_p=salt_pepper_p,
+                           salt_pepper_ampl=salt_pepper_ampl)
     transf_raw_tensor = \
         apply_transforms_to_batch(tensor=src_raw,
                                   volume_transforms=raw_volume_transforms)
@@ -149,104 +172,109 @@ def apply_transformation_iteration(src_raw, src_label_data, rot_range,
     return transf_raw_tensor, transf_label_tensors
 
 
-import argparse
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-segmentation_names", "--segmentation_names",
+                        help="segmentation_names",
+                        type=str)
+    parser.add_argument("-dst_data_path", "--dst_data_path",
+                        help="Destination file path",
+                        type=str)
+    parser.add_argument("-write_on_table", "--write_on_table",
+                        help="if True, name of training set "
+                             "will be recorded in db",
+                        type=str)
+    parser.add_argument("-data_aug_rounds", "--data_aug_rounds",
+                        type=int)
+    parser.add_argument("-rot_angle", "--rot_angle",
+                        type=float)
+    parser.add_argument("-elastic_alpha", "--elastic_alpha",
+                        type=float)
+    parser.add_argument("-sigma_noise", "--sigma_noise",
+                        type=float)
+    parser.add_argument("-salt_pepper_p", "--salt_pepper_p",
+                        type=float, default=0.04)
+    parser.add_argument("-salt_pepper_ampl", "--salt_pepper_ampl",
+                        type=float, default=0.8)
+    parser.add_argument("-epsilon", "--epsilon",
+                        type=float)
+    parser.add_argument("-src_data_path", "--src_data_path",
+                        help="path to src_data_path in .h5 format",
+                        type=str)
+    parser.add_argument("-dataset_table", "--dataset_table",
+                        help="path to db (dataset_table) in .csv format",
+                        type=str)
+    parser.add_argument("-tomo_name", "--tomo_name",
+                        help="tomo_name in sessiondate/datanumber format",
+                        type=str)
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-segmentation_names", "--segmentation_names",
-                    help="segmentation_names",
-                    type=str)
-parser.add_argument("-dst_data_path", "--dst_data_path",
-                    help="Destination file path",
-                    type=str)
-parser.add_argument("-write_on_table", "--write_on_table",
-                    help="if True, name of training set will be recorded in db",
-                    type=str)
-parser.add_argument("-data_aug_rounds", "--data_aug_rounds",
-                    type=int)
-parser.add_argument("-rot_angle", "--rot_angle",
-                    type=float)
-parser.add_argument("-elastic_alpha", "--elastic_alpha",
-                    type=float)
-parser.add_argument("-sigma_noise", "--sigma_noise",
-                    type=float)
-parser.add_argument("-src_data_path", "--src_data_path",
-                    help="path to src_data_path in .h5 format",
-                    type=str)
-parser.add_argument("-dataset_table", "--dataset_table",
-                    help="path to db (dataset_table) in .csv format",
-                    type=str)
-parser.add_argument("-tomo_name", "--tomo_name",
-                    help="tomo_name in sessiondate/datanumber format",
-                    type=str)
+    args = parser.parse_args()
+    tomo_name = args.tomo_name
+    dataset_table = args.dataset_table
+    dst_data_path = args.dst_data_path
+    segmentation_names = args.segmentation_names
+    data_aug_rounds = args.data_aug_rounds
+    rot_angle = args.rot_angle
+    sigma_noise = args.sigma_noise
+    epsilon = args.epsilon
+    salt_pepper_p = args.salt_pepper_p
+    salt_pepper_ampl = args.salt_pepper_ampl
+    elastic_alpha = args.elastic_alpha
+    src_data_path = args.src_data_path
+    write_on_table = strtobool(args.write_on_table)
+    folder_name = segmentation_names + "_DA"
 
-args = parser.parse_args()
-tomo_name = args.tomo_name
-dataset_table = args.dataset_table
-dst_data_path = args.dst_data_path
-segmentation_names = args.segmentation_names
-data_aug_rounds = args.data_aug_rounds
-rot_angle = args.rot_angle
-sigma_noise = args.sigma_noise
-elastic_alpha = args.elastic_alpha
-src_data_path = args.src_data_path
-write_on_table = strtobool(args.write_on_table)
+    output_dir = os.path.dirname(dst_data_path)
+    makedirs(name=output_dir, exist_ok=True)
 
-# segmentation_names = 'ribo_fas_memb'
-# output_dir = "/struct/mahamid/Irene/yeast/healthy/180426/004/G_sigma1_non_sph/train_and_test_partitions/"
-# data_aug_rounds = 3
-# rot_angle = 90
-# elastic_alpha = 2
-# sigma_noise = 1.5
-# src_data_path = "/struct/mahamid/Irene/yeast/healthy/180426/004/G_sigma1_non_sph/train_and_test_partitions/full_partition.h5"
+    semantic_classes = segmentation_names.split('_')
+    print("semantic_classes", semantic_classes)
 
+    if os.path.exists(dst_data_path):
+        os.remove(dst_data_path)
 
-folder_name = segmentation_names + "_DA"
+    src_raw, src_label_data = \
+        get_raw_and_labels_vols(src_data_path=src_data_path,
+                                semantic_classes=semantic_classes)
+    # print("src_raw.shape", src_raw.shape)
 
-output_dir = os.path.dirname(dst_data_path)
-makedirs(name=output_dir, exist_ok=True)
-
-semantic_classes = segmentation_names.split('_')
-print("semantic_classes", semantic_classes)
-
-if os.path.exists(dst_data_path):
-    os.remove(dst_data_path)
-
-src_raw, src_label_data = \
-    get_raw_and_labels_vols(src_data_path=src_data_path,
-                            semantic_classes=semantic_classes)
-# print("src_raw.shape", src_raw.shape)
-
-# Copying the original data
-iteration = -1
-write_raw_and_labels_vols(dst_data_path=dst_data_path, src_raw=src_raw,
-                          src_label_data=src_label_data,
-                          semantic_classes=semantic_classes,
-                          iteration=iteration)
-
-# Starting data augmentation:
-for iteration in range(data_aug_rounds):
-    transf_raw_tensor, transf_label_tensors = apply_transformation_iteration(
-        src_raw, src_label_data, rot_range=rot_angle,
-        elastic_alpha=elastic_alpha,
-        sigma_noise=sigma_noise)
-
-    write_raw_and_labels_vols(dst_data_path=dst_data_path,
-                              src_raw=transf_raw_tensor,
-                              src_label_data=transf_label_tensors,
+    # Copying the original data
+    iteration = -1
+    write_raw_and_labels_vols(dst_data_path=dst_data_path, src_raw=src_raw,
+                              src_label_data=src_label_data,
                               semantic_classes=semantic_classes,
                               iteration=iteration)
 
-if write_on_table:
-    dataset_table = args.dataset_table
-    tomo_name = args.tomo_name
-    print("Writing path and DA data on table:", dataset_table)
-    print("Training partition written on table: ", dst_data_path)
-    df = pd.read_csv(dataset_table)
-    df['tomo_name'] = df['tomo_name'].astype(str)
-    tomo_df = df[df['tomo_name'] == tomo_name]
-    df.loc[df['tomo_name'] == tomo_name, 'train_partition'] = dst_data_path
-    df.loc[df['tomo_name'] == tomo_name, 'rot_angle'] = rot_angle
-    df.loc[df['tomo_name'] == tomo_name, 'elastic_alpha'] = elastic_alpha
-    df.loc[df['tomo_name'] == tomo_name, 'sigma_noise'] = sigma_noise
-    df.loc[df['tomo_name'] == tomo_name, 'data_aug_rounds'] = data_aug_rounds
-    df.to_csv(path_or_buf=dataset_table, index=False)
+    # Starting data augmentation:
+    for iteration in range(data_aug_rounds):
+        transf_raw_tensor, transf_label_tensors = \
+            apply_transformation_iteration(
+                src_raw, src_label_data, rot_range=rot_angle,
+                elastic_alpha=elastic_alpha,
+                sigma_noise=sigma_noise,
+                epsilon=epsilon,
+                salt_pepper_p=0,
+                salt_pepper_ampl=0)
+
+        write_raw_and_labels_vols(dst_data_path=dst_data_path,
+                                  src_raw=transf_raw_tensor,
+                                  src_label_data=transf_label_tensors,
+                                  semantic_classes=semantic_classes,
+                                  iteration=iteration)
+
+    if write_on_table:
+        dataset_table = args.dataset_table
+        tomo_name = args.tomo_name
+        print("Writing path and DA data on table:", dataset_table)
+        print("Training partition written on table: ", dst_data_path)
+        df = pd.read_csv(dataset_table)
+        df['tomo_name'] = df['tomo_name'].astype(str)
+        tomo_df = df[df['tomo_name'] == tomo_name]
+        df.loc[df['tomo_name'] == tomo_name, 'train_partition'] = dst_data_path
+        df.loc[df['tomo_name'] == tomo_name, 'rot_angle'] = rot_angle
+        df.loc[df['tomo_name'] == tomo_name, 'elastic_alpha'] = elastic_alpha
+        df.loc[df['tomo_name'] == tomo_name, 'sigma_noise'] = sigma_noise
+        df.loc[df['tomo_name'] == tomo_name, 'salt_pepper_p'] = salt_pepper_p
+        df.loc[
+            df['tomo_name'] == tomo_name, 'data_aug_rounds'] = data_aug_rounds
+        df.to_csv(path_or_buf=dataset_table, index=False)

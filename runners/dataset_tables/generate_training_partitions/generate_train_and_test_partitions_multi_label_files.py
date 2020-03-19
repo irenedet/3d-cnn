@@ -38,6 +38,12 @@ parser.add_argument("-min_label_fraction", "--min_label_fraction",
 parser.add_argument("-max_label_fraction", "--max_label_fraction",
                     help="max_label_fraction",
                     type=float)
+parser.add_argument("-prefix", "--prefix",
+                    help="additional name reference for the set to partition",
+                    type=str or int, default="false")
+parser.add_argument("-edge_tolerance", "--edge_tolerance",
+                    help="edge_tolerance to not include particles half padded.",
+                    type=int, default=0)
 
 args = parser.parse_args()
 tomo_name = args.tomo_name
@@ -50,17 +56,24 @@ number_iter = args.number_iter
 split = args.split
 segmentation_names = args.segmentation_names
 write_on_table = strtobool(args.write_on_table)
-
+prefix = args.prefix
+edge_tolerance = args.edge_tolerance
 segmentation_names = list(map(str, segmentation_names.split(',')))
 print(segmentation_names)
 overlap = 12
+# edge_tolerance = 20
 print("output_dir", output_dir)
 
 df = pd.read_csv(dataset_table)
 df['tomo_name'] = df['tomo_name'].astype(str)
-tomo_df = df[df['tomo_name'] == tomo_name]
-path_to_raw = tomo_df.iloc[0]['eman2_filetered_tomo']
 
+if prefix == "false":
+    tomo_df = df[df['tomo_name'] == tomo_name]
+else:
+    tomo_df = df[
+        (df['tomo_name'] == tomo_name) & (df["subset_prefix"] == prefix)]
+
+path_to_raw = tomo_df.iloc[0]['eman2_filetered_tomo']
 labels_dataset_list = list()
 for semantic_class in segmentation_names:
     mask_name = semantic_class + '_mask'
@@ -84,27 +97,29 @@ label_fractions_list = generate_strongly_labeled_partition(
     subtomo_shape=subtomogram_shape,
     overlap=overlap,
     min_label_fraction=min_label_fraction,
-    max_label_fraction=max_label_fraction)
+    max_label_fraction=max_label_fraction,
+    edge_tolerance=edge_tolerance)
 
-print(label_fractions_list)
-
-fig_path = join(output_dir, "label_fractions_hist.png")
-print("The training data path is ", output_path)
-zoom = np.where(np.array(label_fractions_list) < 0.01)[0]
-plt.figure(1)
-plt.hist(label_fractions_list, bins=10)
-plt.xlabel("label fraction")
-plt.ylabel("frequency")
-plt.gcf()
-plt.savefig(fname=fig_path, format="png")
-
-fig_path = join(output_dir, "zoom_label_fractions_hist.png")
-plt.figure(2)
-plt.hist(np.array(label_fractions_list)[zoom], bins=10)
-plt.xlabel("label_fraction < 0.01")
-plt.ylabel("frequency")
-plt.gcf()
-plt.savefig(fname=fig_path, format="png")
+print("label_fractions_list =", label_fractions_list)
+print(np.where(np.array(label_fractions_list) > 0)[0].shape, "out of",
+      len(label_fractions_list), " cubes selected in partition file.")
+# fig_path = join(output_dir, "label_fractions_hist.png")
+# print("The training data path is ", output_path)
+# zoom = np.where(np.array(label_fractions_list) < 0.01)[0]
+# plt.figure(1)
+# plt.hist(label_fractions_list, bins=10)
+# plt.xlabel("label fraction")
+# plt.ylabel("frequency")
+# plt.gcf()
+# plt.savefig(fname=fig_path, format="png")
+#
+# fig_path = join(output_dir, "zoom_label_fractions_hist.png")
+# plt.figure(2)
+# plt.hist(np.array(label_fractions_list)[zoom], bins=10)
+# plt.xlabel("label_fraction < 0.01")
+# plt.ylabel("frequency")
+# plt.gcf()
+# plt.savefig(fname=fig_path, format="png")
 
 if write_on_table:
     print("path to training partition written on table: ", output_path)

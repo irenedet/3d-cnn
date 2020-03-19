@@ -11,7 +11,7 @@ import pandas as pd
 from file_actions.writers.csv import motl_writer
 from file_actions.writers.csv import write_statistics
 from performance.statistics_utils import pr_auc_score, \
-    f1_score_calculator, precision_recall_calculator_and_detected
+    f1_score_calculator, precision_recall_calculator
 from tomogram_utils.peak_toolbox.subtomos import \
     select_coordinates_in_subtomos, select_coordinates_and_values_in_subtomos
 from tomogram_utils.peak_toolbox.utils import read_motl_coordinates_and_values
@@ -169,7 +169,7 @@ precision, recall, detected_true, detected_predicted, \
 undetected_predicted, value_detected_predicted, \
 value_undetected_predicted, redundantly_detected_predicted, \
 value_redudndantly_detected_predicted = \
-    precision_recall_calculator_and_detected(
+    precision_recall_calculator(
         predicted_coordinates_test,
         predicted_values_test,
         true_coordinates_test,

@@ -9,7 +9,7 @@ import torch.nn as nn
 from tomogram_utils.coordinates_toolbox.subtomos import get_coord_from_name, \
     get_subtomo_corners, read_subtomo_names, get_subtomo_corner_and_side_lengths
 from tomogram_utils.coordinates_toolbox.subtomos import \
-    get_subtomo_corner_side_lengths_and_zero_padding
+    get_subtomo_corner_side_lengths_and_padding
 from tomogram_utils.coordinates_toolbox.utils import shift_coordinates_by_vector
 from constants import h5_internal_paths
 from tomogram_utils.peak_toolbox.utils import extract_peaks
@@ -82,10 +82,10 @@ def get_peaks_per_subtomo_with_overlap(h5file: h5py.File, subtomo_name: str,
                                        min_peak_distance: int,
                                        overlap: int) -> tuple:
     subtomo_corner, subtomo_side_lengths, zero_padding = \
-        get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name,
-                                                         subtomo_shape,
-                                                         output_shape,
-                                                         overlap // 2)
+        get_subtomo_corner_side_lengths_and_padding(subtomo_name,
+                                                    subtomo_shape,
+                                                    output_shape,
+                                                    overlap // 2)
 
     subtomo_h5_internal_path = join(subtomos_internal_path,
                                     subtomo_name)
@@ -122,10 +122,10 @@ def get_peaks_per_subtomo_with_overlap_multiclass(
         final_activation: nn.Module = None,
         threshold: float = -np.inf) -> tuple:
     subtomo_corner, subtomo_side_lengths, zero_padding = \
-        get_subtomo_corner_side_lengths_and_zero_padding(subtomo_name,
-                                                         subtomo_shape,
-                                                         output_shape,
-                                                         overlap // 2)
+        get_subtomo_corner_side_lengths_and_padding(subtomo_name,
+                                                    subtomo_shape,
+                                                    output_shape,
+                                                    overlap // 2)
 
     subtomo_h5_internal_path = join(subtomos_internal_path,
                                     subtomo_name)

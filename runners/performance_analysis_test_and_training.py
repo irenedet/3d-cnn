@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from performance.statistics_utils import pr_auc_score, \
-    f1_score_calculator, precision_recall_calculator_and_detected
+    f1_score_calculator, precision_recall_calculator
 from coordinates_toolbox.utils import \
     extract_coordinates_from_em_motl
-from file_actions.readers.csv import read_motl_from_csv
+from file_actions.readers.motl import read_motl_from_csv
 from file_actions.readers.em import read_em
 from peak_toolbox.subtomos import select_coordinates_in_subtomos, \
     select_coordinates_and_values_in_subtomos
@@ -119,7 +119,7 @@ print(len(predicted_coordinates_test))
 
 precision, recall, detected_clean, detected_predicted, \
 undetected_predicted, value_detected_predicted, value_undetected_predicted = \
-    precision_recall_calculator_and_detected(
+    precision_recall_calculator(
         predicted_coordinates_test,
         predicted_coordinates_test_values,
         true_coordinates_test,

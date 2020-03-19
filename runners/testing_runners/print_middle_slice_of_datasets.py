@@ -107,26 +107,29 @@ dataset_names = [
 #     pdf.savefig(fig)
 # pdf.close()
 # /scratch/trueba/3d-cnn/cross-validation/fas_cross_validation/original-training-data//181126/002/strongly_labeled_min0.002_max0.1/no_eman_filter_256pix/full_partition.h5
+import random
+
 pdf = matplotlib.backends.backend_pdf.PdfPages(
-    "/home/papalotl/Desktop/64pix_non_sph_fas_strongly_labeled_min0.0004_max1.pdf")
+    "/home/papalotl/Desktop/DA_64pix_4bin_non_sph_fas_strongly_labeled_min0.01_max1.pdf")
+DA = "G5_E0_R180"
 for index, tomo_name in enumerate(dataset_names):
     print("tomo_name", tomo_name)
-    data_path = join(
-        "/struct/mahamid/Irene/scratch/3d-cnn/cross-validation/fas/original-training-data",
-        tomo_name)
-    data_path = join(
-        data_path,
-        "strongly_labeled_min0.0004_max1/eman_filter_64pix/full_partition.h5")
+    tomo_path = join("/struct/mahamid/Irene/yeast/healthy", tomo_name)
+    data_path = join(tomo_path, "strongly_labeled_min0.01_max1")
+    data_path = join(data_path, "single_filter_64pix")
+    data_path = join(data_path, DA + "_DArounds4/full_partition.h5")
 
     iterations = 0
     labels = ['fas']
-    volumes = get_image_dict(data_path=data_path, labels=labels, iterations=0)
+    volumes = get_image_dict(data_path=data_path, labels=labels, iterations=4)
     names_list = list(volumes.keys())
+    names_list = random.choices(names_list, k=40)
     vol_numbers = range(len(names_list))
+
     matplotlib.use('Agg')
     plt.ioff()
-    # fig = plt.figure(index, frameon=False)
-    figsize = (10, 1.5 * len(vol_numbers))
+    print("starting fig for", tomo_name)
+    figsize = (10, 1.5 * len(names_list))
     nrows = len(vol_numbers)
     nlabels = len(labels)
     fig, axes = plt.subplots(nrows=nrows, ncols=nlabels + 1, figsize=figsize,

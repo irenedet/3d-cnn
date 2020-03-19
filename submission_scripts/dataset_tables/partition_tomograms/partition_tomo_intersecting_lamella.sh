@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 10G
-#SBATCH --time 0-00:25
+#SBATCH --mem 50G
+#SBATCH --time 0-4:25
 #SBATCH -o slurm_outputs/partition_tomo_slurm.%N.%j.out
 #SBAtCH -e slurm_outputs/partition_tomo_slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -64,9 +64,9 @@ echo outh5 = $outh5
 
 module load Anaconda3
 echo 'starting virtual environment'
-source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
+source activate $UPICKER_VENV_PATH
 
 export outh5=$output_dir"/tomo_partition.h5"
 echo 'starting python script'
-python3 runners/dataset_tables/particle_picking/partition_from_dataset_table.py -dataset_table $dataset_table -tomo_name $tomo_name -outh5 $outh5 -output $output_dir -box $box_side -overlap $overlap -write_on_table $write_on_table
+python3 $UPICKER_PATH/runners/dataset_tables/particle_picking/partition_from_dataset_table.py -dataset_table $dataset_table -tomo_name $tomo_name -outh5 $outh5 -output $output_dir -box $box_side -overlap $overlap -write_on_table $write_on_table
 echo 'done'

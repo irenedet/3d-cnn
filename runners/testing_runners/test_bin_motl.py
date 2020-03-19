@@ -5,7 +5,7 @@ import numpy as np
 
 from coordinates_toolbox.utils import \
     extract_coordinates_and_values_from_em_motl
-from file_actions.readers.csv import read_motl_from_csv
+from file_actions.readers.motl import read_motl_from_csv
 from file_actions.readers.em import read_em
 from file_actions.writers.csv import motl_writer
 from peak_toolbox.utils import \
