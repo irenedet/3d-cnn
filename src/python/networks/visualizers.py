@@ -30,6 +30,7 @@ class TensorBoard(object):
 
         self.writer.add_image(tag, img_tensor=image, global_step=step)
 
+
 class TensorBoard_multiclass(object):
     """
     Adapted version from A. Kreshuk and C. Pape

@@ -5,10 +5,7 @@ class DatasetTableHeader(object):
                  processing_tomo='eman2_filtered_tomo',
                  image_acquisition_parameter='vpp'):
 
-        if clean_motl is None:
-            self.clean_motl = ["path_to_motl_clean"]
-        else:
-            self.clean_motl = clean_motl
+
 
         self.processing_tomo = processing_tomo
         self.original_tomo = 'original_tomo'
@@ -28,12 +25,20 @@ class DatasetTableHeader(object):
         self.y_shift = 'y_shift'
         self.z_shift = 'z_shift'
         if semantic_classes is not None:
-            self.masks_names = [name + "_mask" for name in
-                                self.semantic_classes]
+            self.masks_names = [
+                name + "_mask" for name in self.semantic_classes
+            ]
+        if clean_motl is None:
+            if semantic_classes is not None:
+                self.clean_motls = ["path_to_motl_clean_" + semantic_class for
+                                    semantic_class in semantic_classes]
+        else:
+            self.clean_motls = clean_motl
         return
 
 
 class ModelsTableHeader(object):
+
     def __init__(self):
         self.batch_normalization = "BN"
         self.date = "date"
@@ -52,4 +57,23 @@ class ModelsTableHeader(object):
         self.training_set = "training_set"
         self.encoder_dropout = "encoder_dropout"
         self.decoder_dropout = "decoder_dropout"
+        self.label_name = "label_name"
+        self.dtype_dict = {
+            self.batch_normalization: bool,
+            self.date: str,
+            self.depth: int,
+            self.dropout: float,
+            self.initial_features: int,
+            self.logging_path: str,
+            self.model_name: str,
+            self.model_path: str,
+            self.epochs: int,
+            self.old_model: str,
+            self.output_classes: int,
+            self.retrain: bool,
+            self.train_split: float,
+            self.encoder_dropout: float,
+            self.decoder_dropout: float,
+            self.label_name: str
+        }
         return

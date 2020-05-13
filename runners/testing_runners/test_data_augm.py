@@ -3,6 +3,7 @@ import os
 from distutils.util import strtobool
 from os import makedirs
 from os.path import join
+from shutil import copyfile
 
 import h5py
 import numpy as np
@@ -16,19 +17,24 @@ from tomogram_utils.volume_actions.random_transformations import RandomRot3D, \
 
 
 def get_transforms(rot_range: float, elastic_alpha: int,
-                   sigma_noise: float, epsilon: float,
-                   salt_pepper_p: float = 0.04,
+                   sigma_noise: float, salt_pepper_p: float = 0.04,
                    salt_pepper_ampl: float = 0.8) -> tuple:
     """
-    sigma_noise: radius (std)
-    epsilon: modulation of the noise (amplitude)
+
+    :param rot_range:
+    :param elastic_alpha:
+    :param sigma_noise:
+    :param salt_pepper_p:
+    :param salt_pepper_ampl:
+    :return:
     """
-    rotation_transform = RandomRot3D(rot_range=rot_range, p=1)
+    rotation_transform = RandomRot3D(rot_range=rot_range, p=0.5)
 
     gaussian_transform = AdditiveGaussianNoise(sigma=sigma_noise)
     salt_pepper_noise = AdditiveSaltAndPepperNoise(p=salt_pepper_p,
                                                    amplitude=salt_pepper_ampl)
     if elastic_alpha >= 1:
+
         elastic_transform = SinusoidalElasticTransform3D(alpha=elastic_alpha,
                                                          interp_step=32)
         raw_transforms = [rotation_transform, elastic_transform,
@@ -63,7 +69,7 @@ def apply_transforms_to_batch(tensor, volume_transforms):
 
 
 def get_transform_list(volumes_number: int, rot_range: float,
-                       elastic_alpha: int, sigma_noise: float, epsilon: float,
+                       elastic_alpha: int, sigma_noise: float,
                        salt_pepper_p: float, salt_pepper_ampl: float):
     raw_volume_transforms, label_volume_transforms = [], []
 
@@ -72,7 +78,6 @@ def get_transform_list(volumes_number: int, rot_range: float,
             get_transforms(rot_range=rot_range,
                            elastic_alpha=elastic_alpha,
                            sigma_noise=sigma_noise,
-                           epsilon=epsilon,
                            salt_pepper_p=salt_pepper_p,
                            salt_pepper_ampl=salt_pepper_ampl)
 
@@ -83,23 +88,21 @@ def get_transform_list(volumes_number: int, rot_range: float,
 
 
 def write_raw_tensor(dst_data, raw_tensor, iteration):
-    print("raw_tensor.shape", raw_tensor.shape)
+    print("data shape", raw_tensor.shape)
     volumes_number = raw_tensor.shape[0]
-    print("volumes_number =", volumes_number)
+    print("Iteration", iteration, "for raw data")
     global_subtomo_raw_h5_path = h5_internal_paths.RAW_SUBTOMOGRAMS
     with h5py.File(dst_data, 'a') as f:
         for batch_id in range(volumes_number):
             subtomo_name = str(iteration) + "_" + str(batch_id)
-            print("batch_id =", batch_id)
-            print("subtomo_name =", subtomo_name)
             subtomo_raw_h5_path = join(global_subtomo_raw_h5_path, subtomo_name)
             f[subtomo_raw_h5_path] = raw_tensor[batch_id, 0, :, :, :]
-            print(list(f[global_subtomo_raw_h5_path]))
     return
 
 
 def write_label_tensor(dst_data, label_tensor, iteration, label_name):
     volumes_number = label_tensor.shape[0]
+    print("Iteration", iteration, "for label", label_name)
     with h5py.File(dst_data, 'a') as f:
         for batch_id in range(volumes_number):
             subtomo_name = str(iteration) + "_" + str(batch_id)
@@ -120,10 +123,11 @@ def get_raw_and_labels_vols(src_data_path, semantic_classes,
                                          number_vols=number_vols,
                                          labeled_only=False)
         src_label_data += [src_label]
+
     src_raw_keep = list()
     src_label_data_keep = list()
     n = len(src_raw)
-    print("Original number of tomograms", n)
+    print("Number of raw sub-tomograms", n)
     for index in range(n):
         label_maxima_list = [np.max(label[index]) for label in src_label_data]
         if np.max(label_maxima_list) > 0:
@@ -133,7 +137,8 @@ def get_raw_and_labels_vols(src_data_path, semantic_classes,
 
     print("Number of labeled sub-tomograms", len(src_raw_keep))
     src_raw_keep = np.array(src_raw_keep)
-    src_label_data_keep = np.swapaxes(np.array(src_label_data_keep), 0, 1)
+    if len(src_label_data_keep) > 0:
+        src_label_data_keep = np.swapaxes(np.array(src_label_data_keep), 0, 1)
     src_label_data_keep = list(src_label_data_keep)
     return src_raw_keep, src_label_data_keep
 
@@ -147,7 +152,7 @@ def write_raw_and_labels_vols(dst_data_path, src_raw, src_label_data,
 
 
 def apply_transformation_iteration(src_raw, src_label_data, rot_range,
-                                   elastic_alpha, sigma_noise, epsilon,
+                                   elastic_alpha, sigma_noise,
                                    salt_pepper_p, salt_pepper_ampl):
     volumes_number = src_raw.shape[0]
     raw_volume_transforms, label_volume_transforms = \
@@ -155,7 +160,6 @@ def apply_transformation_iteration(src_raw, src_label_data, rot_range,
                            rot_range=rot_range,
                            elastic_alpha=elastic_alpha,
                            sigma_noise=sigma_noise,
-                           epsilon=epsilon,
                            salt_pepper_p=salt_pepper_p,
                            salt_pepper_ampl=salt_pepper_ampl)
     transf_raw_tensor = \
@@ -207,6 +211,10 @@ if __name__ == "__main__":
     parser.add_argument("-tomo_name", "--tomo_name",
                         help="tomo_name in sessiondate/datanumber format",
                         type=str)
+    parser.add_argument("-output_column", "--output_column",
+                        help="name of output_column in dataset table where "
+                             "the partition path will be recorded",
+                        type=str)
 
     args = parser.parse_args()
     tomo_name = args.tomo_name
@@ -216,52 +224,56 @@ if __name__ == "__main__":
     data_aug_rounds = args.data_aug_rounds
     rot_angle = args.rot_angle
     sigma_noise = args.sigma_noise
-    epsilon = args.epsilon
+    # epsilon = args.epsilon
     salt_pepper_p = args.salt_pepper_p
     salt_pepper_ampl = args.salt_pepper_ampl
     elastic_alpha = args.elastic_alpha
     src_data_path = args.src_data_path
     write_on_table = strtobool(args.write_on_table)
     folder_name = segmentation_names + "_DA"
+    output_column = args.output_column
 
     output_dir = os.path.dirname(dst_data_path)
-    makedirs(name=output_dir, exist_ok=True)
+    makedirs(output_dir, exist_ok=True)
 
-    semantic_classes = segmentation_names.split('_')
+    semantic_classes = segmentation_names.split(',')
     print("semantic_classes", semantic_classes)
 
     if os.path.exists(dst_data_path):
-        os.remove(dst_data_path)
+        print("Data-augmented partition already exists.")
+    else:
+        src_raw, src_label_data = \
+            get_raw_and_labels_vols(src_data_path=src_data_path,
+                                    semantic_classes=semantic_classes)
+        # print("src_raw.shape", src_raw.shape)
+        if src_raw.shape[0] > 0:
+            # Copying the original data
+            iteration = -1
+            write_raw_and_labels_vols(dst_data_path=dst_data_path,
+                                      src_raw=src_raw,
+                                      src_label_data=src_label_data,
+                                      semantic_classes=semantic_classes,
+                                      iteration=iteration)
 
-    src_raw, src_label_data = \
-        get_raw_and_labels_vols(src_data_path=src_data_path,
-                                semantic_classes=semantic_classes)
-    # print("src_raw.shape", src_raw.shape)
+            # Starting data augmentation:
+            for iteration in range(data_aug_rounds):
+                transf_raw_tensor, transf_label_tensors = \
+                    apply_transformation_iteration(
+                        src_raw, src_label_data, rot_range=rot_angle,
+                        elastic_alpha=elastic_alpha,
+                        sigma_noise=sigma_noise,
+                        salt_pepper_p=0,
+                        salt_pepper_ampl=0)
 
-    # Copying the original data
-    iteration = -1
-    write_raw_and_labels_vols(dst_data_path=dst_data_path, src_raw=src_raw,
-                              src_label_data=src_label_data,
-                              semantic_classes=semantic_classes,
-                              iteration=iteration)
+                write_raw_and_labels_vols(dst_data_path=dst_data_path,
+                                          src_raw=transf_raw_tensor,
+                                          src_label_data=transf_label_tensors,
+                                          semantic_classes=semantic_classes,
+                                          iteration=iteration)
+        else:
+            print("partition was empty, so is DA")
 
-    # Starting data augmentation:
-    for iteration in range(data_aug_rounds):
-        transf_raw_tensor, transf_label_tensors = \
-            apply_transformation_iteration(
-                src_raw, src_label_data, rot_range=rot_angle,
-                elastic_alpha=elastic_alpha,
-                sigma_noise=sigma_noise,
-                epsilon=epsilon,
-                salt_pepper_p=0,
-                salt_pepper_ampl=0)
-
-        write_raw_and_labels_vols(dst_data_path=dst_data_path,
-                                  src_raw=transf_raw_tensor,
-                                  src_label_data=transf_label_tensors,
-                                  semantic_classes=semantic_classes,
-                                  iteration=iteration)
-
+            copyfile(src_data_path, dst_data_path)
     if write_on_table:
         dataset_table = args.dataset_table
         tomo_name = args.tomo_name
@@ -270,11 +282,11 @@ if __name__ == "__main__":
         df = pd.read_csv(dataset_table)
         df['tomo_name'] = df['tomo_name'].astype(str)
         tomo_df = df[df['tomo_name'] == tomo_name]
-        df.loc[df['tomo_name'] == tomo_name, 'train_partition'] = dst_data_path
-        df.loc[df['tomo_name'] == tomo_name, 'rot_angle'] = rot_angle
-        df.loc[df['tomo_name'] == tomo_name, 'elastic_alpha'] = elastic_alpha
-        df.loc[df['tomo_name'] == tomo_name, 'sigma_noise'] = sigma_noise
-        df.loc[df['tomo_name'] == tomo_name, 'salt_pepper_p'] = salt_pepper_p
-        df.loc[
-            df['tomo_name'] == tomo_name, 'data_aug_rounds'] = data_aug_rounds
+        df.loc[df['tomo_name'] == tomo_name, output_column] = dst_data_path
+        # df.loc[df['tomo_name'] == tomo_name, 'rot_angle'] = rot_angle
+        # df.loc[df['tomo_name'] == tomo_name, 'elastic_alpha'] = elastic_alpha
+        # df.loc[df['tomo_name'] == tomo_name, 'sigma_noise'] = sigma_noise
+        # df.loc[df['tomo_name'] == tomo_name, 'salt_pepper_p'] = salt_pepper_p
+        # df.loc[
+        #     df['tomo_name'] == tomo_name, 'data_aug_rounds'] = data_aug_rounds
         df.to_csv(path_or_buf=dataset_table, index=False)

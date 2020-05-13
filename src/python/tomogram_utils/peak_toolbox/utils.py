@@ -4,14 +4,14 @@ from os.path import join
 
 import numpy as np
 
+from file_actions.readers.em import read_em
+from file_actions.readers.motl import read_motl_from_csv
+from file_actions.readers.tomograms import load_tomogram
+from osactions.filesystem import create_dir
 from tomogram_utils.coordinates_toolbox.utils import \
     extract_coordinates_and_values_from_em_motl
 from tomogram_utils.coordinates_toolbox.utils import \
     filtering_duplicate_coords_with_values
-from file_actions.readers.motl import read_motl_from_csv
-from file_actions.readers.tomograms import load_tomogram
-from file_actions.readers.em import read_em
-from osactions.filesystem import create_dir
 
 
 def _generate_unit_particle(radius: int):
@@ -193,20 +193,20 @@ def paste_rotated_disk(dataset: np.array, center: tuple, radius: int,
 
 def read_motl_coordinates_and_values(path_to_motl: str) -> tuple:
     _, motl_extension = os.path.splitext(path_to_motl)
+
+    assert motl_extension in [".em", ".csv"], "motl clean should be in a valid format .em or .csv"
     if motl_extension == ".em":
         print("motl in .em format")
         header, motl = read_em(path_to_emfile=path_to_motl)
         motl_values, motl_coords = extract_coordinates_and_values_from_em_motl(
             motl)
-        return motl_values, motl_coords
-    elif motl_extension == ".csv":
+    else:
         print("motl in .csv format")
         motl = read_motl_from_csv(path_to_motl)
         motl_values, motl_coords = extract_motl_coordinates_and_score_values(
             motl)
-        return motl_values, np.array(motl_coords)
-    else:
-        print("motl clean should be in a valid format .em or .csv")
+        motl_coords = np.array(motl_coords)
+    return motl_values, motl_coords
 
 
 def read_motl_data(path_to_motl: str):

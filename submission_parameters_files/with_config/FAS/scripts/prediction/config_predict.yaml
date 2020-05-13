@@ -1,0 +1,73 @@
+tomos_sets:
+  -1:
+    test_list: ["180426/026"]
+  -2:
+    test_list: ["180426/027"]
+  -3:
+    test_list: ["180426/028"]
+#  -4:
+#    test_list: ["180426/029"]
+  -5:
+    test_list: ["180426/030"]
+  -6:
+    test_list: ["180426/034"]
+  -7:
+    test_list: ["180426/037"]
+#  -8:
+#    test_list: ["180426/041"]
+  -9:
+    test_list: ["180426/043"]
+  -10:
+    test_list: ["180426/045"]
+
+  1:
+    training_list: ["180426/026","180426/027","180426/028","180426/030","180426/034","180426/037","180426/043","180426/045"]
+    test_list: ["180426/029", "180426/041"]
+    model_name: "singlefilt_64pix_lr_scheduler_10_R_false_encoder_dropout_0_decoder_dropout_0.2_BN_false_DA_G5_E0_R0_DArounds4_shuffle_true_frac_1_fas__D_2_IF_32"
+  2:
+    training_list: ["180426/026","180426/027","180426/028","180426/029","180426/030","180426/034","180426/041","180426/045"]
+    test_list: ["180426/037", "180426/043"]
+    model_name: "64pix_encoder_dropout0_decoder_dropout0.2_DA_DA_G5_E0_R180_SP0.04_DArounds6_BN_False_fas__D_2_IF_32_set_2"
+  3:
+    training_list: ["180426/026","180426/027","180426/028","180426/029","180426/034","180426/037","180426/041","180426/043"]
+    test_list: ["180426/030", "180426/045"]
+    model_name: "64pix_encoder_dropout0_decoder_dropout0.2_DA_DA_G5_E0_R180_SP0.04_DArounds6_BN_False_fas__D_2_IF_32_set_3"
+
+
+dataset_table : "/struct/mahamid/Irene/yeast/yeast_4bin_fas_single_filter.csv"
+overlap : 12
+write_on_table : False
+partition_name : "test_partition"
+processing_tomo : "1xf_tomo"
+box_shape : 64
+output_dir: "/struct/mahamid/Irene/yeast/healthy"
+
+unet_hyperparameters:
+  models_table: "/struct/mahamid/Irene/yeast/FAS_non_sph_mask_4bin_models.csv"
+  model_name: "singlefilt_64pix_lr_scheduler_10_R_false_encoder_dropout_0_decoder_dropout_0.2_BN_false_DA_G5_E0_R0_DArounds4_shuffle_true_frac_1_fas__D_2_IF_32"
+  label_name : "FAS_non_sph_masks"
+
+reconstruction:
+  reconstruction_path : "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation"
+  class_number : 0
+
+motl_parameters:
+  min_cluster_size: 1000
+  max_cluster_size: 35000
+  ignore_border_thickness : 10
+  filtering_mask : 'cytosol_mask'
+
+performance_parameters:
+  clean_motl : 'path_to_motl_clean_fas'
+  pr_tolerance_radius : 12
+#  statistics_file : "/struct/mahamid/Irene/cnn_evaluation/FAS/singlefilt_full_tomo_pr_cluster_analysis_64pix.csv"
+#  statistics_file : "/struct/mahamid/Irene/yeast/masking_cytosol_fas_stats_corrected.csv"
+  statistics_file : "/struct/mahamid/Irene/yeast/masking_cytosol_fas_stats_corrected_cytosol_mask.csv"
+#  statistics_file : "/struct/mahamid/Irene/yeast/masking_cytosol_fas_stats_corrected_lamella_mask.csv"
+#  statistics_file : "/struct/mahamid/Irene/yeast/masking_cytosol_fas_stats_corrected_trainset_cytosol_mask.csv"
+#  statistics_file : "/struct/mahamid/Irene/yeast/masking_cytosol_fas_stats_corrected_trainset_lamella_mask.csv"
+#  statistics_file : "/struct/mahamid/Irene/yeast/masking_cytosol_fas_stats_corrected_trainset.csv"
+
+
+#/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/trainp/FAS_non_sph_masks/singlefilt_64pix_lr_scheduler_10_R_false_encoder_dropout_0_decoder_dropout_0.2_BN_false_DA_G5_E0_R0_DArounds4_shuffle_true_frac_3_fas__D_2_IF_32/180426/045/fas
+

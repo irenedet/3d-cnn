@@ -5,10 +5,10 @@ import numpy as np
 from skimage import morphology as morph
 from tqdm import tqdm
 
+from constants import h5_internal_paths
 from tomogram_utils.coordinates_toolbox.subtomos import \
     get_subtomo_corner_side_lengths_and_padding
 from tomogram_utils.coordinates_toolbox.utils import shift_coordinates_by_vector
-from constants import h5_internal_paths
 
 
 def get_clusters_within_size_range(dataset: np.array, min_cluster_size: int,
@@ -19,11 +19,18 @@ def get_clusters_within_size_range(dataset: np.array, min_cluster_size: int,
                                         return_num=True,
                                         connectivity=connectivity)
     labels_list, cluster_size = np.unique(labeled_clusters, return_counts=True)
+    maximum = np.max(cluster_size)
+    print("number of clusters = ", len(labels_list))
+    print("With size ranges: from", np.min(cluster_size), "to",
+          maximum)
+    next_maximum = np.max(list(cluster_size[cluster_size < maximum]))
+    print("With size ranges: from", np.min(cluster_size), "to",
+          next_maximum)
     labels_list_within_range = labels_list[(cluster_size > min_cluster_size) & (
             cluster_size <= max_cluster_size)]
     cluster_size_within_range = list(
         cluster_size[(cluster_size > min_cluster_size) & (
-                cluster_size < max_cluster_size)])
+                cluster_size <= max_cluster_size)])
     print("Clusters in subtomo before size filtering =", num)
     return labeled_clusters, labels_list_within_range, cluster_size_within_range
 

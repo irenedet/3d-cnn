@@ -1,4 +1,8 @@
 src/python/tomogram_utils/volume_actions/__pycache__/
+venv/
+src/python/plotting/__pycache__/
+submit_job.sh
+venv/src/python/tomogram_utils/volume_actions/__pycache__/
 src/python/file_actions/__pycache__/
 src/python/file_actions/readers/__pycache__/
 src/python/file_actions/writers/__pycache__/

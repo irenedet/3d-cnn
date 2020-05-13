@@ -26,6 +26,9 @@ parser.add_argument("-dataset_table", "--dataset_table",
 parser.add_argument("-write_on_table", "--write_on_table",
                     help="write_on_table if True will store the partition path",
                     type=str, default="False")
+parser.add_argument("-processing_tomo", "--processing_tomo",
+                    help="processing_tomo",
+                    type=str, default='eman2_filetered_tomo')
 
 args = parser.parse_args()
 dataset_table = args.dataset_table
@@ -34,11 +37,11 @@ write_on_table = strtobool(args.write_on_table)
 output_h5_file_path = args.output_h5_path
 box_side = args.box_side
 overlap = args.overlap
-
+processing_tomo = args.processing_tomo
 df = pd.read_csv(dataset_table)
 df['tomo_name'] = df['tomo_name'].astype(str)
 tomo_df = df[df['tomo_name'] == tomo_name]
-path_to_raw = tomo_df.iloc[0]['eman2_filetered_tomo']
+path_to_raw = tomo_df.iloc[0][processing_tomo]
 
 subtomogram_shape = (box_side, box_side, box_side)
 

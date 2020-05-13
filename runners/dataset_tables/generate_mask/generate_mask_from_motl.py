@@ -5,9 +5,9 @@ from os import makedirs
 
 import pandas as pd
 
-from file_actions.writers.h5 import write_hdf_particles_from_motl
+from constants.dataset_tables import DatasetTableHeader
+from file_actions.writers.h5 import write_particle_mask_from_motl
 
-#
 parser = argparse.ArgumentParser()
 parser.add_argument("-dataset_table", "--dataset_table",
                     help="path to dataset_table in .csv format",
@@ -18,8 +18,8 @@ parser.add_argument("-tomo_name", "--tomo_name",
 parser.add_argument("-class_name", "--class_name",
                     help="class name either ribo or fas",
                     type=str)
-parser.add_argument("-hdf_output_path", "--hdf_output_path",
-                    help="directory where the outputs will be stored",
+parser.add_argument("-output_path", "--output_path",
+                    help="file path of output mask",
                     type=str)
 parser.add_argument("-radius", "--sphere_radius",
                     type=int)
@@ -39,30 +39,31 @@ dataset_table = args.dataset_table
 class_name = args.class_name
 coords_in_tom_format = strtobool(args.coords_in_tom_format)
 radius = args.sphere_radius
-hdf_output_path = args.hdf_output_path
+output_path = args.output_path
 values_in_motl = strtobool(args.values_in_motl)
 write_on_dataset_table = strtobool(args.write_on_dataset_table)
+semantic_classes = [class_name]
 
+DTHeader = DatasetTableHeader(semantic_classes=semantic_classes)
 df = pd.read_csv(dataset_table)
-df['tomo_name'] = df['tomo_name'].astype(str)
-tomo_df = df[df['tomo_name'] == tomo_name]
-z_shift = int(tomo_df.iloc[0]['z_shift'])
-x_dim = int(tomo_df.iloc[0]['x_dim'])
-y_dim = int(tomo_df.iloc[0]['y_dim'])
-z_dim = int(tomo_df.iloc[0]['z_dim'])
-test_partition = tomo_df.iloc[0]['test_partition']
-clean_motive_list_name = 'path_to_motl_clean_' + class_name
+df[DTHeader.tomo_name] = df[DTHeader.tomo_name].astype(str)
+tomo_df = df[df[DTHeader.tomo_name] == tomo_name]
+z_shift = int(tomo_df.iloc[0][DTHeader.z_shift])
+x_dim = int(tomo_df.iloc[0][DTHeader.x_dim])
+y_dim = int(tomo_df.iloc[0][DTHeader.y_dim])
+z_dim = int(tomo_df.iloc[0][DTHeader.z_dim])
+clean_motive_list_name = DTHeader.clean_motls[0]
 
 path_to_motl = tomo_df.iloc[0][clean_motive_list_name]
 
 print("coords_in_tom_format = ", coords_in_tom_format)
-output_dir = os.path.dirname(hdf_output_path)
-makedirs(name=output_dir, exist_ok=True)
+output_dir = os.path.dirname(output_path)
+makedirs(output_dir, exist_ok=True)
 
 output_shape = (z_dim, y_dim, x_dim)
 
-write_hdf_particles_from_motl(path_to_motl=path_to_motl,
-                              hdf_output_path=hdf_output_path,
+write_particle_mask_from_motl(path_to_motl=path_to_motl,
+                              output_path=output_path,
                               output_shape=output_shape,
                               sphere_radius=radius,
                               values_in_motl=values_in_motl,
@@ -71,6 +72,6 @@ write_hdf_particles_from_motl(path_to_motl=path_to_motl,
                               particles_in_tom_format=coords_in_tom_format)
 
 if write_on_dataset_table:
-    clean_mask_name = class_name + "_mask"
-    df.loc[df['tomo_name'] == tomo_name, clean_mask_name] = hdf_output_path
+    clean_mask_name = DTHeader.masks_names[0]
+    df.loc[df[DTHeader.tomo_name] == tomo_name, clean_mask_name] = [output_path]
     df.to_csv(path_or_buf=dataset_table, index=False)

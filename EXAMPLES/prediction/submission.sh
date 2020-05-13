@@ -16,12 +16,11 @@ echo "Activating virtual environment"
 module load Anaconda3
 source activate $UPICKER_VENV_PATH
 
-export yaml_file="/struct/mahamid/Irene/test_3d_cnn/prediction/config.yaml"
-tomo_name="180426/027"
-
+export yaml_file="/struct/mahamid/Irene/3d-cnn/submission_parameters_files/dataset_tables/saras_data/FAS/single_filt/evaluation/partition/config_predict.yaml"
+export tomos_set=1
 
 echo "Partitioning dataset"
-python $UPICKER_PATH/pipelines/prediction/partition.py -yaml_file $yaml_file -tomo_name $tomo_name
+python $UPICKER_PATH/PIPELINES/prediction/partition.py -yaml_file $yaml_file -tomos_set $tomos_set
 
 echo "Segmenting partition"
 python3 $UPICKER_PATH/pipelines/prediction/segment.py -yaml_file $yaml_file -tomo_name $tomo_name
@@ -34,3 +33,4 @@ python $UPICKER_PATH/pipelines/prediction/cluster_motl.py -yaml_file $yaml_file 
 
 echo "Selecting coordinates within mask"
 python $UPICKER_PATH/pipelines/prediction/mask_motl.py -yaml_file $yaml_file -tomo_name $tomo_name
+

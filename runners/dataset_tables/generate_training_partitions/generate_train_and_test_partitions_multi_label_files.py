@@ -3,7 +3,6 @@ from distutils.util import strtobool
 from os import makedirs
 from os.path import join
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -44,8 +43,12 @@ parser.add_argument("-prefix", "--prefix",
 parser.add_argument("-edge_tolerance", "--edge_tolerance",
                     help="edge_tolerance to not include particles half padded.",
                     type=int, default=0)
+parser.add_argument("-processing_tomo", "--processing_tomo",
+                    help="raw tomogram column name",
+                    type=str, default='eman2_filetered_tomo')
 
 args = parser.parse_args()
+processing_tomo = args.processing_tomo
 tomo_name = args.tomo_name
 dataset_table = args.dataset_table
 output_dir = args.output_dir
@@ -73,7 +76,7 @@ else:
     tomo_df = df[
         (df['tomo_name'] == tomo_name) & (df["subset_prefix"] == prefix)]
 
-path_to_raw = tomo_df.iloc[0]['eman2_filetered_tomo']
+path_to_raw = tomo_df.iloc[0][processing_tomo]
 labels_dataset_list = list()
 for semantic_class in segmentation_names:
     mask_name = semantic_class + '_mask'
@@ -101,28 +104,11 @@ label_fractions_list = generate_strongly_labeled_partition(
     edge_tolerance=edge_tolerance)
 
 print("label_fractions_list =", label_fractions_list)
-print(np.where(np.array(label_fractions_list) > 0)[0].shape, "out of",
-      len(label_fractions_list), " cubes selected in partition file.")
-# fig_path = join(output_dir, "label_fractions_hist.png")
-# print("The training data path is ", output_path)
-# zoom = np.where(np.array(label_fractions_list) < 0.01)[0]
-# plt.figure(1)
-# plt.hist(label_fractions_list, bins=10)
-# plt.xlabel("label fraction")
-# plt.ylabel("frequency")
-# plt.gcf()
-# plt.savefig(fname=fig_path, format="png")
-#
-# fig_path = join(output_dir, "zoom_label_fractions_hist.png")
-# plt.figure(2)
-# plt.hist(np.array(label_fractions_list)[zoom], bins=10)
-# plt.xlabel("label_fraction < 0.01")
-# plt.ylabel("frequency")
-# plt.gcf()
-# plt.savefig(fname=fig_path, format="png")
+print(np.where(np.array(label_fractions_list) > min_label_fraction)[0].shape,
+      "out of", len(label_fractions_list), " cubes selected in partition file.")
 
 if write_on_table:
     print("path to training partition written on table: ", output_path)
     df.loc[
-        df['tomo_name'] == tomo_name, 'train_partition'] = output_path
+        df['tomo_name'] == tomo_name, 'train_partition'] = [output_path]
     df.to_csv(path_or_buf=dataset_table, index=False)

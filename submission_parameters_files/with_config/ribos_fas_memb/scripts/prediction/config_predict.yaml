@@ -1,0 +1,50 @@
+tomos_sets:
+  -1:
+    test_list: ["180426/026"]
+  -2:
+    test_list: ["180426/027"]
+  -3:
+    test_list: ["180426/028"]
+  -4:
+    test_list: ["180426/029"]
+  -5:
+    test_list: ["180426/030"]
+  -6:
+    test_list: ["180426/034"]
+  -7:
+    test_list: ["180426/037"]
+  -8:
+    test_list: ["180426/041"]
+  -9:
+    test_list: ["180426/043"]
+  -10:
+    test_list: ["180426/045"]
+
+dataset_table : "/struct/mahamid/Irene/yeast/yeast_table.csv"
+overlap : 12
+write_on_table : False
+partition_name : "test_partition_2xf"
+processing_tomo : "2xf_tomo"
+box_shape : 64
+output_dir: "/struct/mahamid/Irene/yeast/healthy"
+
+unet_hyperparameters:
+  models_table: "/struct/mahamid/Irene/cross-validation/multiclass/models_cv_fractions.csv"
+  model_name: "DA_none_shuffle_true_frac_0_ribo_fas_memb__D_2_IF_10"
+  label_name : "cv_fractions"
+
+reconstruction:
+  reconstruction_path : "/struct/mahamid/Irene/scratch/trueba/3d-cnn/predictions_for_sara/"
+  class_number : 0
+
+motl_parameters:
+  min_cluster_size: 100
+  max_cluster_size: 35000
+  ignore_border_thickness : 10
+  filtering_mask : 'cytosol_mask'
+
+performance_parameters:
+  clean_motl : 'path_to_motl_clean_ribo'
+  pr_tolerance_radius : 12
+  statistics_file : "/struct/mahamid/Irene/yeast/predictions_for_sara/ribosomes/cv_fractions/masking_cytosol_ribo_stats.csv"
+

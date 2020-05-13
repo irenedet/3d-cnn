@@ -36,6 +36,9 @@ while [ "$1" != "" ]; do
         -write_on_table | --write_on_table )   shift
                                 write_on_table=$1
                                 ;;
+        -processing_tomo | --processing_tomo )   shift
+                                processing_tomo=$1
+                                ;;
         -h | --help )           usage
                                 exit
                                 ;;
@@ -50,10 +53,10 @@ export dataset_table=$dataset_table
 export box_side=$box_side
 export tomo_name=$tomo_name
 export output_dir=$output_dir
-
+export processing_tomo=$processing_tomo
+echo processing_tomo = $processing_tomo
 echo output_dir = $output_dir
 export output_dir=$output_dir"/"$tomo_name
-export outh5=$output_dir"/tomo_partition.h5"
 export write_on_table=$write_on_table
 
 echo tomo_name = $tomo_name
@@ -68,5 +71,5 @@ source activate $UPICKER_VENV_PATH
 
 export outh5=$output_dir"/tomo_partition.h5"
 echo 'starting python script'
-python3 $UPICKER_PATH/runners/dataset_tables/particle_picking/partition_from_dataset_table.py -dataset_table $dataset_table -tomo_name $tomo_name -outh5 $outh5 -output $output_dir -box $box_side -overlap $overlap -write_on_table $write_on_table
+python3 $UPICKER_PATH/runners/dataset_tables/particle_picking/partition_from_dataset_table.py -dataset_table $dataset_table -tomo_name $tomo_name -outh5 $outh5 -output $output_dir -box $box_side -overlap $overlap -write_on_table $write_on_table -processing_tomo $processing_tomo
 echo 'done'

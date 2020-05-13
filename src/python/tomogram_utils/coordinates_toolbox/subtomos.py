@@ -13,14 +13,12 @@ def get_coord_from_name(subtomo_name: str) -> List[int]:
 
 
 def get_subtomo_corners(output_shape: tuple, subtomo_shape: tuple,
-                        subtomo_center: tuple) -> tuple:
-    subtomo_l1radius = subtomo_shape[0] // 2, subtomo_shape[1] // 2, \
-                       subtomo_shape[2] // 2
-    start_corners = [int(center_dim) - int(subtomo_dim) for
-                     center_dim, subtomo_dim
-                     in zip(subtomo_center, subtomo_l1radius)]
+                        subtomo_center: tuple or list) -> tuple:
+    l1radius = [sh//2 for sh in subtomo_shape]
+    start_corners = [int(center_dim) - int(l1_rad) for
+                     center_dim, l1_rad in zip(subtomo_center, l1radius)]
     end_corners = [center_dim + subtomo_dim for center_dim, subtomo_dim
-                   in zip(subtomo_center, subtomo_l1radius)]
+                   in zip(subtomo_center, l1radius)]
     end_corners = [int(np.min((end_point, tomo_dim))) for end_point, tomo_dim
                    in zip(end_corners,
                           output_shape)]

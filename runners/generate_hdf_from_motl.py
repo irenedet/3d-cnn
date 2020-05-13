@@ -34,10 +34,10 @@ hdf_output_path = join(output_dir, "particles_mask.hdf")
 z_shift = -370  # shift between original tomogram and subtomogram of analysis
 output_shape = (251, 927, 927)
 
-from file_actions.writers.h5 import write_hdf_particles_from_motl
+from file_actions.writers.h5 import write_particle_mask_from_motl
 
-write_hdf_particles_from_motl(path_to_motl=path_to_motl,
-                              hdf_output_path=hdf_output_path,
+write_particle_mask_from_motl(path_to_motl=path_to_motl,
+                              output_path=hdf_output_path,
                               output_shape=output_shape,
                               sphere_radius=8,
                               values_in_motl=True,

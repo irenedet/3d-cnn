@@ -109,7 +109,6 @@ def read_training_data(training_data_path: str,
 def read_training_data_dice_multi_class(training_data_path: str,
                                         segmentation_names: list,
                                         split: int = -1) -> tuple:
-    
     """
     Loads partition training sets from h5 files, where the following are
     internal paths for labels and raw files, respectively:
@@ -128,30 +127,34 @@ def read_training_data_dice_multi_class(training_data_path: str,
     data = []
     labels = []
     with h5py.File(training_data_path, 'r') as f:
-        raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
-        if split == -1:
-            subtomo_list = raw_subtomo_names
-        else:
-            subtomo_list = raw_subtomo_names[:split]
-        for subtomo_name in subtomo_list:
-            raw_subtomo_h5_internal_path = join(
-                h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
-            labels_current_subtomo = []
-            for label_name in segmentation_names:
-                labels_subtomo_h5_internal_path = join(
-                    h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
-                labels_subtomo_h5_internal_path = join(
-                    labels_subtomo_h5_internal_path,
-                    subtomo_name)
-                labels_current_subtomo += [
-                    f[labels_subtomo_h5_internal_path][:]]
-            segm_max = [np.max(label_data) for label_data in
-                        labels_current_subtomo]
-            if np.max(segm_max) > 0.5:
-                data += [[f[raw_subtomo_h5_internal_path][:]]]
-                labels += [np.array(labels_current_subtomo)]
+        if len(list(f)) > 0:
+            raw_subtomo_names = list(f[h5_internal_paths.RAW_SUBTOMOGRAMS])
+            if split == -1:
+                subtomo_list = raw_subtomo_names
             else:
-                print("Due to lack of annotations, discarding", subtomo_name)
+                subtomo_list = raw_subtomo_names[:split]
+            for subtomo_name in subtomo_list:
+                raw_subtomo_h5_internal_path = join(
+                    h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
+                labels_current_subtomo = []
+                for label_name in segmentation_names:
+                    labels_subtomo_h5_internal_path = join(
+                        h5_internal_paths.LABELED_SUBTOMOGRAMS, label_name)
+                    labels_subtomo_h5_internal_path = join(
+                        labels_subtomo_h5_internal_path,
+                        subtomo_name)
+                    labels_current_subtomo += [
+                        f[labels_subtomo_h5_internal_path][:]]
+                segm_max = [np.max(label_data) for label_data in
+                            labels_current_subtomo]
+                if np.max(segm_max) > 0.5:
+                    data += [[f[raw_subtomo_h5_internal_path][:]]]
+                    labels += [np.array(labels_current_subtomo)]
+                else:
+                    print("Due to lack of annotations, discarding",
+                          subtomo_name)
+        else:
+            print("Empty training set")
 
     data = np.array(data)
     labels = np.array(labels)

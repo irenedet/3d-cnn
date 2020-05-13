@@ -14,14 +14,13 @@ from tqdm import tqdm
 from constants import h5_internal_paths
 from file_actions.readers.em import read_em
 from file_actions.readers.motl import read_motl_from_csv
-from file_actions.readers.shrec import particle_dict
-from file_actions.readers.shrec import read_shrec_motl
 from file_actions.readers.tomograms import load_tomogram
+from file_actions.writers.mrc import write_mrc_dataset
 from networks.unet_new import UNet3D
 from tensors.actions import crop_window_around_point
 from tomogram_utils.coordinates_toolbox import subtomos
 from tomogram_utils.coordinates_toolbox.utils import \
-    extract_coordinates_from_em_motl, extract_coordinates_from_txt_shrec
+    extract_coordinates_from_em_motl
 from tomogram_utils.peak_toolbox.utils import paste_sphere_in_dataset
 from tomogram_utils.peak_toolbox.utils import read_motl_coordinates_and_values
 
@@ -62,18 +61,20 @@ def assemble_tomo_from_subtomos(output_path: str, partition_file_path: str,
                                 reconstruction_type: str = "prediction"):
     print("Assembling data from", partition_file_path, ":")
     tomo_data = np.zeros(output_shape)
-    internal_subtomo_shape = tuple([subtomo_dim - 2 * overlap for
-                                    subtomo_dim in subtomo_shape])
+    inner_subtomo_shape = tuple([subtomo_dim - 2 * overlap for
+                                 subtomo_dim in subtomo_shape])
     with h5py.File(partition_file_path, 'r') as f:
         subtomo_names = list(f[subtomos_internal_path])
         total_subtomos = len(subtomo_names)
+        output_shape_overlap = tuple([sh + overlap for sh in output_shape])
         for index, subtomo_name in zip(tqdm(range(total_subtomos)),
                                        subtomo_names):
             subtomo_center = subtomos.get_coord_from_name(subtomo_name)
             start_corner, end_corner, lengths = \
-                subtomos.get_subtomo_corners(output_shape,
-                                             internal_subtomo_shape,
-                                             subtomo_center)
+                subtomos.get_subtomo_corners(output_shape=output_shape_overlap,
+                                             subtomo_shape=inner_subtomo_shape,
+                                             subtomo_center=subtomo_center)
+
             volume_slices = [slice(overlap, overlap + l) for l in lengths]
             if np.min(lengths) > 0:
                 overlap_shift = overlap * np.array([1, 1, 1])
@@ -81,11 +82,10 @@ def assemble_tomo_from_subtomos(output_path: str, partition_file_path: str,
                 end_corner -= overlap_shift
                 subtomo_h5_internal_path = join(subtomos_internal_path,
                                                 subtomo_name)
-                channels, *rest = f[subtomo_h5_internal_path][:].shape
-                assert class_number < channels
                 if reconstruction_type == "prediction":
-                    volume_slices = [slice(overlap, overlap + l) for l in
-                                     lengths]
+                    channels, *rest = f[subtomo_h5_internal_path][:].shape
+                    assert class_number < channels
+                    # noinspection PyTypeChecker
                     channel_slices = [class_number] + volume_slices
                     channel_slices = tuple(channel_slices)
                     subtomo_data = f[subtomo_h5_internal_path][:]
@@ -139,18 +139,14 @@ def write_clustering_labels_subtomos(output_path: str, subtomo_path: str,
                 internal_subtomo_data = np.zeros(lengths)
                 if channels > 1:
                     assert class_number < channels
-                    # ToDo: define if we want this to plot only one class
-                    # at a time TODO  (o.w. delete for loop).
-                    for n in range(1):  # leave out the background class
-                        channel_data = subtomos_set[subtomo_name][
-                                       n + class_number,
-                                       overlap:lengths[0] + overlap,
-                                       overlap:lengths[1] + overlap,
-                                       overlap:lengths[2] + overlap]
-                        print("channel ", n, ", min, max = ",
-                              np.min(channel_data),
-                              np.max(channel_data))
-                        internal_subtomo_data += channel_data
+                    # leave out the background class
+                    channel_data = subtomos_set[subtomo_name][
+                                   class_number, overlap:lengths[0] + overlap,
+                                   overlap:lengths[1] + overlap,
+                                   overlap:lengths[2] + overlap]
+                    print("channel ", 0, ", min, max = ", np.min(channel_data),
+                          np.max(channel_data))
+                    internal_subtomo_data += channel_data
             else:
                 print("subtomos_set[subtomo_name].shape = ",
                       subtomos_set[subtomo_name].shape)
@@ -159,11 +155,9 @@ def write_clustering_labels_subtomos(output_path: str, subtomo_path: str,
                                         overlap:lengths[0] + overlap,
                                         overlap:lengths[1] + overlap,
                                         overlap:lengths[2] + overlap]
-            tomo_data[start_corner[0]: end_corner[0],
-            start_corner[1]: end_corner[1],
-            start_corner[2]: end_corner[2]] = internal_subtomo_data
-            print("internal_subtomo_data = ",
-                  internal_subtomo_data.shape)
+            slices = [slice(i, e) for i, e in zip(start_corner, end_corner)]
+            tomo_data[slices] = internal_subtomo_data
+            print("internal_subtomo_data = ", internal_subtomo_data.shape)
 
     write_dataset_hdf(output_path, tomo_data)
     print("right before deleting the maximum is", np.max(tomo_data))
@@ -203,6 +197,7 @@ def write_dataset_from_subtomos_with_overlap_dice_multiclass(
                 output_shape,
                 internal_subtomo_shape,
                 subtomo_center)
+            volume_slices = [slice(overlap, l + overlap) for l in lengths]
             overlap_shift = overlap * np.array([1, 1, 1])
             start_corner -= overlap_shift
             end_corner -= overlap_shift
@@ -213,19 +208,20 @@ def write_dataset_from_subtomos_with_overlap_dice_multiclass(
             if channels > 1:
                 if isinstance(class_number, list):
                     for channel in class_number:
-                        channel_data = f[subtomo_h5_internal_path][channel,
-                                       overlap:lengths[0] + overlap,
-                                       overlap:lengths[1] + overlap,
-                                       overlap:lengths[2] + overlap]
+                        channel_data = f[subtomo_h5_internal_path][
+                            channel,
+                            volume_slices[0],
+                            volume_slices[1],
+                            volume_slices[2]]
                         print("channel ", channel, ", min, max = ",
                               np.min(channel_data),
                               np.max(channel_data))
                         internal_subtomo_data += channel_data
                 elif isinstance(class_number, int):
                     channel_data = f[subtomo_h5_internal_path][class_number,
-                                   overlap:lengths[0] + overlap,
-                                   overlap:lengths[1] + overlap,
-                                   overlap:lengths[2] + overlap]
+                                                               volume_slices[0],
+                                                               volume_slices[1],
+                                                               volume_slices[2]]
                     print("channel ", class_number, ", min, max = ",
                           np.min(channel_data),
                           np.max(channel_data))
@@ -234,15 +230,11 @@ def write_dataset_from_subtomos_with_overlap_dice_multiclass(
                     print("class_number = ", class_number)
                     print("class_number should be an int or a list of ints")
             else:
-                internal_subtomo_data = f[subtomo_h5_internal_path][0,
-                                        overlap:lengths[0] + overlap,
-                                        overlap:lengths[1] + overlap,
-                                        overlap:lengths[2] + overlap]
-            tomo_data[start_corner[0]: end_corner[0],
-            start_corner[1]: end_corner[1],
-            start_corner[2]: end_corner[2]] = internal_subtomo_data
-            print("internal_subtomo_data = ",
-                  internal_subtomo_data.shape)
+                internal_subtomo_data = f[subtomo_h5_internal_path][
+                    0, volume_slices[0], volume_slices[1], volume_slices[2]]
+            slices = [slice(i, e) for i, e in zip(start_corner, end_corner)]
+            tomo_data[slices] = internal_subtomo_data
+            print("internal_subtomo_data = ", internal_subtomo_data.shape)
     write_dataset_hdf(output_path, tomo_data)
     print("right before deleting the maximum is", np.max(tomo_data))
     return
@@ -270,6 +262,7 @@ def write_dataset_from_subtomos_with_overlap_multiclass_exponentiating(
                 output_shape,
                 internal_subtomo_shape,
                 subtomo_center)
+            volume_slices = [slice(overlap, overlap + l) for l in lengths]
             overlap_shift = overlap * np.array([1, 1, 1])
             start_corner -= overlap_shift
             end_corner -= overlap_shift
@@ -279,18 +272,15 @@ def write_dataset_from_subtomos_with_overlap_multiclass_exponentiating(
             internal_subtomo_data = np.zeros(lengths)
             for n in range(channels - 1):  # leave out the background class
                 channel_data = f[subtomo_h5_internal_path][n + 1,
-                               overlap:lengths[0] + overlap,
-                               overlap:lengths[1] + overlap,
-                               overlap:lengths[2] + overlap]
+                                                           volume_slices[0],
+                                                           volume_slices[1],
+                                                           volume_slices[2]]
                 print("channel ", n, ", min, max = ", np.min(channel_data),
                       np.max(channel_data))
                 internal_subtomo_data += np.exp(channel_data)
-
-            tomo_data[start_corner[0]: end_corner[0],
-            start_corner[1]: end_corner[1],
-            start_corner[2]: end_corner[2]] = internal_subtomo_data
-            print("internal_subtomo_data = ",
-                  internal_subtomo_data.shape)
+            slices = [slice(i, e) for i, e in zip(start_corner, end_corner)]
+            tomo_data[slices] = internal_subtomo_data
+            print("internal_subtomo_data = ", internal_subtomo_data.shape)
     write_dataset_hdf(output_path, tomo_data)
     print("right before deleting the maximum is", np.max(tomo_data))
     del tomo_data
@@ -363,7 +353,7 @@ def generate_classification_training_set(path_to_output_h5: str,
     else:
         mode = 'w'
 
-    makedirs(name=os.path.dirname(path_to_output_h5), exist_ok=True)
+    makedirs(os.path.dirname(path_to_output_h5), exist_ok=True)
     with h5py.File(path_to_output_h5, mode) as f:
         internal_path = h5_internal_paths.LABELED_SUBTOMOGRAMS
         internal_path = join(internal_path, label)
@@ -483,8 +473,8 @@ def write_segmented_data(data_path: str, output_segmentation: np.array,
                 label_name)
             subtomo_h5_internal_path = join(segmented_subtomo_path,
                                             subtomo_name)
-            f[subtomo_h5_internal_path] = output_segmentation[subtomo_indx, :,
-                                          :, :, :]
+            f[subtomo_h5_internal_path] = \
+                output_segmentation[subtomo_indx, :, :, :, :]
 
 
 def _check_segmentation_existence(data_file: h5py.File, label_name: str):
@@ -517,18 +507,18 @@ def _get_subtomos_names_to_segment(file: h5py.File, label_name: str, flag: str):
     return predicted_subtomos_names, subtomo_names, total_subtomos
 
 
-def segment_and_write(data_path: str, model: UNet3D, label_name: str):
-    with h5py.File(data_path, 'a') as data_file:
+def segment_and_write(data_path: str, model: UNet3D, label_name: str) -> None:
+    with h5py.File(data_path, 'r') as data_file:
         flag = _check_segmentation_existence(data_file, label_name)
         predicted_subtomos_names, subtomo_names, total_subtomos = \
             _get_subtomos_names_to_segment(data_file, label_name, flag)
-        for index, subtomo_name in zip(tqdm(range(total_subtomos)),
-                                       subtomo_names):
-            subtomo_h5_internal_path = join(
-                h5_internal_paths.RAW_SUBTOMOGRAMS,
-                subtomo_name)
 
+    for index, subtomo_name in zip(tqdm(range(total_subtomos)),
+                                   subtomo_names):
+        with h5py.File(data_path, 'a') as data_file:
             if subtomo_name not in predicted_subtomos_names:
+                subtomo_h5_internal_path = join(
+                    h5_internal_paths.RAW_SUBTOMOGRAMS, subtomo_name)
                 subtomo_data = np.array(
                     [data_file[subtomo_h5_internal_path][:]])
                 subtomo_data = subtomo_data[:, None]
@@ -554,23 +544,22 @@ def _write_segmented_subtomo_data(data_file: h5py.File,
     return
 
 
-def write_hdf_particles_from_motl(path_to_motl: str,
-                                  hdf_output_path: str,
+def write_particle_mask_from_motl(path_to_motl: str,
+                                  output_path: str,
                                   output_shape: tuple,
                                   sphere_radius=8,
                                   values_in_motl: bool = True,
                                   number_of_particles=None,
                                   z_shift=0,
-                                  particle_classes=None,
                                   particles_in_tom_format=True) -> None:
-    if particle_classes is None:
-        particle_classes = [0]
-    _, file_extension = os.path.splitext(path_to_motl)
-    print("The motive list has extension ", file_extension)
-    assert file_extension in [".csv", ".em", ".txt"]
+    _, motl_extension = os.path.splitext(path_to_motl)
+    assert motl_extension in [".csv", ".em"]
 
-    if file_extension == ".csv" or file_extension == ".em":
-        if file_extension == ".csv":
+    _, mask_extension = os.path.splitext(output_path)
+    assert mask_extension in [".hdf", ".mrc"]
+
+    if motl_extension == ".csv" or motl_extension == ".em":
+        if motl_extension == ".csv":
             motive_list = read_motl_from_csv(path_to_motl)
             if isinstance(number_of_particles, int):
                 motive_list = motive_list[:number_of_particles]
@@ -578,7 +567,6 @@ def write_hdf_particles_from_motl(path_to_motl: str,
                       " particles in the motive list will be pasted.")
             else:
                 print("All particles in the motive list will be pasted.")
-                # Already in x,y,z format:
             if particles_in_tom_format:
                 coordinates = [
                     np.array([int(row[9]) + z_shift, int(row[8]), int(row[7])])
@@ -595,7 +583,7 @@ def write_hdf_particles_from_motl(path_to_motl: str,
                 score_values = np.ones(len(motive_list))
                 print("The map will be binary.")
         else:
-            header, motive_list = read_em(path_to_emfile=path_to_motl)
+            _, motive_list = read_em(path_to_emfile=path_to_motl)
             if isinstance(number_of_particles, int):
                 motive_list = motive_list[:number_of_particles]
                 print("Only", str(number_of_particles),
@@ -612,66 +600,24 @@ def write_hdf_particles_from_motl(path_to_motl: str,
                 print("transforming coordinates to tom format")
                 coordinates = [[int(p[2]) + z_shift, int(p[1]), int(p[0])] for p
                                in coordinates]
-
             score_values = np.ones(len(coordinates))
 
         predicted_dataset = np.zeros(output_shape)
         for center, value in zip(coordinates, score_values):
-            paste_sphere_in_dataset(dataset=predicted_dataset,
-                                    center=center, radius=sphere_radius,
-                                    value=value)
+            paste_sphere_in_dataset(dataset=predicted_dataset, center=center,
+                                    radius=sphere_radius, value=value)
 
-        write_dataset_hdf(output_path=hdf_output_path,
-                          tomo_data=predicted_dataset)
-    elif file_extension == ".txt":
-        motive_list = read_shrec_motl(path_to_motl)
-        predicted_dataset = np.zeros(output_shape)
-        for counter, particle_class in enumerate(particle_classes):
-            if isinstance(particle_class, int):
-                if values_in_motl:
-                    value = counter + 1
-                else:
-                    value = 1
-                coordinates = extract_coordinates_from_txt_shrec(
-                    motive_list=motive_list, particle_class=particle_class)
-                coordinates = [p + np.array([z_shift, 0, 0]) for p in
-                               coordinates]
-                for center in coordinates:
-                    paste_sphere_in_dataset(dataset=predicted_dataset,
-                                            radius=sphere_radius,
-                                            value=value,
-                                            center=tuple(center))
-            elif isinstance(particle_class, str):
-                particle_class_number = particle_dict[particle_class]['class']
-                if values_in_motl:
-                    value = counter + 1
-                    print("The value assigned to", particle_class, "is", value)
-                else:
-                    value = 1
-                    print("The value assigned to", particle_class, "is", value)
-
-                sphere_radius = particle_dict[particle_class]['radius']
-                print("The radius in pixels of", particle_class, "is",
-                      sphere_radius)
-                coordinates = extract_coordinates_from_txt_shrec(
-                    motive_list=motive_list,
-                    particle_class=particle_class_number)
-                print("len(coordinates) =", len(coordinates))
-                coordinates = [p + np.array([z_shift, 0, 0]) for p in
-                               coordinates]
-                print("coordinates[0] = ", coordinates[0])
-                for center in coordinates:
-                    paste_sphere_in_dataset(dataset=predicted_dataset,
-                                            radius=sphere_radius,
-                                            value=value,
-                                            center=tuple(center))
+        if mask_extension == ".hdf":
+            write_dataset_hdf(output_path=output_path,
+                              tomo_data=predicted_dataset)
+        elif mask_extension == ".mrc":
+            if np.max(score_values) == np.min(score_values):
+                dtype = np.int8
             else:
-                print("particle classes should be either integers or strings.")
-        write_dataset_hdf(output_path=hdf_output_path,
-                          tomo_data=predicted_dataset)
+                dtype = np.float16
 
-    else:
-        print("The motive list is not written in a valid file format.")
+            write_mrc_dataset(mrc_path=output_path, array=predicted_dataset,
+                              dtype=dtype)
 
     return
 
@@ -695,7 +641,6 @@ def split_and_write_h5_partition(h5_partition_data_path: str,
             split = int(split)
             print("split = ", split)
             if split < 0:
-                split
                 print("All the subtomos are considered in the training set.")
                 with h5py.File(h5_train_patition_path, "w") as f_train:
                     for subtomo_name in raw_subtomo_names:

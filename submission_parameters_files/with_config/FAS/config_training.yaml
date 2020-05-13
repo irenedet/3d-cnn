@@ -1,0 +1,34 @@
+tomos_sets:
+  1:
+    training_list: ["180426/026","180426/027","180426/028","180426/030","180426/034","180426/037","180426/043","180426/045"]
+    test_list: ["180426/029", "180426/041"]
+  2:
+    training_list: ["180426/026","180426/027","180426/028","180426/029","180426/030","180426/034","180426/041","180426/045"]
+    test_list: ["180426/037", "180426/043"]
+  3:
+    training_list: ["180426/026","180426/027","180426/028","180426/029","180426/034","180426/037","180426/041","180426/043"]
+    test_list: ["180426/030", "180426/045"]
+
+
+dataset_table: "/struct/mahamid/Irene/yeast/yeast_4bin_fas_single_filter.csv"
+# Training
+partition_name: "DA_rounds9"
+box_shape: 64
+semantic_classes: ['fas']
+
+unet_hyperparameters:
+  models_table: "/struct/mahamid/Irene/yeast/FAS_non_sph_mask_4bin_models.csv"
+  label_name: "FAS_non_sph_mask"
+  log_dir: "/struct/mahamid/Irene/yeast/config_models/logging"
+  model_path: "/struct/mahamid/Irene/yeast/config_models/models"
+  epochs: 150
+  split: 0.8
+  depth: 2
+  initial_features: 32
+  output_classes: 1
+  DA_tag: "DA_G5_E0_R180_SP0.04_DArounds9"
+  BatchNorm: False
+  encoder_dropout: 0
+  decoder_dropout: 0.2
+  batch_size: 4
+

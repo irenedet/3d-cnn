@@ -1,14 +1,23 @@
-dataset_table : "datasets.csv"
+tomos_sets:
+  1:
+    training_list: ["180426/027"]
+    test_list: ["180426/028"]
+  2:
+    training_list: ["180426/028"]
+    test_list: ["180426/027"]
+
+
+dataset_table : "/struct/mahamid/Irene/EXAMPLES/datasets.csv"
 partition_name : "train_partition"
 box_shape : 64
 semantic_classes: ['fas']
 
 unet_hyperparameters:
-  models_table : "/struct/mahamid/Irene/test_3d_cnn/models.csv"
+  models_table : "/struct/mahamid/Irene/EXAMPLES/models.csv"
   label_name : "test_experiment"
-  log_dir : "/struct/mahamid/Irene/test_3d_cnn/logging"
-  model_path : "/struct/mahamid/Irene/test_3d_cnn/models"
-  epochs : 1
+  log_dir : "/struct/mahamid/Irene/EXAMPLES/logging"
+  model_path : "/struct/mahamid/Irene/EXAMPLES/models"
+  epochs : 5
   split: 0.7
   depth : 1
   initial_features : 1

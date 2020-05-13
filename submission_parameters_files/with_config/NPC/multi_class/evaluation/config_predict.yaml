@@ -1,0 +1,62 @@
+tomos_sets:
+  -1:
+    test_list: ["190218/060"]
+  -2:
+    test_list: ["190218/064"]
+  -3:
+    test_list: ["190218/068"]
+  -4:
+    test_list: ["190218/072"]
+  -5:
+    test_list: ["190218/077"]
+  -6:
+    test_list: ["190218/083"]
+  -7:
+    test_list: ["190218/087"]
+  -8:
+    test_list: ["190218/091"]
+
+  -21:
+    test_list: ["190223/131"]
+  -22:
+    test_list: ["190223/135"]
+  -23:
+    test_list: ["190223/141"]
+
+  -11:
+    test_list: ["190223/130"]
+  -12:
+    test_list: ["190223/134"]
+  -13:
+    test_list: ["190223/140"]
+
+
+dataset_table : "/struct/mahamid/Irene/NPC/SPombe/NPC_table.csv"
+overlap : 12
+write_on_table : True
+partition_name : "test_partition_2xf"
+processing_tomo : "eman2_filetered_tomo"
+box_shape : 128
+output_dir: "/struct/mahamid/Irene/scratch/3d-cnn/cross-validation/NPC/SPombe/test_partitions"
+
+unet_hyperparameters:
+  models_table: "/struct/mahamid/Irene/NPC/SPombe/multiclass/npc_models.csv"
+#  models_table: "/struct/mahamid/Irene/yeast/npc/models_npc.csv"
+  model_name: "128pix_encoder_dropout0_decoder_dropout0_DA_G5_E2_R180_SP0.04_DArounds4_BN_False_npc__D_4_IF_8_set_2"
+  label_name : "quality_tomos"
+
+reconstruction:
+  reconstruction_path : "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/npc"
+  class_number : 0
+
+motl_parameters:
+  min_cluster_size: 1000
+  max_cluster_size: 3500000
+  ignore_border_thickness : 10
+  filtering_mask : 'lamella_file'
+
+performance_parameters:
+  clean_motl : 'motl_npc'
+  pr_tolerance_radius : 40
+  statistics_file : "/struct/mahamid/Irene/cnn_evaluation/npc/christian_data/npc_statistics.csv"
+

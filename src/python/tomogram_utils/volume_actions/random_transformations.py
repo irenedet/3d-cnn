@@ -194,14 +194,16 @@ class RandomRot3D(Transform):
         np.random.seed()
         self.set_random_variable('angle_z', np.random.uniform(-self.rot_range,
                                                               self.rot_range))
+        p_rotate = np.random.uniform(low=0, high=1, size=1)[0]
+        self.set_random_variable('p_rotate', p_rotate)
 
     def volume_function(self, volume):
-        print("For now, the angle of rotation is fixed to rot_range =",
-              self.rot_range)
         # angle_z = self.get_random_variable('angle_z')
         angle_z = self.rot_range
-        volume = interpolation.rotate(volume, angle_z, order=0, mode='reflect',
-                                      axes=(1, 2), reshape=False)
+        if self.get_random_variable('p_rotate') < self.p:
+            volume = interpolation.rotate(volume, angle_z, order=0,
+                                          mode='reflect', axes=(1, 2),
+                                          reshape=False)
         return volume
 
 
@@ -350,7 +352,7 @@ class SinusoidalElasticTransform3D(Transform):
     NATIVE_DTYPES = {'float32', 'float64'}
     PREFERRED_DTYPE = 'float32'
 
-    def __init__(self, alpha, interp_step, order=1, **super_kwargs):
+    def __init__(self, alpha, interp_step, order=3, **super_kwargs):
         self._initial_dtype = None
         super(SinusoidalElasticTransform3D, self).__init__(**super_kwargs)
         self.alpha = alpha
@@ -383,17 +385,20 @@ class SinusoidalElasticTransform3D(Transform):
         coarse_random_field_y = np.sin(coarse_random_field_y) * self.alpha
         coarse_random_field_z = np.sin(coarse_random_field_z) * self.alpha
 
-        new_indices = np.mgrid[0:nz - 1:self.interp_factor * nz * 1j,
+        new_indices = np.mgrid[
+                      0:nz - 1:self.interp_factor * nz * 1j,
                       0:ny - 1:self.interp_factor * ny * 1j,
-                      0:nx - 1:self.interp_factor * nx * 1j]
+                      0:nx - 1:self.interp_factor * nx * 1j
+                      ]
 
+        # interpolate:
         sdx = map_coordinates(coarse_random_field_x, new_indices,
-                              order=3, output=coarse_random_field_x.dtype)
+                              order=self.order, output=coarse_random_field_x.dtype)
         sdy = map_coordinates(coarse_random_field_y, new_indices,
-                              order=3, output=coarse_random_field_y.dtype)
+                              order=self.order, output=coarse_random_field_y.dtype)
         sdz = map_coordinates(coarse_random_field_z, new_indices,
-                              order=3, output=coarse_random_field_z.dtype)
-
+                              order=self.order, output=coarse_random_field_z.dtype)
+        # reshape
         sdx = sdx.reshape((self.interp_factor * nz, self.interp_factor * ny,
                            self.interp_factor * nx))
         sdy = sdy.reshape((self.interp_factor * nz, self.interp_factor * ny,
@@ -416,15 +421,12 @@ class SinusoidalElasticTransform3D(Transform):
         volume = self.cast(volume)
         # Take measurements
         imshape = volume.shape
-        # print(imshape)
 
         # Obtain flows
-        flow_z, flow_y, flow_x = self.get_random_variable('flow_z',
-                                                          imshape=imshape), \
-                                 self.get_random_variable('flow_y',
-                                                          imshape=imshape), \
-                                 self.get_random_variable('flow_x',
-                                                          imshape=imshape)
+        flow_z = self.get_random_variable('flow_z', imshape=imshape)
+        flow_y = self.get_random_variable('flow_y', imshape=imshape)
+        flow_x = self.get_random_variable('flow_x', imshape=imshape)
+
         # To preserve orientation
         flows = flow_y, flow_z, flow_x
         # Map cooordinates from image to distorted index set
@@ -438,9 +440,10 @@ class SinusoidalElasticTransform3D(Transform):
 class AdditiveGaussianNoise(Transform):
     """Add gaussian noise to the input."""
 
-    def __init__(self, sigma, **super_kwargs):
+    def __init__(self, sigma, epsilon=0.1, **super_kwargs):
         super(AdditiveGaussianNoise, self).__init__(**super_kwargs)
         self.sigma = sigma
+        self.epsilon = epsilon
 
     def build_random_variables(self, **kwargs):
         np.random.seed()
@@ -449,13 +452,18 @@ class AdditiveGaussianNoise(Transform):
                                           size=kwargs.get('imshape'))
         self.set_random_variable('noise', gaussian_noise)
 
+        noise_amplitude = np.random.uniform(low=0, high=self.epsilon, size=1)[0]
+        self.set_random_variable("noise_amplitude", noise_amplitude)
+
     def image_function(self, image):
         image = image + self.get_random_variable('noise', imshape=image.shape)
         return image
 
     def volume_function(self, volume):
-        volume = volume + self.get_random_variable('noise',
-                                                   imshape=volume.shape)
+        noise_level = self.get_random_variable('noise_amplitude')
+        noise = noise_level * \
+                self.get_random_variable('noise', imshape=volume.shape)
+        volume = volume + noise
         return volume
 
 

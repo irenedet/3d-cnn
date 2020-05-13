@@ -498,7 +498,8 @@ def unite_motls(path_to_motl1: str, path_to_motl2: str,
                 motl_name=output_motl_name)
 
 
-def write_on_models_notebook(model_name: str, model_path: str,
+def write_on_models_notebook(model_name: str, label_name:str,
+                             model_dir: str,
                              log_dir: str, depth: int,
                              initial_features: int, n_epochs: int,
                              training_paths_list: list,
@@ -513,7 +514,8 @@ def write_on_models_notebook(model_name: str, model_path: str,
     """
 
     :param model_name:
-    :param model_path:
+    :param label_name:
+    :param model_dir:
     :param log_dir:
     :param depth:
     :param initial_features:
@@ -531,6 +533,7 @@ def write_on_models_notebook(model_name: str, model_path: str,
     :param BN:
     :return:
     """
+    model_path = os.path.join(model_dir, model_name + ".pkl")
     ModelsHeader = ModelsTableHeader()
     training_paths = reduce(lambda x, y: x + ", " + y, training_paths_list)
     segmentation_names = reduce(lambda x, y: x + ", " + y, segmentation_names)
@@ -541,6 +544,7 @@ def write_on_models_notebook(model_name: str, model_path: str,
     mini_notebook_df = pd.DataFrame({ModelsHeader.model_name: model_name},
                                     index=[0])
     mini_notebook_df[ModelsHeader.model_name] = model_name
+    mini_notebook_df[ModelsHeader.label_name] = label_name
     mini_notebook_df[ModelsHeader.model_path] = model_path
     mini_notebook_df[ModelsHeader.logging_path] = log_dir
     mini_notebook_df[ModelsHeader.depth] = depth

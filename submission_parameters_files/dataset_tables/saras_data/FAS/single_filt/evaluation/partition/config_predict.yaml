@@ -1,0 +1,30 @@
+tomos_sets:
+  1:
+    training_list: ["180426/026","180426/027","180426/028","180426/030","180426/034","180426/037","180426/041","180426/043","180426/045","180426/028"]
+    test_list: ["180426/026","180426/027","180426/028","180426/030","180426/034","180426/037","180426/041","180426/043","180426/045","180426/028"]
+  2:
+    training_list: ["180426/028"]
+    test_list: ["180426/027"]
+
+dataset_table: "/struct/mahamid/Irene/yeast/yeast_4bin_fas_single_filter.csv"
+overlap: 12
+write_on_table: True
+partition_name: "test_partition"
+processing_tomo: "1xf_tomo"
+box_shape: 64
+output_dir: "/struct/mahamid/Irene/yeast/healthy/"
+
+unet_hyperparameters:
+  models_table: "/struct/mahamid/Irene/test_3d_cnn/models.csv"
+  model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_Falsefas__D_1_IF_1"
+  label_name: "test_experiment"
+
+reconstruction:
+  reconstruction_path: "/struct/mahamid/Irene/test_3d_cnn/evaluation"
+  class_number: 0
+
+motl_parameters:
+  min_cluster_size: 10
+  max_cluster_size: 600000000
+  ignore_border_thickness: 10
+  filtering_mask: 'lamella_file'

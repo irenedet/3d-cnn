@@ -35,6 +35,9 @@ parser.add_argument("-write_on_table", "--write_on_table",
 parser.add_argument("-rel_bin_lamella_mask", "--rel_bin_lamella_mask",
                     help="A bin of 1 means that lamella is one time binned",
                     type=int, default=0)
+parser.add_argument("-processing_tomo", "--processing_tomo",
+                    help="processing_tomo",
+                    type=str, default='eman2_filetered_tomo')
 
 args = parser.parse_args()
 dataset_table = args.dataset_table
@@ -46,6 +49,7 @@ overlap = args.overlap
 rel_bin_lamella_mask = args.rel_bin_lamella_mask
 write_on_table = strtobool(args.write_on_table)
 box_shape = box_shape.split(',')
+processing_tomo = args.processing_tomo
 
 assert len(box_shape) in [1, 3], "Invalid box_side"
 if len(box_shape) == 1:
@@ -65,7 +69,7 @@ else:
 
 df = pd.read_csv(dataset_table)
 tomo_df = df[df['tomo_name'] == tomo_name]
-path_to_raw = tomo_df.iloc[0]['eman2_filetered_tomo']
+path_to_raw = tomo_df.iloc[0][processing_tomo]
 path_to_lamella = tomo_df.iloc[0]['lamella_file']
 
 raw_dataset = load_tomogram(path_to_dataset=path_to_raw)

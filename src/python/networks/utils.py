@@ -88,36 +88,38 @@ def data_loader(data_path: str, semantic_class: str,
     raw_array = list()
     label_array = list()
     with h5py.File(data_path, 'r') as f:
-        h5_path_raw = h5_internal_paths.RAW_SUBTOMOGRAMS
-        h5_path_label = join(h5_internal_paths.LABELED_SUBTOMOGRAMS,
-                             semantic_class)
-        source_raw_names = list(f[h5_path_raw])
-        source_label_names = list(f[h5_path_label])
-        assert set(source_raw_names) == set(source_label_names)
-        if number_vols == -1:
-            number_vols = len(source_raw_names)
-        for vol_name in source_raw_names[:number_vols]:
-            src_raw_path = join(h5_path_raw, vol_name)
-            src_label_path = join(h5_path_label, vol_name)
-            if labeled_only:
-                # Only read if at least one label is positive:
-                if np.max(f[src_label_path][:]) > 0:
+        if len(list(f)) > 0:
+            h5_path_raw = h5_internal_paths.RAW_SUBTOMOGRAMS
+            h5_path_label = join(h5_internal_paths.LABELED_SUBTOMOGRAMS,
+                                 semantic_class)
+            source_raw_names = list(f[h5_path_raw])
+            source_label_names = list(f[h5_path_label])
+            assert set(source_raw_names) == set(source_label_names)
+            if number_vols == -1:
+                number_vols = len(source_raw_names)
+            for vol_name in source_raw_names[:number_vols]:
+                src_raw_path = join(h5_path_raw, vol_name)
+                src_label_path = join(h5_path_label, vol_name)
+                if labeled_only:
+                    # Only read if at least one label is positive:
+                    if np.max(f[src_label_path][:]) > 0:
+                        raw_array += [f[src_raw_path][:]]
+                        label_array += [f[src_label_path][:]]
+                    else:
+                        print(
+                            "Partition element with no label data: not included.")
+                else:
+                    # Read all of the data.
                     raw_array += [f[src_raw_path][:]]
                     label_array += [f[src_label_path][:]]
-                else:
-                    print("Partition element with no label data: not included.")
-            else:
-                # Read all of the data.
-                raw_array += [f[src_raw_path][:]]
-                label_array += [f[src_label_path][:]]
-        # Add channel dimension
-        raw_array, label_array = np.array(raw_array)[:, None], np.array(
-            label_array)[:, None]
+            # Add channel dimension
+    raw_array, label_array = np.array(raw_array)[:, None], np.array(
+        label_array)[:, None]
     return raw_array, label_array
 
 
 def generate_model_name(box_shape: tuple or list, semantic_classes: list,
-                        DA_tag: str, net_conf: dict) -> str:
+                        DA_tag: str, net_conf: dict, tomos_set: str) -> str:
     if np.max(box_shape) == np.min(box_shape):
         box_size = str(np.min(box_shape))
     else:
@@ -131,12 +133,14 @@ def generate_model_name(box_shape: tuple or list, semantic_classes: list,
         net_conf['encoder_dropout']) + "_decoder_dropout" + str(
         net_conf['decoder_dropout']) + "_DA_" + DA_tag + "_BN_" + str(
         net_conf['BN']) + classes_string + "_D_" + str(
-        net_conf['depth']) + "_IF_" + str(net_conf['initial_features'])
+        net_conf['depth']) + "_IF_" + str(net_conf['initial_features']) + \
+               "_set_" + tomos_set
     return net_name
 
 
-def build_prediction_output_dir(base_output_dir: str, label_name: str, model_name: str,
-                     tomo_name: str, semantic_class: str):
+def build_prediction_output_dir(base_output_dir: str, label_name: str,
+                                model_name: str,
+                                tomo_name: str, semantic_class: str):
     output_dir = os.path.join(base_output_dir, label_name)
     output_dir = os.path.join(output_dir, model_name)
     output_dir = os.path.join(output_dir, tomo_name)

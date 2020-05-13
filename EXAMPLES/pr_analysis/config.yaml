@@ -1,3 +1,12 @@
+tomos_sets:
+  1:
+    training_list: ["180426/027"]
+    test_list: ["180426/028"]
+  2:
+    training_list: ["180426/028"]
+    test_list: ["180426/027"]
+
+
 dataset_table : "datasets.csv"
 overlap : 12
 write_on_table : True

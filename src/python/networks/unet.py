@@ -367,6 +367,7 @@ class UNet3D(nn.Module):
             x = self.activation(x)
         return x
 
+
 class UNet_dropout(nn.Module):
     """ UNet implementation
     Arguments:
@@ -420,8 +421,9 @@ class UNet_dropout(nn.Module):
 
     def __init__(self, in_channels=1, out_channels=1,
                  depth=4, initial_features=16, decoder_dropout=0.1,
-                 encoder_dropout=0.1, elu=False,
+                 encoder_dropout=0.1, BN=False, elu=False,
                  final_activation=None):
+        print("Without BN")
         super().__init__()
         self.depth = depth
         self.decoder_dropout = decoder_dropout

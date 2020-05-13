@@ -115,7 +115,7 @@ print("*******************************************")
 print("The unet training script is running")
 print("*******************************************")
 print("\n")
-# os.environ["CUDA_VISIBLE_DEVICES"] = str()
+
 final_activation = nn.Sigmoid()
 net_conf = {'final_activation': final_activation,
             'depth': depth,
@@ -124,6 +124,7 @@ net_conf = {'final_activation': final_activation,
 
 DTHeader = DatasetTableHeader(partition_name=training_partition,
                               semantic_classes=segmentation_names)
+
 df = pd.read_csv(dataset_table)
 df[DTHeader.tomo_name] = df[DTHeader.tomo_name].astype(str)
 
@@ -214,7 +215,7 @@ model_path_pkl = join(model_path, model_name_pkl)
 log_model = join(log_dir, model_name)
 logger = TensorBoard_multiclass(log_dir=log_model, log_image_interval=1)
 
-write_on_models_notebook(model_name=model_name, model_path=model_path,
+write_on_models_notebook(model_name=model_name, model_dir=model_path,
                          log_dir=log_model, depth=depth,
                          initial_features=initial_features, n_epochs=n_epochs,
                          training_paths_list=training_partition_paths,
@@ -239,7 +240,8 @@ for epoch in range(n_epochs):
           log_image=False, lr_scheduler=lr_scheduler)
     step = new_epoch * len(train_loader.dataset)
     # run validation after training epoch
-    current_validation_loss = validate(net, val_loader, loss, metric,
+    current_validation_loss = validate(model=net, loader=val_loader,
+                                       loss_function=loss, metric=metric,
                                        device=device, step=step,
                                        tb_logger=logger)
     if current_validation_loss <= validation_loss:

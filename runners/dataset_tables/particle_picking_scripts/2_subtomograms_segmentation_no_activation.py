@@ -68,11 +68,10 @@ data_path = tomo_df.iloc[0]['test_partition']
 print("test_partition", data_path)
 conf = {'final_activation': None, 'depth': depth,
         'initial_features': init_feat, 'out_channels': output_classes}
-if not BN:
-    model = UNet(**conf)
-else:
+
+if BN:
     model = UNet_BN(**conf)
-if np.max([encoder_dropout, decoder_dropout]) > 0:
+elif np.max([encoder_dropout, decoder_dropout]) > 0:
     conf['encoder_dropout'] = encoder_dropout
     conf['decoder_dropout'] = decoder_dropout
     model = UNet_dropout(**conf)
