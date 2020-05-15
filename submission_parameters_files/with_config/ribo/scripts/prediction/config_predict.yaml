@@ -20,40 +20,40 @@ tomos_sets:
   
   -11:
     test_list: ["190301/006"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_1"
   -12:
     test_list: ["190301/013"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_1"
   -13:
     test_list: ["190301/020"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0.2_DA_none_BN_False_ribo__D_2_IF_32_set_1"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_1"
   -14:
     test_list: ["190301/029"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_1"
   -21:
     test_list: ["190301/002"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_2"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_2"
   -22:
     test_list: ["190301/011"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_2"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_2"
   -23:
     test_list: ["190301/021"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_2"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_2"
   -24:
     test_list: ["190301/030"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_2"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_2"
   -31:
     test_list: ["190301/001"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_3"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_3"
   -32:
     test_list: ["190301/010"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_3"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_3"
   -33:
     test_list: ["190301/015"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_3"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_3"
   -34:
     test_list: ["190301/026"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_3"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_3"
 
   1:
     training_list: [ "190301/001", "190301/002", "190301/004", "190301/007",
@@ -92,7 +92,7 @@ output_dir: "/struct/mahamid/Irene/yeast/ED"
 
 unet_hyperparameters:
   models_table: "/struct/mahamid/Irene/yeast/config_models/ribo/models.csv"
-  model_name: "64pix_encoder_dropout0_decoder_dropout0.2_DA_none_BN_False_ribo__D_2_IF_32_set_3"
+#  model_name: "64pix_encoder_dropout0_decoder_dropout0.2_DA_none_BN_False_ribo__D_2_IF_32_set_3"
   label_name : "ribo_sph_masks_TM_CNNs"
 
 reconstruction:

@@ -21,12 +21,17 @@ from networks.visualizers import TensorBoard_multiclass
 from tomogram_utils.volume_actions.actions import \
     load_and_normalize_dataset_list
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3,4"
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-yaml_file", "--yaml_file", help="yaml_file", type=str)
 parser.add_argument("-tomos_set", "--tomos_set",
                     help="tomos set name to be used for training", type=int)
+parser.add_argument("-gpu", "--gpu", help="cuda visible devices", type=str)
+
 args = parser.parse_args()
+gpu = args.gpu
+os.environ["CUDA_VISIBLE_DEVICES"] = gpu
+
 yaml_file = args.yaml_file
 config = yaml.safe_load(open(yaml_file))
 tomos_set = args.tomos_set
@@ -68,9 +73,7 @@ df = pd.read_csv(dataset_table, dtype={DTHeader.tomo_name: str})
 training_partition_paths = list()
 data_aug_rounds_list = list()
 for tomo_name in tomo_training_list:
-    print(tomo_name)
     tomo_df = df[df[DTHeader.tomo_name] == tomo_name]
-    print(tomo_df)
     training_partition_paths += [tomo_df.iloc[0][DTHeader.partition_name]]
     if 'data_aug_rounds' in tomo_df.keys():
         tomo_df = tomo_df.fillna(0)
@@ -78,6 +81,7 @@ for tomo_name in tomo_training_list:
     else:
         d = 0
     data_aug_rounds_list += [int(d)]
+
 device = get_device()
 train_data, train_labels, val_data, val_labels = \
     load_and_normalize_dataset_list(training_partition_paths,
@@ -105,6 +109,13 @@ net_conf = {'final_activation': final_activation, 'depth': depth,
 # net = UNet_dropout(**net_conf)
 net = UNet3D(**net_conf)
 net = net.to(device)
+
+if torch.cuda.device_count() > 1:
+    print("Let's use", torch.cuda.device_count(), "GPUs!")
+    # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
+    net = nn.DataParallel(net)
+net.to(device)  # currently the model is in one single node
+
 loss = DiceCoefficientLoss()
 loss = loss.to(device)
 optimizer = optim.Adam(net.parameters())
@@ -162,4 +173,4 @@ for epoch in range(n_epochs):
 
 print("We have finished the training!")
 print("The best validation loss was", validation_loss)
-print("The best epoch was ", best_epoch)
+print("The best epoch was", best_epoch)

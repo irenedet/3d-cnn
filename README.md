@@ -1,124 +1,58 @@
 # 3d-cnn
 
-## Description.
+## 1. Description.
 
 3D UNet adapted for cryo-ET segmentation and particle localisaton.
 
-## Submission scripts {**script_name**: description}
-
-### Training the UNet
-
-**submission_scripts/training_submission.sh** : given a training dataset (add description), this script outputs a trained model which is saved under the given path. By default in: models/given_name.pkl
-
-### Using a trained UNet to segment a tomogram
-#### STEP 1
+## 2. Usage
+### 2.1 Submission scripts 
 
 
-**submission_scripts/1_dataset2subtomos_submission.sh** : Given a tomogram, the output is a h5 file where the subtomograms of a given size are stored. This is the preparation step to apply the neural network.
-
-**Input variables**:
-
-  in file: repository_path/3d-cnn/runners/dataset2subtomos.py
-
- - **path_to_raw ** : path to the tomogram that will be segmented
-
- - **folder_path = "/scratch/trueba/3d-cnn/TEST/"** TODO
-
- - **h5_output_file** : name of the h5 file where the output will be stored.
-
-      E.g. h5_output_file = "004_in_subtomos_128side.h5"
-
-**Output**:
-
-- a h5 file where the subtomograms in which the original tomogram was partitioned. Each subtomogram is stored in the internal h5 path:
-
-  volumes/raw/subtomo_name
-
- where  
-
-```
-  subtomo_name = "subtomo_" + "_" + str(subtomogram_center)
-```
-
-#### STEP 2
-
-
-**submission_scripts/2_cnn_subtomo_segmentation_submission.sh** : Given a h5 file that contains a series of subtomograms of a compatible size to a given trained neural network, the neural network is applied for segmentation of each subtomogram.
-
-**Input variables**:
-
-  in file: repository_path/3d-cnn/runners/subtomo_segmentation.py
-
- - **data_dir** : Path to the directory where the h5 file containing the subtomograms to be segmented are stored.
-
-    E.g. data_dir = "/scratch/trueba/3d-cnn/TEST/"
-
- - **data_file** : A string defining the name of the h5 file where the subtomograms to be segmented are stored.
-
-  Necessarily, the internal path of the subtomograms should be given by
-
-   volumes/raw/subtomo_name
-
-This file is, in principle, the output of Step 1.
-
- - ** label_name ** : A string that defines the name of the predicted segmentation. By default this is set as "ribosomes".
-
- - **model_dir** and **model_name_pkl**: then the variable **model_path = model_dir/model_name_pkl** corresponds to the path of the trained and stored UNet model in .pkl format that will be used to segment each subtomogram.
-
-**Output**
-
- A set of datasets corresponding to the predicted segmentations of each subtomogram stored in the h5 file **data_dir/data_file**: the corresponding predicted segmentation of each subtomogram:
- ```
- volumes/raw/subtomo_name
-```
-is stored as
-```
-  volumes/raw/label_name/subtomo_name
-```
-
-#### STEP 2 bis (optional)  
-
-
-**submission_scripts/2bis_subtomos2dataset_submission.sh** : This is an optional (and relatively expensive step). This script runs a program that assembles prediction sub tomograms in an h5 file, to get the global prediction of the full tomogram.
-
-
-#### STEP 3
-**submission_scripts/3_compute_motl_submission.sh** : A motive list is produced from the predictions obtained in step 2.
-
-**Input variables**:
-
-  in file: repository_path/3d-cnn/runners/compute_peaks_motl.py
-
- - **peaks_numb**?
-
-**Output**
-
- - The file with path:
-   path_to_output_folder/'motl_' + str(numb_peaks) + '.csv'
-
-   where the a motive list associated to the local maxima of the prediction score (in decreasing order) is produced. Where numb_peaks is the total number of local maxima (or peaks) corresponding in the motive list.
-
-## To run in the cluster
+### 2.2 Run in the cluster
 
 ```bash
 cd path_to_project_repository
 sbatch submission_scripts/script_name.sh
 ```
-# Requirements
- ## 1. conda environment
- ### 1.1 Create a conda environment
- #### 1.1.1 In an EMBL system
- In a folder with large enough capacity (e.g. a /g/scb2/zaugg/zaugg_shared):
+## 3. Requirements and conda environment
+
+
+### 3.0 Package Installation (miniconda and torch)
+Install locally the packages (both in the cluster or other):
+
+#### Miniconda
 ```bash
-module load Anaconda3
-conda env create -f environment.yaml -p /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse --force
-ln -sv /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/envs/mlcourse ~/.conda/envs/mlcourse
+cd foldertodownload
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
 ```
-#### 1.1.2 In a local server
+
+#### pytorch and torchvision for gpus:
 ```bash
-conda env create -f environment.yaml
+conda install -c anaconda pytorch-gpus #? check exact command
+conda install -c anaconda torchvision-gpus #? check exact command
 ```
- ### 1.2 Conda environment usage
+
+#### Switch the global variable to make conda installations in a large folder, 
+by adding the paths to the ~/.bashrc or ~/.profile files:
+
+```bash
+export CONDA_PKGS_DIRS=/struct/mahamid/Irene/envs/.conda
+```
+
+### 3.1 Create the conda virtual environment
+
+Now create the virtual environment with all requirements:
+```bash
+conda env create -f environment.yaml -p /folder/large/capacity/.conda/envs/3d-cnn --force
+```
+and set the virtual environment path in `~/.bashrc` or `~/.profile`:
+```bash
+UPICKER_PATH='/path/to/this/repo'
+UPICKER_VENV_PATH='/folder/large/capacity/.conda/envs/3d-cnn'
+```
+
+### 3.2 Conda environment usage
 
 
  To activate this environment, use:
@@ -135,10 +69,52 @@ source activate /g/scb2/zaugg/zaugg_shared/Programs/Anaconda/envs/irene/.conda/e
 
  ``` source deactivate ```
 
-## 2. Activate modules of this project
+### 3.3 GPU usage
+
+check gpu current state/availability
+```bash
+nvidia-smi
+```
+the output should be smthg like 
+```bash
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 440.87       Driver Version: 440.87       CUDA Version: 10.2     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  GRID P40-12Q        On   | 00000000:02:00.0 Off |                  N/A |
+| N/A   N/A    P8    N/A /  N/A |  11957MiB / 12288MiB |      0%      Default |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                       GPU Memory |
+|  GPU       PID   Type   Process name                             Usage      |
+|=============================================================================|
+|    0     10078      C   ...ttausc/miniconda3/envs/keras/bin/python 11109MiB |
++-----------------------------------------------------------------------------+
+```
+
+### 3.4 Activate parallel use of GPUs to handle data
+
+```
+import torch
+
+if torch.cuda.device_count() > 1:
+    print("Let's use", torch.cuda.device_count(), "GPUs!")
+    # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
+    model = nn.DataParallel(model)
+    # DataParallel splits your data automatically and
+    # sends job orders to multiple models on several GPUs.
+    # After each model finishes their job, DataParallel
+    # collects and merges the results before returning it to you.
+model.to(device)  # currently the device is in one single node
+```
+
+## Appendix. Activate modules of this project
 Moreover, for running any script, add to the head of the python script:
 
-```python
+```
 import sys
 
 py_src_path = "the/local/path/to/the/src/python"
@@ -147,6 +123,80 @@ runners_path = "/the/local/path/to/3d-cnn/runners"
 sys.path.append(runners_path)
 
 ```
+
+## 4. Notes for organelle segmentation
+
+### 4.1 Package Installation
+Install locally the following packages in the cluster or locally:
+
+4.1.1 miniconda 
+```bash
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
+```
+Switch the glogal variable to make conda installations in a large folder, by adding
+to the ~/.bashrc or ~/.profile files:
+```bash
+export CONDA_PKGS_DIRS=/struct/mahamid/Irene/envs/.conda
+```
+
+4.1.2 keras and tensorflow for gpus
+
+ToDo
+```bash
+conda install -c anaconda keras-gpu
+```
+
+### 4.2 Generate the virtual environment
+
+```bash
+conda env create -f envs/keras-env.yaml -p /struct/mahamid/Irene/envs/.conda/snakemake-keras
+```
+
+
+### 4.3 Dryrun
+
+First check whether snakemake can build the directed graph:
+
+in deploy_cluster.sh or deploy_local.sh, add the --dryrun flag:
+
+```bash
+srun -t 4:00:00 -c 1 --mem 2G \
+    snakemake \
+    --snakefile "${srcdir}/snakefile.py" \
+    --cluster "sbatch" \
+    --config config="${config_file}" \
+    --jobscript "${srcdir}/jobscript.sh" \
+    --jobs 20 \
+    --use-conda \
+    --printshellcmds \
+    --latency-wait 30 --dryrun #to not execute any rule with dryrun
+```
+
+and it is ran by:
+
+```bash
+bash deploy_cluster.sh config.yaml
+```
+
+Obviously, to run the code, just delete the --dryrun flag.
+
+### 4.4 Activate/deactivate modes
+
+There are three modes:
+- Training-evaluation
+- Training-Production
+- Non Training-Predict
+
+In the file `config.yaml` just set the `active` parameters as corresponding (True or False).
+
+### 4.5 Notes on formats
+
+- Label files are piece-wise constant maps in .mrc format. The id value - semantic 
+class correspondence is predetermined in the file `labels.csv`.
+- The `train_metadata.csv` and `yeast_sara_short.csv` have the information for 
+the training.
+
 
 
 

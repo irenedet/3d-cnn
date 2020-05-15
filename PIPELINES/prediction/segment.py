@@ -12,11 +12,13 @@ from networks.unet import UNet3D
 # from networks.unet import UNet #, UNet_dropout
 
 parser = argparse.ArgumentParser()
+parser.add_argument("-gpu", "--gpu", help="cuda visible devices", type=str)
 parser.add_argument("-yaml_file", "--yaml_file", help="yaml_file", type=str)
 parser.add_argument("-tomos_set", "--tomos_set",
                     help="tomos set name to be used for training", type=int)
 
 args = parser.parse_args()
+gpu = args.gpu #TODO understand what to do with this
 yaml_file = args.yaml_file
 config = yaml.safe_load(open(yaml_file))
 tomos_set = args.tomos_set

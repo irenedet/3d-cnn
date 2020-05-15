@@ -3,17 +3,17 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 60G
-#SBATCH --time 0-2:25
+#SBATCH --mem 120G
+#SBATCH --time 0-2:00
 #SBATCH -o predict.slurm.%N.%j.out
 #SBAtCH -e predict.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBAtCH --mail-user=irene.de.teresa@embl.de
 #SBATCH -p gpu
-#SBAtCH --gres=gpu:4 -n1 -c4
+#SBATCH --gres=gpu:4
 
 echo "Activating virtual environment"
-module load Anaconda3
+#module load Anaconda3
 source activate $UPICKER_VENV_PATH
 
 usage()
@@ -41,20 +41,20 @@ export yaml_file="/struct/mahamid/Irene/3d-cnn/submission_parameters_files/with_
 export tomos_set=$set
 echo "Analyzing set" $set
 
-echo "Partitioning dataset"
-python $UPICKER_PATH/PIPELINES/prediction/partition.py -yaml_file $yaml_file -tomos_set $tomos_set
-
-echo "Segmenting partition"
-python $UPICKER_PATH/PIPELINES/prediction/segment.py -yaml_file $yaml_file -tomos_set $tomos_set
-
-echo "Reconstructing segmentation"
-python $UPICKER_PATH/PIPELINES/prediction/assemble.py -yaml_file $yaml_file -tomos_set $tomos_set
-
-#echo "Getting cluster centroids motl"
-#python $UPICKER_PATH/PIPELINES/prediction/cluster_motl.py -yaml_file $yaml_file -tomos_set $tomos_set
+#echo "Partitioning dataset"
+#python $UPICKER_PATH/PIPELINES/prediction/partition.py -yaml_file $yaml_file -tomos_set $tomos_set
 #
-#echo "Selecting coordinates within mask"
-#python $UPICKER_PATH/PIPELINES/prediction/mask_motl.py -yaml_file $yaml_file -tomos_set $tomos_set
+#echo "Segmenting partition"
+#python $UPICKER_PATH/PIPELINES/prediction/segment.py -yaml_file $yaml_file -tomos_set $tomos_set --gpu $CUDA_VISIBLE_DEVICES
 #
-#echo "Performing precision-recall analysis"
-#python $UPICKER_PATH/PIPELINES/pr_analysis/pr_analysis.py -yaml_file $yaml_file -tomos_set $tomos_set
+#echo "Reconstructing segmentation"
+#python $UPICKER_PATH/PIPELINES/prediction/assemble.py -yaml_file $yaml_file -tomos_set $tomos_set
+
+echo "Getting cluster centroids motl"
+python $UPICKER_PATH/PIPELINES/prediction/cluster_motl.py -yaml_file $yaml_file -tomos_set $tomos_set
+
+echo "Selecting coordinates within mask"
+python $UPICKER_PATH/PIPELINES/prediction/mask_motl.py -yaml_file $yaml_file -tomos_set $tomos_set
+
+echo "Performing precision-recall analysis"
+python $UPICKER_PATH/PIPELINES/pr_analysis/pr_analysis.py -yaml_file $yaml_file -tomos_set $tomos_set
