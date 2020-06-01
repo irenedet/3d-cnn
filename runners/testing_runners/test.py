@@ -35,7 +35,6 @@
 #                     subtomo_path = os.path.join(label_path, subtomo_name)
 #                     subtomo_data = f[subtomo_path][:]
 #                     o[subtomo_path] = subtomo_data
-from file_actions.writers.h5 import write_particle_mask_from_motl
 
 motl_paths = [
     # "/struct/mahamid/Irene/yeast/ED/190301/001/clean_motls/ribo/combined/TM_cnnIF4_cnnIF8_cnnIF32_motl_1411.csv",
@@ -79,22 +78,67 @@ mask_paths = [
     # "/struct/mahamid/Irene/yeast/ED/190301/019/clean_masks/TM_cnnIF4_cnnIF8_cnnIF32_motl_1105.mrc",
 ]
 
-output_shape = (500, 928, 928)
-radius = 8
-values_in_motl = False
-z_shift = 0
-coords_in_tom_format = True
+# output_shape = (500, 928, 928)
+# radius = 8
+# values_in_motl = False
+# z_shift = 0
+# coords_in_tom_format = True
+#
+# for motl_path, output_path in zip(motl_paths, mask_paths):
+#     print(motl_path)
+#
+#     write_particle_mask_from_motl(path_to_motl=motl_path,
+#                                   output_path=output_path,
+#                                   output_shape=output_shape,
+#                                   sphere_radius=radius,
+#                                   values_in_motl=values_in_motl,
+#                                   number_of_particles=None,
+#                                   z_shift=z_shift,
+#                                   particles_in_tom_format=coords_in_tom_format)
+#
+#
 
-for motl_path, output_path in zip(motl_paths, mask_paths):
-    print(motl_path)
 
-    write_particle_mask_from_motl(path_to_motl=motl_path,
-                                  output_path=output_path,
-                                  output_shape=output_shape,
-                                  sphere_radius=radius,
-                                  values_in_motl=values_in_motl,
-                                  number_of_particles=None,
-                                  z_shift=z_shift,
-                                  particles_in_tom_format=coords_in_tom_format)
+import numpy as np
 
+from file_actions.readers.tomograms import load_tomogram
+from file_actions.writers.mrc import write_mrc_dataset
 
+paths = [
+    "/struct/mahamid/Irene/yeast/ED/181119/002/alex_labels.hdf",
+    "/struct/mahamid/Irene/yeast/ED/181119/030/alex_labels.hdf",
+    "/struct/mahamid/Irene/yeast/ED/190329/001/alex_labels.hdf",
+    "/struct/mahamid/Irene/yeast/ED/190329/004/alex_labels.hdf",
+    # "/struct/mahamid/Irene/yeast/healthy/180426/021/alex_labels.hdf",
+    # "/struct/mahamid/Irene/yeast/healthy/180426/024/alex_labels.hdf",
+    # "/struct/mahamid/Irene/yeast/healthy/180426/026/alex_labels.hdf",
+    # "/struct/mahamid/Irene/yeast/healthy/180426/027/alex_labels.hdf",
+    # "/struct/mahamid/Irene/yeast/healthy/180711/003/alex_labels.hdf",
+    # "/struct/mahamid/Irene/yeast/healthy/180711/004/alex_labels.hdf",
+]
+
+flips = [
+    False,  # /struct/mahamid/Irene/yeast/ED/181119/002/alex_labels.hdf
+    False,  # /struct/mahamid/Irene/yeast/ED/181119/030/alex_labels.hdf
+    True,  # /struct/mahamid/Irene/yeast/ED/190329/001/alex_labels.hdf
+    True,  # /struct/mahamid/Irene/yeast/ED/190329/004/alex_labels.hdf
+    # True,  # /struct/mahamid/Irene/yeast/healthy/180426/021/alex_labels.hdf
+    # True,  # /struct/mahamid/Irene/yeast/healthy/180426/024/alex_labels.hdf
+    # False,  # /struct/mahamid/Irene/yeast/healthy/180426/026/alex_labels.hdf
+    # False,  # /struct/mahamid/Irene/yeast/healthy/180426/027/alex_labels.hdf
+    # True,  # /struct/mahamid/Irene/yeast/healthy/180711/003/alex_labels.hdf
+    # True,  # /struct/mahamid/Irene/yeast/healthy/180711/004/alex_labels.hdf
+]
+# path = "/struct/mahamid/Irene/yeast/healthy/180426/005/alex_labels.hdf"
+assert len(flips) == len(paths)
+for path, flip in zip(paths, flips):
+    tomo = load_tomogram(path_to_dataset=path)
+    tomo_name = path[-26:-16]
+    print(tomo_name)
+    id = 1
+    tomo = 1 * (tomo == 1)
+    output_path = "/struct/mahamid/Irene/yeast/ED/"+ tomo_name +"/cytosol_mask.mrc"
+    if flip:
+        tomo = np.flip(tomo, axis=1)
+
+    write_mrc_dataset(mrc_path=output_path, array=tomo, dtype=np.int8)

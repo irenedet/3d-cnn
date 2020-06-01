@@ -73,6 +73,7 @@ df = pd.read_csv(dataset_table, dtype={DTHeader.tomo_name: str})
 training_partition_paths = list()
 data_aug_rounds_list = list()
 for tomo_name in tomo_training_list:
+    print(tomo_name)
     tomo_df = df[df[DTHeader.tomo_name] == tomo_name]
     training_partition_paths += [tomo_df.iloc[0][DTHeader.partition_name]]
     if 'data_aug_rounds' in tomo_df.keys():

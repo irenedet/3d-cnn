@@ -14,7 +14,8 @@ from tomogram_utils.coordinates_toolbox.utils import \
     filtering_duplicate_coords_with_values
 
 
-def _generate_unit_particle(radius: int):
+def _generate_unit_particle(radius: float):
+    radius = int(radius)
     unit_particle = [(0, 0, 0)]
     for i in range(radius):
         for j in range(radius):
@@ -205,7 +206,7 @@ def read_motl_coordinates_and_values(path_to_motl: str) -> tuple:
         motl = read_motl_from_csv(path_to_motl)
         motl_values, motl_coords = extract_motl_coordinates_and_score_values(
             motl)
-        motl_coords = np.array(motl_coords)
+        motl_coords = np.array(motl_coords, dtype=int)
     return motl_values, motl_coords
 
 

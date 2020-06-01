@@ -3,19 +3,18 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 150G
+#SBATCH --mem 80G
 #SBATCH --time 0-25:00
 #SBATCH -o training.slurm.%N.%j.out
 #SBATCH -e training.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBAtCH --mail-user=irene.de.teresa@embl.de
 #SBATCH -p gpu
-#SBATCH --gres=gpu:4 -n1 -c4
+#SBATCH --gres=gpu:4
 
 
 
 echo "Activating virtual environment"
-module load Anaconda3
 source activate $UPICKER_VENV_PATH
 echo "done"
 export QT_QPA_PLATFORM='offscreen'
@@ -47,4 +46,4 @@ done
 export tomos_set=$tomos_set
 export yaml_file=$yaml_file
 echo "Submitting job for set" $tomos_set
-python $UPICKER_PATH/PIPELINES/training/training.py -yaml_file $yaml_file -tomos_set $tomos_set
+python $UPICKER_PATH/PIPELINES/training/training.py -yaml_file $yaml_file -tomos_set $tomos_set -gpu $CUDA_VISIBLE_DEVICES

@@ -94,7 +94,7 @@ def extract_coordinates_from_em_motl(motl: np.array) -> np.array:
 
 def extract_coordinates_and_values_from_em_motl(motl: np.array) -> np.array:
     values = np.array(motl[:, 0])
-    coordinates = np.array(motl[:, 7:10])
+    coordinates = np.array(motl[:, 7:10], dtype=int)
     return values, coordinates
 
 

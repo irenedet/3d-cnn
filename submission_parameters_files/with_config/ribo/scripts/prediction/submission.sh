@@ -3,7 +3,7 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 120G
+#SBATCH --mem 40G
 #SBATCH --time 0-2:00
 #SBATCH -o predict.slurm.%N.%j.out
 #SBAtCH -e predict.slurm.%N.%j.err

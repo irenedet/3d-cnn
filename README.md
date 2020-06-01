@@ -29,8 +29,7 @@ bash Miniconda3-latest-Linux-x86_64.sh
 
 #### pytorch and torchvision for gpus:
 ```bash
-conda install -c anaconda pytorch-gpus #? check exact command
-conda install -c anaconda torchvision-gpus #? check exact command
+conda install -c pytorch pytorch torchvision
 ```
 
 #### Switch the global variable to make conda installations in a large folder, 
@@ -43,8 +42,11 @@ export CONDA_PKGS_DIRS=/struct/mahamid/Irene/envs/.conda
 ### 3.1 Create the conda virtual environment
 
 Now create the virtual environment with all requirements:
+(important to put the prefix directory, othwise it will try to install in home
+where the memory space may be limited)
+
 ```bash
-conda env create -f environment.yaml -p /folder/large/capacity/.conda/envs/3d-cnn --force
+conda env create --file environment.yaml -p /folder/large/capacity/.conda/envs/3d-cnn --force
 ```
 and set the virtual environment path in `~/.bashrc` or `~/.profile`:
 ```bash
@@ -147,14 +149,21 @@ ToDo
 conda install -c anaconda keras-gpu
 ```
 
-### 4.2 Generate the virtual environment
+### 4.2 Generate the virtual environment with only snakemake and pandas
 
 ```bash
-conda env create -f envs/keras-env.yaml -p /struct/mahamid/Irene/envs/.conda/snakemake-keras
+conda create -c conda-forge -c bioconda -n snakemake-demo python=3.6
+conda activate snakemake-demo
+conda install pandas
+conda install -c bioconda snakemake
 ```
 
+Later, when running the pipeline, a virtual environment with the rest of the packages will 
+created.
 
 ### 4.3 Dryrun
+
+After activating snakemake-demo do:
 
 First check whether snakemake can build the directed graph:
 

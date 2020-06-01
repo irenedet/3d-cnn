@@ -2,6 +2,7 @@ import argparse
 
 import pandas as pd
 import torch
+import torch.nn as nn
 import yaml
 
 from constants.dataset_tables import ModelsTableHeader, DatasetTableHeader
@@ -64,13 +65,21 @@ net_conf = {'final_activation': None, 'depth': depth,
             "BN": BN, "encoder_dropout": encoder_dropout,
             "decoder_dropout": decoder_dropout}
 
+
+device = get_device()
 model = UNet3D(**net_conf)
+model.to(device)
 
 # model = UNet(in_channels=1, out_channels=output_classes,
 #              depth=depth, initial_features=initial_features,
 #              final_activation=None)
 
-device = get_device()
+if torch.cuda.device_count() > 1:
+    print("Let's use", torch.cuda.device_count(), "GPUs!")
+    # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
+    model = nn.DataParallel(model)
+
+
 checkpoint = torch.load(path_to_model, map_location=device)
 model.load_state_dict(checkpoint['model_state_dict'])
 model = model.eval()

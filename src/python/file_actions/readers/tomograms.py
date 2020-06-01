@@ -12,6 +12,7 @@ def load_tomogram(path_to_dataset: str) -> np.array:
     Verified that they open according to same coordinate system
     """
     _, data_file_extension = os.path.splitext(path_to_dataset)
+    print("file in {} format".format(data_file_extension))
     assert data_file_extension in [".em", ".hdf", ".mrc", ".rec"], \
         "file in non valid format."
     if data_file_extension == ".em":

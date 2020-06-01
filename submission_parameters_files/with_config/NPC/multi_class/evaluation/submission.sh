@@ -3,23 +3,25 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 60G
-#SBATCH --time 0-1:35
+#SBATCH --mem 5G
+#SBATCH --time 0-0:20
 #SBATCH -o predict.slurm.%N.%j.out
 #SBAtCH -e predict.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
 #SBAtCH --mail-user=irene.de.teresa@embl.de
 #SBATCH -p gpu
-#SBATCH --gres=gpu:4 -n1 -c4
+#SBATCH --gres=gpu:4
 
 echo "Activating virtual environment"
-module load Anaconda3
+#module load Anaconda3
 source activate $UPICKER_VENV_PATH
 
 usage()
 
 {
-    echo "usage: [[ [-set][-set set] | [-h]]"
+    echo "usage: [[ [-output output_dir][-test_partition test_partition ]
+                  [-model path_to_model] [-label label_name]
+                  [-out_h5 output_h5_file_path] [-conf conf]] | [-h]]"
 }
 while [ "$1" != "" ]; do
     case $1 in
@@ -43,7 +45,7 @@ echo "Partitioning dataset"
 python $UPICKER_PATH/PIPELINES/prediction/partition.py -yaml_file $yaml_file -tomos_set $tomos_set
 
 echo "Segmenting partition"
-python $UPICKER_PATH/PIPELINES/prediction/segment.py -yaml_file $yaml_file -tomos_set $tomos_set
+python $UPICKER_PATH/PIPELINES/prediction/segment.py -yaml_file $yaml_file -tomos_set $tomos_set --gpu $CUDA_VISIBLE_DEVICES
 
 echo "Reconstructing segmentation"
 python $UPICKER_PATH/PIPELINES/prediction/assemble.py -yaml_file $yaml_file -tomos_set $tomos_set

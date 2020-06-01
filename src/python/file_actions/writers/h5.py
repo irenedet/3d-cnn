@@ -17,6 +17,7 @@ from file_actions.readers.motl import read_motl_from_csv
 from file_actions.readers.tomograms import load_tomogram
 from file_actions.writers.mrc import write_mrc_dataset
 from networks.unet_new import UNet3D
+from pytorch_cnn.classes.io import get_device
 from tensors.actions import crop_window_around_point
 from tomogram_utils.coordinates_toolbox import subtomos
 from tomogram_utils.coordinates_toolbox.utils import \
@@ -508,6 +509,7 @@ def _get_subtomos_names_to_segment(file: h5py.File, label_name: str, flag: str):
 
 
 def segment_and_write(data_path: str, model: UNet3D, label_name: str) -> None:
+    device = get_device()
     with h5py.File(data_path, 'r') as data_file:
         flag = _check_segmentation_existence(data_file, label_name)
         predicted_subtomos_names, subtomo_names, total_subtomos = \
@@ -522,8 +524,8 @@ def segment_and_write(data_path: str, model: UNet3D, label_name: str) -> None:
                 subtomo_data = np.array(
                     [data_file[subtomo_h5_internal_path][:]])
                 subtomo_data = subtomo_data[:, None]
-                segmented_data = model(torch.from_numpy(subtomo_data))
-                segmented_data = segmented_data.detach().numpy()
+                segmented_data = model(torch.from_numpy(subtomo_data).to(device))
+                segmented_data = segmented_data.cpu().detach().numpy()
                 _write_segmented_subtomo_data(data_file=data_file,
                                               segmented_data=segmented_data,
                                               label_name=label_name,
@@ -620,6 +622,68 @@ def write_particle_mask_from_motl(path_to_motl: str,
                               dtype=dtype)
 
     return
+
+
+def generate_particle_mask_from_motl(path_to_motl: str,
+                                     output_shape: tuple,
+                                     sphere_radius=8,
+                                     values_in_motl: bool = True,
+                                     number_of_particles=None,
+                                     z_shift=0,
+                                     particles_in_tom_format=True) -> None:
+    _, motl_extension = os.path.splitext(path_to_motl)
+    assert motl_extension in [".csv", ".em"]
+
+    if motl_extension == ".csv" or motl_extension == ".em":
+        if motl_extension == ".csv":
+            motive_list = read_motl_from_csv(path_to_motl)
+            if isinstance(number_of_particles, int):
+                motive_list = motive_list[:number_of_particles]
+                print("Only", str(number_of_particles),
+                      " particles in the motive list will be pasted.")
+            else:
+                print("All particles in the motive list will be pasted.")
+            if particles_in_tom_format:
+                coordinates = [
+                    np.array([int(row[9]) + z_shift, int(row[8]), int(row[7])])
+                    for
+                    row in motive_list]
+            else:
+                coordinates = [
+                    np.array([int(row[7]) + z_shift, int(row[8]), int(row[9])])
+                    for
+                    row in motive_list]
+            if values_in_motl:
+                score_values = [row[0] for row in motive_list]
+            else:
+                score_values = np.ones(len(motive_list))
+                print("The map will be binary.")
+        else:
+            _, motive_list = read_em(path_to_emfile=path_to_motl)
+            if isinstance(number_of_particles, int):
+                motive_list = motive_list[:number_of_particles]
+                print("Only", str(number_of_particles),
+                      " particles in the motive list will be pasted.")
+            else:
+                print("All particles in the motive list will be pasted.")
+            coordinates = extract_coordinates_from_em_motl(motive_list)
+
+            if particles_in_tom_format:
+                print("coordinates already in tom format")
+                coordinates = [[int(p[2]) + z_shift, int(p[1]), int(p[0])] for p
+                               in coordinates]
+            else:
+                print("transforming coordinates to tom format")
+                coordinates = [[int(p[2]) + z_shift, int(p[1]), int(p[0])] for p
+                               in coordinates]
+            score_values = np.ones(len(coordinates))
+
+        predicted_dataset = np.zeros(output_shape)
+        for center, value in zip(coordinates, score_values):
+            paste_sphere_in_dataset(dataset=predicted_dataset, center=center,
+                                    radius=sphere_radius, value=value)
+
+    return predicted_dataset
 
 
 def split_and_write_h5_partition(h5_partition_data_path: str,

@@ -1,10 +1,11 @@
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import numpy as np
 import re
-from scipy.stats import f_oneway
 
+import numpy as np
+import pandas as pd
+
+default_dict_sample = {'ED': 'ED_1h', 'healthy': 'WT', 'energy depleted': 'ED_1h',
+                       'ED_6h': 'ED_6h', 'S.pombe': 'S.pombe', 'S.cerevisiae': 'S.cerevisiae'}
+default_excluded_labels = ['tomo_name']
 
 def get_tomo_names_dict(tomos_names):
     tomo_names_dict = {}
@@ -123,8 +124,15 @@ def extract_parameter_from_label(label, param):
     return param_value
 
 
-def load_plot_df(statistics_df, dataset_df, test_tomos, tomo_names_dict, excluded_labels=['tomo_name'],
-                 radius=8, dict_sample_type={'ED': 'ED', 'healthy': 'WT'}, dice=False):
+
+
+
+def load_plot_df(statistics_df, dataset_df, test_tomos, tomo_names_dict, excluded_labels=None,
+                 radius=8, dict_sample_type=None, dice=False):
+    if excluded_labels is None:
+        excluded_labels = default_excluded_labels
+    if dict_sample_type is None:
+        dict_sample_type = default_dict_sample
     stats_df = pd.read_csv(statistics_df)
     dataset_df = pd.read_csv(dataset_df)
     labels = []
@@ -157,6 +165,7 @@ def load_plot_df(statistics_df, dataset_df, test_tomos, tomo_names_dict, exclude
             if tomo_name in dataset_df['tomo_name'].values:
                 tomo_data = dataset_df[dataset_df['tomo_name'] == tomo_name]
                 sample_type = dict_sample_type[tomo_data.iloc[0]['sample_type']]
+                species = dict_sample_type[tomo_data.iloc[0]['species']]
                 vpp = tomo_data.iloc[0]['vpp']
                 stats_tomo_name = extract_tomo_name_from_fraction_name(tomo_name)
                 if stats_tomo_name in test_tomos:
@@ -181,6 +190,7 @@ def load_plot_df(statistics_df, dataset_df, test_tomos, tomo_names_dict, exclude
                         miniplot_df['encoder_dropout'] = encoder_dropout
                         miniplot_df['full_dropout'] = [full_dropout]
                         miniplot_df['sample_type'] = sample_type
+                        miniplot_df['species'] = species
                         miniplot_df['vpp'] = vpp
                         plot_df = plot_df.append(miniplot_df, sort=False)
                     else:
@@ -209,11 +219,12 @@ def sample_type_dictionary(sample_type: str):
 
 
 def load_plot_df_from_full_tomo(statistics_df, dataset_df, test_tomos, tomo_names_dict,
-                                excluded_labels=['tomo_name'], radius=8,
-                                dict_sample_type={'ED': 'ED_1h', 'healthy': 'WT',
-                                                  'energy depleted': 'ED_1h',
-                                                  'ED_6h': 'ED_6h'},
+                                excluded_labels=None, radius=8,dict_sample_type=None,
                                 dice=False, name_with_frac=True, statistic=None):
+    if excluded_labels is None:
+        excluded_labels = default_excluded_labels
+    if dict_sample_type is None:
+        dict_sample_type = default_dict_sample
     stats_df = pd.read_csv(statistics_df)
     dataset_df = pd.read_csv(dataset_df)
     labels = []
@@ -264,6 +275,7 @@ def load_plot_df_from_full_tomo(statistics_df, dataset_df, test_tomos, tomo_name
             if tomo_name in dataset_df['tomo_name'].values:
                 tomo_data = dataset_df[dataset_df['tomo_name'] == tomo_name]
                 sample_type = dict_sample_type[tomo_data.iloc[0]['sample_type']]
+                species = dict_sample_type[tomo_data.iloc[0]['species']]
                 vpp = tomo_data.iloc[0]['vpp']
                 if stats_tomo_name in test_tomos:
                     tmp_stats_df = stats_df[stats_df['tomo_name'] == tomo_name]
@@ -291,6 +303,7 @@ def load_plot_df_from_full_tomo(statistics_df, dataset_df, test_tomos, tomo_name
                         miniplot_df['encoder_dropout'] = encoder_dropout
                         miniplot_df['full_dropout'] = [full_dropout]
                         miniplot_df['sample_type'] = sample_type
+                        miniplot_df['species'] = species
                         miniplot_df['vpp'] = vpp
                         plot_df = plot_df.append(miniplot_df, sort=False)
                     else:
