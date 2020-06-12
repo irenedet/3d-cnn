@@ -1,6 +1,7 @@
 import os
 import random
 from time import time
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,6 +32,7 @@ def get_minimum_distance_between_motls(coordinates1: list, coordinates2: list = 
 def get_minimum_distance_distribution_between_motls(coordinates1: list, coordinates2: list = None,
                                                     voxel_size: float = 1):
     if coordinates2 is None:
+        coordinates1 = np.array(coordinates1)
         d = cdist(coordinates1, coordinates1)
         d_mod = d + np.max(d) * np.eye(d.shape[0])
         min_distance_distribution = d_mod.min(axis=1)
@@ -313,7 +315,7 @@ def get_Ripley_Kest(A, coords, r_min, r_max, num):
     return K, radius_range
 
 
-def get_Ripley_Kest3(A, coords, r_min, r_max, num):
+def get_Ripley_Kest3(A, coords, r_min, r_max, num) -> Tuple:
     n = len(coords)
     d = cdist(coords, coords)
     r = np.sort(d, axis=1)[:, 1:]
@@ -347,10 +349,40 @@ def get_Ripley_Kest3(A, coords, r_min, r_max, num):
     return K, radius_range
 
 
+def save_Kest_fig(fig_path: str, Kest: list or np.array, envelope_min: list or np.array,
+                  envelope_max: list or np.array, particle: str, percent: float, voxel_size_nm: float,
+                  radius_range: list or np.array):
+    radius_range_nm = voxel_size_nm * np.array(radius_range)
+    r_min_nm, r_max_nm = np.min(radius_range_nm), np.max(radius_range_nm)
+    envelope_mean = 0.5 * (envelope_min + envelope_max)
+    fig, axs = plt.subplots()
+    axs.plot(voxel_size_nm * np.array(radius_range), 0 * envelope_mean, "-", color='lightgreen')
+    axs.fill_between(voxel_size_nm * np.array(radius_range), envelope_min - envelope_mean,
+                     envelope_max - envelope_mean, color='lightgreen', alpha=0.5)
+    axs.plot(voxel_size_nm * np.array(radius_range), np.array(Kest) - envelope_mean, "--o",
+             color='cornflowerblue')
+    title = "K (Ripley's estimate): " + particle
+    axs.set_title(title)
+    axs.set_xlabel("radius (nm)")
+    axs.set_xlim([r_min_nm, r_max_nm])
+    axs.set_ylabel("K")
+    envelope_label = "$K_{CSR} - mean(K_{CSR})$ envelope at " + str(percent) + "%"
+    labels = ["$K_{est} - mean(K_{CSR})$",
+              envelope_label]
+    handles = [Line2D(xdata=[0], ydata=[0], color='cornflowerblue', marker='o'),
+               plt.Rectangle((0, 0), 0.5, 0.1, color='lightgreen', alpha=0.5)]
+
+    axs.legend(handles, labels, loc="upper right", shadow=True)
+
+    plt.savefig(fig_path)
+    return
+
+
 HEALTHY = ["180426/004", "180426/005", "180426/021", "180426/024", "180711/003",
            # "180711/004",
-           "180711/005",
-           "180711/018"]
+           # "180711/005",
+           # "180711/018",
+           ]
 ED = ["181119/002", "181119/030", "181126/002", "181126/012", "181126/025"]
 
 # FOR_RIBO_CONCENTRATION = [
@@ -361,18 +393,20 @@ sample_type = "healthy"  # "healthy" or "ED"
 dataset_table = "/struct/mahamid/Irene/yeast/yeast_table.csv"
 # tomo_name = "180426/005"
 
+particle_radius = {"ribo": 8, "fas": 12}
 binning = 4
 resolution_ori_A = 3.37
 voxel_size_nm = binning * resolution_ori_A * 0.1
 voxel_size_microm = binning * resolution_ori_A * 0.0001
 
 test = False
-calculate_K_function_Ripley_est = True
+calculate_K_function_Ripley_est = False
 calculate_K_function2 = False
 calculate_K_function = False
 calculate_distance_to_mask = False
 calculate_distance_between_particles = False
 calculate_points_density = False
+calculate_envelope = True
 
 if calculate_distance_between_particles:
     # particles = ["ribo"]
@@ -590,11 +624,11 @@ if calculate_K_function2:
     _, motl_coords = read_motl_coordinates_and_values(path_to_motl=motl_path)
 
     coords = np.array([[p[2], p[1], p[0]] for p in motl_coords])
-    particle_diameter = np.min(cdist(coords, coords) + np.max(coords) * np.eye(len(coords)))
-    r_min_nm = particle_diameter * voxel_size_nm
+    global_min_dist = np.min(cdist(coords, coords) + np.max(coords) * np.eye(len(coords)))
+    r_min_nm = global_min_dist * voxel_size_nm
     n = len(coords)
     # lambda_poisson = n / mask_volume_nm
-    Eest, radius_range = generate_Eest(coords=coords, r_min=particle_diameter, r_max=r_max, num=num)
+    Eest, radius_range = generate_Eest(coords=coords, r_min=global_min_dist, r_max=r_max, num=num)
 
     Envelope = []
     N_simulations = 100
@@ -607,9 +641,9 @@ if calculate_K_function2:
                 candidate_coords = np.append(sampled_points, [point], axis=0)
                 dist = cdist(candidate_coords, candidate_coords)
                 distance = np.min(dist + np.max(dist) * np.eye(len(candidate_coords)))
-                if distance >= particle_diameter:
+                if distance >= global_min_dist:
                     sampled_points = np.append(sampled_points, [point], axis=0)
-        Eest_env, _ = generate_Eest(coords=sampled_points, r_min=particle_diameter, r_max=r_max, num=num)
+        Eest_env, _ = generate_Eest(coords=sampled_points, r_min=global_min_dist, r_max=r_max, num=num)
         Envelope.append(Eest_env)
 
     envelope = np.array(Envelope)  # (n_envelopes, n_radius)
@@ -687,13 +721,24 @@ if calculate_K_function_Ripley_est:
     """
     mask = "cytosol"
     particle = "ribo"
+    sample_type = "healthy"
     mask_value = 1
-
 
     df = pd.read_csv(dataset_table)
     DTHeader_masks = DatasetTableHeader(semantic_classes=[mask])
     DTHeader_particles = DatasetTableHeader(semantic_classes=[particle])
-    for tomo_name in HEALTHY[1:]:
+    r_max_nm = 30
+    r_max = int(r_max_nm / voxel_size_nm)
+    r_min = 2 * particle_radius[particle]
+    r_min_nm = r_min * voxel_size_nm
+    num = 30
+    N_simulations = 100
+    n_total = 0
+    K_global = np.zeros(num)
+    global_envelope_max = 0
+    global_envelope_min = 0
+    percent = 95
+    for tomo_name in HEALTHY:
         print("Calculating K function for tomo", tomo_name)
         tomo_row = df.loc[df[DTHeader_masks.tomo_name] == tomo_name]
         mask_column = DTHeader_masks.masks_names[0]
@@ -705,9 +750,6 @@ if calculate_K_function_Ripley_est:
         mask_array_coords = [tuple(point) for point in mask_array_coords]
         mask_volume_nm = np.sum(mask_array) * (voxel_size_nm ** 3)
         assert mask_volume_nm != 0, "The domain mask is empty."
-        r_max_nm = 30
-        num = 30
-        r_max = int(r_max_nm / voxel_size_nm)
 
         motl_column = DTHeader_particles.clean_motls[0]
         motl_path = tomo_row[motl_column].values[0]
@@ -715,22 +757,24 @@ if calculate_K_function_Ripley_est:
         coords = [(p[2], p[1], p[0]) for p in motl_coords]
         coords = set(coords) & set(mask_array_coords)
         coords = np.array(list(coords))
-        print("number odf coords in mask",len(coords))
+        n = len(coords)
+        print("number odf coords in mask", n)
 
         coords = np.array(coords)
-        particle_diameter = np.min(cdist(coords, coords) + np.max(coords) * np.eye(len(coords)))
-        r_min_nm = particle_diameter * voxel_size_nm
-        n = len(coords)
+        global_min_dist = np.min(cdist(coords, coords) + np.max(coords) * np.eye(len(coords)))
+
+        particle_diam_nm = r_min * voxel_size_nm
+
         """
         Here to calculate the edge correctors
         """
         start = time()
-        Kest, radius_range = get_Ripley_Kest3(A=mask_array, coords=coords, r_min=particle_diameter, r_max=r_max, num=num)
+        Kest, radius_range = get_Ripley_Kest3(A=mask_array, coords=coords, r_min=r_min, r_max=r_max, num=num)
         end = time()
         print("Elapsed time {} secs.".format(end - start))
 
         Envelope = []
-        N_simulations = 100
+
         for t in tqdm(range(N_simulations)):
             k_sampled_points = random.sample(mask_array_coords, k=2 * n)
             sampled_points = [k_sampled_points[0]]
@@ -740,22 +784,25 @@ if calculate_K_function_Ripley_est:
                     candidate_coords = np.append(sampled_points, [point], axis=0)
                     dist = cdist(candidate_coords, candidate_coords)
                     distance = np.min(dist + np.max(dist) * np.eye(len(candidate_coords)))
-                    if distance >= particle_diameter:
+                    if distance >= r_min:
                         sampled_points = np.append(sampled_points, [point], axis=0)
-            Kest_env, _ = get_Ripley_Kest3(A=mask_array, coords=sampled_points, r_min=particle_diameter, r_max=r_max,
+            Kest_env, _ = get_Ripley_Kest3(A=mask_array, coords=sampled_points, r_min=r_min, r_max=r_max,
                                            num=num)
+            distance_distribution = get_minimum_distance_distribution_between_motls(coordinates1=sampled_points,
+                                                                                    voxel_size=voxel_size_nm)
             Envelope.append(Kest_env)
 
         envelope = np.array(Envelope)  # (n_envelopes, n_radius)
         sorted_envelope = np.sort(envelope, axis=0)
-        percent = 95
-        percent_1 = int(N_simulations * 0.01*(100-percent))
+
+        percent_1 = int(N_simulations * 0.01 * (100 - percent))
         envelope_max = sorted_envelope[-percent_1, :]
         envelope_min = sorted_envelope[percent_1, :]
         envelope_mean = 0.5 * (envelope_min + envelope_max)
         fig, axs = plt.subplots()
         axs.plot(voxel_size_nm * np.array(radius_range), 0 * envelope_mean, "-", color='lightgreen')
-        axs.fill_between(voxel_size_nm * np.array(radius_range), envelope_min - envelope_mean, envelope_max - envelope_mean,
+        axs.fill_between(voxel_size_nm * np.array(radius_range), envelope_min - envelope_mean,
+                         envelope_max - envelope_mean,
                          color='lightgreen', alpha=0.5)
         axs.plot(voxel_size_nm * np.array(radius_range), np.array(Kest) - envelope_mean, "--o", color='cornflowerblue')
         title = "Ripley's K estimate for " + particle + " (" + tomo_name + ")"
@@ -763,7 +810,7 @@ if calculate_K_function_Ripley_est:
         axs.set_xlabel("radius (nm)")
         axs.set_xlim([r_min_nm, r_max_nm])
         axs.set_ylabel("K")
-        envelope_label = "$K_{CSR} - mean(K_{CSR})$ envelope at "+str(percent)+"%"
+        envelope_label = "$K_{CSR} - mean(K_{CSR})$ envelope at " + str(percent) + "%"
         labels = ["$K_{est} - mean(K_{CSR})$",
                   envelope_label]
         handles = [Line2D(xdata=[0], ydata=[0], color='cornflowerblue', marker='o'),
@@ -772,6 +819,113 @@ if calculate_K_function_Ripley_est:
         axs.legend(handles, labels, loc="upper right", shadow=True)
         fig_file = os.path.join("/struct/mahamid/Irene/3d-cnn/FIGS", tomo_name)
         os.makedirs(fig_file, exist_ok=True)
-        fig_file = os.path.join(fig_file, "K_centered_Ripley_estimate_" +str(percent)+ "percent_"+ particle + "_" + str(
-            r_max_nm) + "_rmax_nm.png")
+        fig_file = os.path.join(fig_file,
+                                "K_centered_Ripley_estimate_" + str(percent) + "percent_" + particle + "_" + str(
+                                    r_max_nm) + "_rmax_nm.png")
         plt.savefig(fig_file)
+
+        K_global += n * Kest
+        n_total += n
+        global_envelope_max += n * envelope_max
+        global_envelope_min += n * envelope_min
+        # global_envelope.
+    K_global = K_global / n_total
+    global_envelope_max = global_envelope_max / n_total
+    global_envelope_min = global_envelope_min / n_total
+    global_envelope_mean = 0.5 * (global_envelope_min + global_envelope_max)
+
+    fig, axs = plt.subplots()
+    axs.plot(voxel_size_nm * np.array(radius_range), 0 * global_envelope_mean, "-", color='lightgreen')
+    axs.fill_between(voxel_size_nm * np.array(radius_range), global_envelope_min - global_envelope_mean,
+                     global_envelope_max - global_envelope_mean,
+                     color='lightgreen', alpha=0.5)
+    axs.plot(voxel_size_nm * np.array(radius_range), np.array(K_global) - global_envelope_mean, "--o",
+             color='cornflowerblue')
+    title = "Global K (Ripley's estimate): " + particle
+    axs.set_title(title)
+    axs.set_xlabel("radius (nm)")
+    axs.set_xlim([r_min_nm, r_max_nm])
+    axs.set_ylabel("K")
+    envelope_label = "$K_{CSR} - mean(K_{CSR})$ envelope at " + str(percent) + "%"
+    labels = ["$K_{est} - mean(K_{CSR})$",
+              envelope_label]
+    handles = [Line2D(xdata=[0], ydata=[0], color='cornflowerblue', marker='o'),
+               plt.Rectangle((0, 0), 0.5, 0.1, color='lightgreen', alpha=0.5)]
+
+    axs.legend(handles, labels, loc="upper right", shadow=True)
+    fig_file = "/struct/mahamid/Irene/3d-cnn/FIGS"
+    os.makedirs(fig_file, exist_ok=True)
+    fig_file = os.path.join(fig_file, sample_type + "_Global_K_centered_Ripley_estimate_" + str(percent) +
+                            "percent_" + particle + "_" + str(r_max_nm) + "_rmax_nm.png")
+    plt.savefig(fig_file)
+if calculate_envelope:
+    mask = "cytosol"
+    particle = "ribo"
+    sample_type = "healthy"
+    mask_value = 1
+
+    r_max_nm = 30
+    r_max = int(r_max_nm / voxel_size_nm)
+    r_min = 2 * particle_radius[particle]
+    r_min_nm = r_min * voxel_size_nm
+    num = 30
+    N_simulations = 10
+    n_total = 0
+    K_global = np.zeros(num)
+    global_envelope_max = 0
+    global_envelope_min = 0
+    percent = 95
+
+    if sample_type == "healthy":
+        tomos = HEALTHY
+    elif sample_type == "ED":
+        tomos = ED
+
+    df = pd.read_csv(dataset_table)
+    DTHeader_masks = DatasetTableHeader(semantic_classes=[mask])
+    DTHeader_particles = DatasetTableHeader(semantic_classes=[particle])
+
+    statistics_dir = os.path.join("/struct/mahamid/Irene/yeast/quantifications/NN", particle)
+    os.makedirs(statistics_dir, exist_ok=True)
+    for tomo_name in tomos:
+        print("Calculating envelope for NN: tomo", tomo_name)
+        tomo_row = df.loc[df[DTHeader_masks.tomo_name] == tomo_name]
+        mask_column = DTHeader_masks.masks_names[0]
+        mask_path = tomo_row[mask_column].values[0]
+        print(mask_path)
+        mask_array = load_tomogram(mask_path)
+        mask_array_coords = list(np.transpose(np.where(mask_array == mask_value)))
+
+        print("number of vals in mask", len(mask_array_coords))
+        mask_array_coords = [tuple(point) for point in mask_array_coords]
+        mask_volume_nm = np.sum(mask_array) * (voxel_size_nm ** 3)
+        assert mask_volume_nm != 0, "The domain mask is empty."
+
+        motl_column = DTHeader_particles.clean_motls[0]
+        motl_path = tomo_row[motl_column].values[0]
+        _, motl_coords = read_motl_coordinates_and_values(path_to_motl=motl_path)
+        coords = [(p[2], p[1], p[0]) for p in motl_coords]
+        coords = set(coords) & set(mask_array_coords)
+        coords = np.array(list(coords))
+        n = len(coords)
+        print("number odf coords in mask", n)
+
+        global_min_dist = np.min(cdist(coords, coords) + np.max(coords) * np.eye(len(coords)))
+        particle_diam_nm = r_min * voxel_size_nm
+
+        # start = time()
+        stats_file_name = "envelope_" + sample_type + "_distance_statistics.csv"
+        statistics_file = os.path.join(statistics_dir, stats_file_name)
+        # distance_distribution = \
+        #     get_minimum_distance_distribution_between_motls(coordinates1=coords, voxel_size=voxel_size_nm)
+        # write_distribution(statistics_file=statistics_file, tomo_name=tomo_name, stat_measure=distance_distribution)
+        # end = time()
+        # print("Elapsed time {} secs.".format(end - start))
+
+        for t in tqdm(range(N_simulations)):
+            sampled_points = random.sample(mask_array_coords, k=n)
+            tomo_name_env = tomo_name + str(t)
+            distance_distribution_env = get_minimum_distance_distribution_between_motls(coordinates1=sampled_points,
+                                                                                        voxel_size=voxel_size_nm)
+            write_distribution(statistics_file=statistics_file, tomo_name=tomo_name_env,
+                               stat_measure=distance_distribution_env)

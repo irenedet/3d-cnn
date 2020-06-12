@@ -15,6 +15,6 @@
 echo "Activating virtual environment"
 ##module load Anaconda3
 #UPICKER_VENV_PATH=/struct/mahamid/Irene/envs/.conda/3d-cnn
-source activate $UPICKER_VENV_PATH
+conda activate $UPICKER_VENV_PATH
 
 python3 /struct/mahamid/Irene/3d-cnn/runners/quantifications/runner.py

@@ -36,6 +36,10 @@ conda install -c pytorch pytorch torchvision
 by adding the paths to the ~/.bashrc or ~/.profile files:
 
 ```bash
+# If this is the first time you install a venv,
+# make sure to locate it in a large capacity folder
+
+ln -s  /struct/mahamid/Irene/envs/.conda /home/trueba
 export CONDA_PKGS_DIRS=/struct/mahamid/Irene/envs/.conda
 ```
 
@@ -129,43 +133,80 @@ sys.path.append(runners_path)
 ## 4. Notes for organelle segmentation
 
 ### 4.1 Package Installation
-Install locally the following packages in the cluster or locally:
+#### 1. Preparation step
+For the installation, comment all modifications to PYTHONPATH in 
+the ~/.bashrc, ~/.bash_profile and ~/.profile files (and source them after that).
 
-4.1.1 miniconda 
+
+#### 2. miniconda 
+
+Install miniconda3 in the cluster node or locally:
+
 ```bash
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh
 ```
-Switch the glogal variable to make conda installations in a large folder, by adding
-to the ~/.bashrc or ~/.profile files:
-```bash
-export CONDA_PKGS_DIRS=/struct/mahamid/Irene/envs/.conda
-```
-
-4.1.2 keras and tensorflow for gpus
-
-ToDo
-```bash
-conda install -c anaconda keras-gpu
-```
-
-### 4.2 Generate the virtual environment with only snakemake and pandas
+During installation, set the miniconda3 in a large folder, e.g.
 
 ```bash
-conda create -c conda-forge -c bioconda -n snakemake-demo python=3.6
-conda activate snakemake-demo
-conda install pandas
-conda install -c bioconda snakemake
+/g/scb/zaugg/zaugg_shared/.venvs/Irene/miniconda3
+```
+then link to the home folder:
+
+```bash
+ln -s /g/scb/zaugg/zaugg_shared/.venvs/Irene/miniconda3 /home/trueba
+```
+you will see `/home/trueba/miniconda3` in the home folder.
+
+All the venvs created will be then placed in `/g/scb/zaugg/zaugg_shared/.venvs/Irene/miniconda3/envs/`
+
+Also, create a large folder where the packages will be installed by conda
+when creating new venvs and link it to the home folder:
+```bash
+mkdir /g/scb/zaugg/zaugg_shared/.venvs/Irene/.conda
+ln -s /g/scb/zaugg/zaugg_shared/.venvs/Irene/.conda /home/trueba
 ```
 
-Later, when running the pipeline, a virtual environment with the rest of the packages will 
-created.
+Additionally, switch the global variable to make conda installations in that large folder, 
+by adding to the ~/.bashrc or ~/.profile files, and:
+```bash
+export CONDA_PKGS_DIRS=/g/scb/zaugg/zaugg_shared/.venvs/Irene/.conda
+```
 
-### 4.3 Dryrun
+#### 3. keras (and tensorflow) for gpus
 
-After activating snakemake-demo do:
+Install the right version of keras-gpu (which also installs tensorflow):
+```bash
+conda install -c anaconda keras-gpu=2.3.1
+#check whether it's better to install keras to match python 3.6??
+```
 
-First check whether snakemake can build the directed graph:
+Check the installation by importing tensorflow in a python console.
+
+
+#### 4. Generate the virtual environment 
+
+The necessary virtual environment for the installation needs only snakemake 5.3 and pandas
+
+```bash
+conda create -c conda-forge -c bioconda -n snakemake-pandas snakemake=5.3.0
+conda activate snakemake-pandas
+conda install -c conda-forge pandas
+```
+
+Later, when running the pipeline, snakemake will generate the keras virtual environment with the rest of 
+the necessary packages.
+
+#### 5. Testing the pipeline with --dryrun
+
+After activating the venv snakemake-pandas with:
+
+```bash
+conda activate snakemake-pandas
+```
+
+check whether snakemake can build the directed graph for the 
+pipeline:
 
 in deploy_cluster.sh or deploy_local.sh, add the --dryrun flag:
 
@@ -182,13 +223,16 @@ srun -t 4:00:00 -c 1 --mem 2G \
     --latency-wait 30 --dryrun #to not execute any rule with dryrun
 ```
 
-and it is ran by:
+and if it does, then test the pipeline by deleting --dryrun:
 
 ```bash
 bash deploy_cluster.sh config.yaml
 ```
 
-Obviously, to run the code, just delete the --dryrun flag.
+The pipeline will generate automatically in the running directory a 
+hidden folder .snakemake, where the venv and the snakemake locks will
+be stored.
+
 
 ### 4.4 Activate/deactivate modes
 
@@ -206,6 +250,30 @@ class correspondence is predetermined in the file `labels.csv`.
 - The `train_metadata.csv` and `yeast_sara_short.csv` have the information for 
 the training.
 
+### About permissions:
+
+to change and allow reading:
+
+```bash
+chmod 774 /path/to/dir
+```
 
 
+```python
+# import sys
+# print(sys.path)
+# [
+# '', 
+# '/struct/mahamid/Irene/3d-cnn', 
+# '/struct/mahamid/Irene/3d-cnn/src/python', 
+# '/struct/mahamid/Irene/organelle_detection_local/new_test/.snakemake/conda/b7da5f31/lib/python36.zip', 
+# '/struct/mahamid/Irene/organelle_detection_local/new_test/.snakemake/conda/b7da5f31/lib/python3.6', 
+# '/struct/mahamid/Irene/organelle_detection_local/new_test/.snakemake/conda/b7da5f31/lib/python3.6/lib-dynload', 
+# '/home/trueba/.local/lib/python3.6/site-packages', 
+# '/struct/mahamid/Irene/organelle_detection_local/new_test/.snakemake/conda/b7da5f31/lib/python3.6/site-packages', 
+# '/struct/mahamid/Irene/organelle_detection_local/new_test/.snakemake/conda/b7da5f31/lib/python3.6/site-packages/pysftp-0.2.9-py3.6.egg', 
+# '/struct/mahamid/Irene/organelle_detection_local/new_test/.snakemake/conda/b7da5f31/lib/python3.6/site-packages/rsa-3.1.4-py3.6.egg']
+# 
+# ['/struct/mahamid/Irene/organelle_detection_local/new_test/.snakemake/conda/b7da5f31/lib/python36.zip','/struct/mahamid/Irene/organelle_detection_local/new_test/.snakemake/conda/b7da5f31/lib/python3.6', '/struct/mahamid/Irene/organelle_detection_local/new_test/.snakemake/conda/b7da5f31/lib/python3.6/lib-dynload', '/struct/mahamid/Irene/organelle_detection_local/new_test/.snakemake/conda/b7da5f31/lib/python3.6/site-packages', '/struct/mahamid/Irene/organelle_detection_local/new_test/.snakemake/conda/b7da5f31/lib/python3.6/site-packages/pysftp-0.2.9-py3.6.egg', '/struct/mahamid/Irene/organelle_detection_local/new_test/.snakemake/conda/b7da5f31/lib/python3.6/site-packages/rsa-3.1.4-py3.6.egg'
+```
 
