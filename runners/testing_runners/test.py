@@ -1,41 +1,3 @@
-# import numpy as np
-# import os
-#
-# import h5py
-# import numpy as np
-# from tqdm import tqdm
-
-# input_paths = [
-#     "/struct/mahamid/Irene/yeast/healthy/180426/030/grid_partition.h5",
-#     "/struct/mahamid/Irene/yeast/healthy/180426/034/grid_partition.h5",
-#     "/struct/mahamid/Irene/yeast/healthy/180426/037/grid_partition.h5",
-#     "/struct/mahamid/Irene/yeast/healthy/180426/043/grid_partition.h5",
-#     "/struct/mahamid/Irene/yeast/healthy/180426/045/grid_partition.h5",
-#     ]
-#
-# output_paths = [
-#     "/struct/mahamid/Irene/yeast/healthy/180426/030/strongly_labeled_min0.01_max1/single_filter_64pix/full_partition.h5",
-#     "/struct/mahamid/Irene/yeast/healthy/180426/034/strongly_labeled_min0.01_max1/single_filter_64pix/full_partition.h5",
-#     "/struct/mahamid/Irene/yeast/healthy/180426/037/strongly_labeled_min0.01_max1/single_filter_64pix/full_partition.h5",
-#     "/struct/mahamid/Irene/yeast/healthy/180426/043/strongly_labeled_min0.01_max1/single_filter_64pix/full_partition.h5",
-#     "/struct/mahamid/Irene/yeast/healthy/180426/045/strongly_labeled_min0.01_max1/single_filter_64pix/full_partition.h5",
-# ]
-#
-# label = 'FAS_non_sph_masks_64pix_encoder_dropout0_decoder_dropout0.2_DA_DA_G5_E0_R180_SP0.04_DArounds6_BN_False_fas__D_2_IF_32_set_1'
-# label_path = os.path.join('volumes/predictions', label)
-#
-# for input_path, output_path in zip(input_paths, output_paths):
-#     with h5py.File(input_path, "r") as f:
-#         with h5py.File(output_path, "a") as o:
-#             labeled_subtomos = list(f[label_path])
-#             o_raw_subtomos = list(o['volumes/raw'])
-#             n = len(o_raw_subtomos)
-#             for index, subtomo_name in zip(tqdm(range(n)),o_raw_subtomos):
-#                 if subtomo_name in labeled_subtomos:
-#                     subtomo_path = os.path.join(label_path, subtomo_name)
-#                     subtomo_data = f[subtomo_path][:]
-#                     o[subtomo_path] = subtomo_data
-
 # motl_paths = [
 #     # "/struct/mahamid/Irene/yeast/ED/190301/001/clean_motls/ribo/combined/TM_cnnIF4_cnnIF8_cnnIF32_motl_1411.csv",
 #     # "/struct/mahamid/Irene/yeast/ED/190301/002/clean_motls/ribo/combined/TM_cnnIF4_cnnIF8_cnnIF32_motl_1311.csv",
@@ -146,19 +108,19 @@
 import numpy as np
 import pandas as pd
 
+from tomogram_utils.peak_toolbox.utils import read_motl_coordinates_and_values
+# from file_actions.writers.mrc import write_mrc_dataset
+
 motl_path = "/Users/trueba/struct/mahamid/Irene/yeast/healthy/180426/004/ribos/motl/corrected_motl_verified.csv"
 output_mask_path = "/Users/trueba/struct/mahamid/Irene/3d-cnn/runners/quantifications/test_data/cube_mask.mrc"
 output_cube_motl = "/Users/trueba/struct/mahamid/Irene/3d-cnn/runners/quantifications/test_data/cube_motl.csv"
 
 length = 100
-lower_corner = np.array([500, 570, 500])
+lower_corner = np.array([315, 485, 445])
 upper_corner = lower_corner + length * np.ones((1, 3))
 
-mask = np.ones((length, length, length))
-from tomogram_utils.peak_toolbox.utils import read_motl_coordinates_and_values
-
-# from file_actions.writers.datasets import write_dataset
-# write_dataset(output_path=output_mask_path, array=mask)
+# mask = np.ones((length, length, length))
+# write_mrc_dataset(mrc_path=output_mask_path, array=mask, dtype=np.int8)
 _, motl_coords = read_motl_coordinates_and_values(path_to_motl=motl_path)
 output_cube_motl_df = pd.DataFrame({})
 

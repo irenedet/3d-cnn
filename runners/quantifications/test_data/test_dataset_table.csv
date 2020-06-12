@@ -1,2 +1,2 @@
-test_motl,test_mask
-/Users/trueba/struct/mahamid/Irene/3d-cnn/runners/quantifications/normal_pp.csv,
+tomo_name,test_motl,test_mask
+test_001,/Users/trueba/struct/mahamid/Irene/3d-cnn/runners/quantifications/test_data/cube_motl.csv,/Users/trueba/struct/mahamid/Irene/3d-cnn/runners/quantifications/test_data/cube_mask.mrc
