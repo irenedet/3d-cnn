@@ -51,7 +51,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.lines import Line2D
-from scipy.signal import convolve
+from scipy.signal import convolve, fftconvolve
 from scipy.spatial.distance import cdist
 from tqdm import tqdm
 
@@ -104,12 +104,14 @@ def get_minimum_distance_distribution_between_motls(coordinates1: list, coordina
 
 def get_centered_grid(shape: tuple, center: tuple or list or np.array):
     nx, ny, nz = shape
+    nx, ny, nz = nx // 2, ny // 2, nz // 2
     a, b, c = center
-    y, x, z = np.ogrid[-a:nx - a, -b:ny - b, -c:nz - c]
+    y, x, z = np.ogrid[a - nx - 1:nx + a, b - ny - 1:ny + b, c - nz - 1:nz + c]
     return x, y, z
 
 
 def get_tight_ball_mask(radius: float) -> np.array:
+    radius = int(radius)
     shape = 2 * radius + 1, 2 * radius + 1, 2 * radius + 1
     center = radius, radius, radius
     y, x, z = get_centered_grid(shape=shape, center=center)
@@ -119,10 +121,13 @@ def get_tight_ball_mask(radius: float) -> np.array:
 
 def get_wij3(A: np.array, xi: tuple or list or np.array, radius: float) -> float:
     ball = get_tight_ball_mask(radius=radius)
+    # r = ball.shape[0] // 2
+    ball_vol = np.sum(ball)
     y, x, z = get_centered_grid(shape=ball.shape, center=xi)
     A_submatrix = A[x, y, z]
-    A_conv_ball = convolve(A_submatrix, ball, mode='valid', method='direct')
-    wij = A_conv_ball[0, 0, 0]
+    A_conv_ball = np.sum(A_submatrix*ball)#fftconvolve(A_submatrix, ball, mode='valid')
+    print(A_conv_ball[0, 0, 0])
+    wij = A_conv_ball[0, 0, 0] / ball_vol
     return wij
 
 
@@ -146,6 +151,7 @@ def get_ripley_k3est(domain, pp, r_minimum, r_maximum, steps, corrections: None 
     :param value:
     :return:
     """
+    domain = np.pad(array=domain, pad_width=r_max)
     domain_vol = np.sum(domain)
     assert domain_vol > 0, "The domain is empty."
     n = len(pp)
@@ -161,9 +167,10 @@ def get_ripley_k3est(domain, pp, r_minimum, r_maximum, steps, corrections: None 
             for j in range(n - 1):
                 rij = r[i, j]
                 if rij <= r_maximum:
-                    wij = get_wij3(A=domain, xi=xi, radius=rij)
-                    wij /= (4 * np.pi * rij ** 3) / 3  # it's the fraction of the total ball
-                    assert wij > 0, "Point xi={} out from the domain!".format(xi)
+                    xi_shifted = np.array(xi, dtype=int) + (r_max + 1) * np.ones(3, dtype=int)
+                    wij = get_wij3(A=domain, xi=xi_shifted, radius=rij)
+                    print("r_max = {}, xi_shifted = {}".format(r_max, xi_shifted))
+                    assert wij > 0, "Point xi={} out from the domain! rij = {}".format(xi, rij)
                     w[i, j] = wij
     else:
         w = np.ones(r.shape)
@@ -176,11 +183,13 @@ def get_ripley_k3est(domain, pp, r_minimum, r_maximum, steps, corrections: None 
         k_t = 0
         for i in range(n):
             ri = r[i, :]
-            indicator = 1 * (ri <= t)
-            i_t = np.sum(indicator) - 1
+            indicator = (ri <= t)
+            i_t = np.sum(1 * indicator) - 1
             if i_t > 0:
                 # print("For t = {}, indicator = {}".format(t, indicator))
-                # print("w[{}, indicator] = {}".format(i, w[i, indicator]))
+                # if i == 0:
+                #     print("w[{}, indicator] = {}".format(i, w[i, indicator]))
+
                 wij = np.min(w[i, indicator])
                 k_t += i_t / wij
         k_ripley.append(k_t)
@@ -197,17 +206,17 @@ particle = "test"
 tomo_name = "test_001"
 mask_value = 1
 voxel_size_nm = 1
-particle_radius = {'test': 0}
+particle_radius = {'test': 1}
 sample_type = "healthy"
-corrections = None
+corrections = "ripley"
 df = pd.read_csv(dataset_table)
 DTHeader_masks = DatasetTableHeader(semantic_classes=[mask])
 DTHeader_particles = DatasetTableHeader(semantic_classes=[particle])
-r_max_nm = 50
+r_max_nm = 50 * voxel_size_nm
 r_max = int(r_max_nm / voxel_size_nm)
-r_min = 2 * particle_radius[particle]
+r_min = 3  # 2 * particle_radius[particle]
 r_min_nm = r_min * voxel_size_nm
-num = 40
+num = 50
 N_simulations = 100
 n_total = 0
 K_global = np.zeros(num)
