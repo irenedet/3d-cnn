@@ -1,2 +1,2 @@
-tomo_name,path_to_motl_clean_test,test_mask
-test_001,/Users/trueba/struct/mahamid/Irene/3d-cnn/runners/quantifications/test_data/cube_motl.csv,/Users/trueba/struct/mahamid/Irene/3d-cnn/runners/quantifications/test_data/cube_mask.mrc
+sample_type,tomo_name,path_to_motl_clean_test,test_mask
+some_sample_type,test_001,/Users/trueba/struct/mahamid/Irene/3d-cnn/runners/quantifications/test_data/cube_motl.csv,/Users/trueba/struct/mahamid/Irene/3d-cnn/runners/quantifications/test_data/cube_mask.mrc

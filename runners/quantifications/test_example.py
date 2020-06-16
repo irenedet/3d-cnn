@@ -1,5 +1,5 @@
 """
-This test is to compare to the R package spacestat? check name
+Test to compare to the R package 'spatstat'
 
 x,y,z
 0.6521905,0.3458780,0.6362098
@@ -102,11 +102,18 @@ def get_minimum_distance_distribution_between_motls(coordinates1: list, coordina
     return voxel_size * min_distance_distribution
 
 
-def get_centered_grid(shape: tuple, center: tuple or list or np.array):
+def get_grid_around_center(shape: tuple, center: tuple or list or np.array):
     nx, ny, nz = shape
     nx, ny, nz = nx // 2, ny // 2, nz // 2
     a, b, c = center
     y, x, z = np.ogrid[a - nx - 1:nx + a, b - ny - 1:ny + b, c - nz - 1:nz + c]
+    return x, y, z
+
+
+def get_centered_grid(shape: tuple, center: tuple or list or np.array):
+    nx, ny, nz = shape
+    a, b, c = center
+    y, x, z = np.ogrid[-a:nx - a, -b:ny - b, -c:nz - c]
     return x, y, z
 
 
@@ -123,11 +130,13 @@ def get_wij3(A: np.array, xi: tuple or list or np.array, radius: float) -> float
     ball = get_tight_ball_mask(radius=radius)
     # r = ball.shape[0] // 2
     ball_vol = np.sum(ball)
-    y, x, z = get_centered_grid(shape=ball.shape, center=xi)
+    y, x, z = get_grid_around_center(shape=ball.shape, center=xi)
     A_submatrix = A[x, y, z]
-    A_conv_ball = np.sum(A_submatrix*ball)#fftconvolve(A_submatrix, ball, mode='valid')
-    print(A_conv_ball[0, 0, 0])
-    wij = A_conv_ball[0, 0, 0] / ball_vol
+    if radius < 50:
+        A_conv_ball = np.sum(A_submatrix * ball)
+    else:
+        A_conv_ball = fftconvolve(A_submatrix, ball, mode='valid')[0, 0, 0]
+    wij = A_conv_ball / ball_vol
     return wij
 
 
@@ -164,18 +173,16 @@ def get_ripley_k3est(domain, pp, r_minimum, r_maximum, steps, corrections: None 
     if corrections == "ripley":
         w = np.zeros(r.shape)
         for i, xi in enumerate(pp):
+            xi_shifted = np.array(xi, dtype=int) + r_max * np.ones(3, dtype=int)
+            print("xi = {}, r_max = {}, xi_shifted = {}".format(xi, r_max, xi_shifted))
             for j in range(n - 1):
                 rij = r[i, j]
                 if rij <= r_maximum:
-                    xi_shifted = np.array(xi, dtype=int) + (r_max + 1) * np.ones(3, dtype=int)
                     wij = get_wij3(A=domain, xi=xi_shifted, radius=rij)
-                    print("r_max = {}, xi_shifted = {}".format(r_max, xi_shifted))
                     assert wij > 0, "Point xi={} out from the domain! rij = {}".format(xi, rij)
                     w[i, j] = wij
     else:
         w = np.ones(r.shape)
-    # print("r[1, :] = {}".format(r[1, :]))
-    # print("w[1, :] = {}".format(w[1, :]))
 
     k_ripley = []
     r_range = np.linspace(start=r_minimum, stop=r_maximum, num=steps)
@@ -186,10 +193,6 @@ def get_ripley_k3est(domain, pp, r_minimum, r_maximum, steps, corrections: None 
             indicator = (ri <= t)
             i_t = np.sum(1 * indicator) - 1
             if i_t > 0:
-                # print("For t = {}, indicator = {}".format(t, indicator))
-                # if i == 0:
-                #     print("w[{}, indicator] = {}".format(i, w[i, indicator]))
-
                 wij = np.min(w[i, indicator])
                 k_t += i_t / wij
         k_ripley.append(k_t)

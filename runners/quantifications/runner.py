@@ -285,6 +285,14 @@ def get_wij3(A: np.array, xi: tuple or list or np.array, radius: float) -> float
     wij = A_conv_ball[0, 0, 0]
     return wij
 
+# def get_wij3(domain: np.array, xi: tuple or list or np.array, radius: float) -> float:
+#     ball = get_tight_ball_mask(radius=radius)
+#     ball_vol = 4 * np.pi * radius ** 3 / 3
+#     y, x, z = get_grid_around_center(shape=ball.shape, center=xi)
+#     square_subdomain = domain[x, y, z]
+#     intersection = convolve(square_subdomain, ball, mode='valid', method='direct')
+#     wij = intersection[0, 0, 0] / ball_vol
+#     return wij
 
 def get_Ripley_Kest(A, coords, r_min, r_max, num):
     n = len(coords)
