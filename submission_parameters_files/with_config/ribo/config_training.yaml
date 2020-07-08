@@ -26,6 +26,11 @@ dataset_table: "/struct/mahamid/Irene/yeast/yeast_table.csv"
 partition_name: "train_partition_1xf"
 box_shape: 64
 semantic_classes: ['ribo']
+output_dir: "/scratch/trueba/3d-cnn/training_data"  # TODO add to config
+processing_tomo: "training_set"
+min_label_fraction: 0.002
+max_label_fraction: 1
+edge_tolerance: 20
 
 unet_hyperparameters:
   models_table: "/struct/mahamid/Irene/yeast/config_models/ribo/models.csv"

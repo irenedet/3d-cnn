@@ -12,7 +12,7 @@ from tomogram_utils.coordinates_toolbox.utils import shift_coordinates_by_vector
 
 
 def get_clusters_within_size_range(dataset: np.array, min_cluster_size: int,
-                                   max_cluster_size: int, connectivity=1):
+                                   max_cluster_size: float = np.inf, connectivity=1):
     assert min_cluster_size <= max_cluster_size
 
     labeled_clusters, num = morph.label(input=dataset, background=0,
@@ -32,6 +32,7 @@ def get_clusters_within_size_range(dataset: np.array, min_cluster_size: int,
         cluster_size[(cluster_size > min_cluster_size) & (
                 cluster_size <= max_cluster_size)])
     print("Clusters in subtomo before size filtering =", num)
+    print("Clusters in subtomo after size filtering =", np.sum(labels_list_within_range > 0))
     return labeled_clusters, labels_list_within_range, cluster_size_within_range
 
 

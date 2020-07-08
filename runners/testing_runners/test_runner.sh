@@ -12,9 +12,10 @@
 
 
 
-module load Anaconda3
-echo "activating virtual environment"
-source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
-echo "... done"
-
-python3 /struct/mahamid/Irene/3d-cnn/runners/testing_runners/test.py
+#module load Anaconda3
+#echo "activating virtual environment"
+#source activate /struct/mahamid/Processing/envs/.conda/3d-cnn/
+#echo "... done"
+conda activate 3d-cnn
+python3 runners/testing_runners/hdf2mrc_convert.py
+#python3 /struct/mahamid/Irene/3d-cnn/runners/testing_runners/test.py

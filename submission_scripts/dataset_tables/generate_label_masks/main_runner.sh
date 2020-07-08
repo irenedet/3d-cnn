@@ -7,18 +7,25 @@
 
 
 # VPP, ED, TOMOS (with fas and ribos):
-TOMOS="190301/018
-190301/019"
+TOMOS=""
 
-sample_type="ED" #ED or healthy
+sample_type="" #ED or healthy
 global_output_dir="/struct/mahamid/Irene/yeast/"$sample_type
 path_to_dataset_table="/struct/mahamid/Irene/yeast/yeast_table.csv"
 coords_in_tom_format="True"
 values_in_motl="False"
-write_on_dataset_table="True"
+write_on_dataset_table="False"
 class_name="ribo"
 sphere_radius=8
 
+#dataset_table
+#tomo_name
+#class_name
+#output_path
+#radius
+#coords_in_tom_format
+#write_on_dataset_table
+#values_in_motl
 
 
 for tomo_name in $TOMOS

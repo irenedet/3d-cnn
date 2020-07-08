@@ -68,7 +68,7 @@ if __name__ == "__main__":
     CNN_predictions_dir = "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks"
     cnn_predictions_list = os.listdir(CNN_predictions_dir)
     radius = 10
-    value_threshold = 1200
+    value_threshold = 3000
     full_names = []
     for tomo_name in tomo_names:
         print("tomo_name =", tomo_name)
@@ -103,7 +103,7 @@ if __name__ == "__main__":
         print("len(filtered_coordinates) =", len(filtered_coordinates))
 
         path_to_output = os.path.join("/struct/mahamid/Irene/yeast/ED", tomo_name)
-        path_to_output = os.path.join(path_to_output, "clean_motls/ribo/combined")
+        path_to_output = os.path.join(path_to_output, "clean_motls/ribo/combined/")
         os.makedirs(path_to_output, exist_ok=True)
 
         n = len(filtered_coordinates)

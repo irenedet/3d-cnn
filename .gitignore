@@ -1,3 +1,7 @@
+*.png
+*.h5
+*/*/*/*.mrc
+*/*/*/*.csv
 src/python/file_actions/__init__.pyc
 src/python/file_actions/readers/__init__.pyc
 FIGS/

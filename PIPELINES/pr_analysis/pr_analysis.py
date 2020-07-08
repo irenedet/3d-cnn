@@ -64,8 +64,8 @@ for tomo_name in tomo_list:
                                              model_name=model_name,
                                              tomo_name=tomo_name,
                                              semantic_class=semantic_class)
-
-    output_dir = os.path.join(output_dir, "in_" + filtering_mask)
+    if filtering_mask is not None:
+        output_dir = os.path.join(output_dir, "in_" + filtering_mask)
     motls_in_dir = [file for file in os.listdir(output_dir) if 'motl_' in file]
     assert len(motls_in_dir) == 1, "only one motive list can be filtered."
     path_to_motl_predicted = os.path.join(output_dir, motls_in_dir[0])
@@ -115,7 +115,7 @@ for tomo_name in tomo_list:
         path_to_motl=path_to_motl_true)
     unique_peaks_number = len(predicted_values)
 
-    shift_vector = np.array([x_shift, y_shift, 0])
+    shift_vector = np.array([x_shift, y_shift, 0])  # TODO why did I put this shift?
     predicted_coordinates = [np.array(p) + shift_vector for p in
                              predicted_coordinates]
     predicted_coordinates = np.array(predicted_coordinates)
@@ -186,6 +186,8 @@ for tomo_name in tomo_list:
     plt.plot(F1_score, label=f1_legend_str)
     plt.xlabel("number of peaks")
     plt.ylabel("F1 score")
+    plt.xlim((0, 1))
+    plt.ylim((0, 1))
     plt.title(title_str)
     plt.legend()
     plt.gcf()
@@ -198,18 +200,21 @@ for tomo_name in tomo_list:
     plt.ylabel("precision")
     plt.title(title_str)
     plt.legend()
+    plt.xlim((0, 1))
+    plt.ylim((0, 1))
     plt.gcf()
     fig_name = join(figures_dir, "pr_" + title_str + ".png")
     plt.savefig(fname=fig_name, format="png")
+    plt.close()
+    if statistics_file is not None:
+        statistics_label = segmentation_label + "_pr_radius_" + str(radius)
 
-    statistics_label = segmentation_label + "_pr_radius_" + str(radius)
+        write_statistics(statistics_file=statistics_file,
+                         statistics_label="auPRC_" + statistics_label,
+                         tomo_name=tomo_name,
+                         stat_measure=round(auPRC, 4))
 
-    write_statistics(statistics_file=statistics_file,
-                     statistics_label= "auPRC_" + statistics_label,
-                     tomo_name=tomo_name,
-                     stat_measure=round(auPRC, 4))
-
-    write_statistics(statistics_file=statistics_file,
-                     statistics_label= "F1_" + statistics_label,
-                     tomo_name=tomo_name,
-                     stat_measure=round(max_F1, 4))
+        write_statistics(statistics_file=statistics_file,
+                         statistics_label="F1_" + statistics_label,
+                         tomo_name=tomo_name,
+                         stat_measure=round(max_F1, 4))

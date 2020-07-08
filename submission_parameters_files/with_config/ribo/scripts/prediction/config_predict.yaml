@@ -1,117 +1,10 @@
 tomos_sets:
-  -1000:
-    test_list: ["190329/001"] #Done
+  0:
+    test_list: [ "190301/001", "190301/002", "190301/004", "190301/006", "190301/007", "190301/010",
+                 "190301/011", "190301/013", "190301/014", "190301/015", "190301/017", "190301/018",
+                 "190301/019", "190301/020", "190301/021", "190301/026", "190301/029", "190301/030",
+                 "190329/001", "190329/004"]
     model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -1001:
-    test_list: ["190329/004"] #running
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -1002:
-    test_list: ["190329/005", "190329/007"] #running
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -1003:
-    test_list: ["190329/010", "190329/012"] #running
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -1004:
-    test_list: ["190329/013", "190329/015", "190329/017", "190329/021"] #Done
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -1005:
-    test_list: ["190329/022", "190329/023", "190329/025", "190329/028"] #computing
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -1006:
-    test_list: ["190329/032", "190329/036"] #Done
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -2000:
-    test_list: [ "ScED_6h/001", "ScED_6h/002", "ScED_6h/003", "ScED_6h/006", "ScED_6h/011",
-                 "ScED_6h/015", "ScED_6h/019", "ScED_6h/021", "ScED_6h/022", "ScED_6h/023",
-                 "ScED_6h/035", "ScED_6h/036", "ScED_6h/037", "ScED_6h/039", "ScED_6h/041",
-                 "ScED_6h/044", "ScED_6h/047", "ScED_6h/049", "ScED_6h/054", "ScED_6h/055",
-                 "ScED_6h/056", "ScED_6h/057", "ScED_6h/058", "ScED_6h/059", "ScED_6h/062",
-                 "ScED_6h/064", "ScED_6h/065", "ScED_6h/069", "ScED_6h/070",]
-  -2001:
-    test_list: [ "ScED_6h/001", "ScED_6h/002", "ScED_6h/003", "ScED_6h/006", "ScED_6h/011"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-  -2002:
-    test_list: [ "ScED_6h/015", "ScED_6h/019", "ScED_6h/021", "ScED_6h/022", "ScED_6h/023"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -2003:
-    test_list: [ "ScED_6h/035", "ScED_6h/036", "ScED_6h/037", "ScED_6h/039", "ScED_6h/041"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -2004:
-    test_list: [ "ScED_6h/044", "ScED_6h/047", "ScED_6h/049", "ScED_6h/054", "ScED_6h/055"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -2005:
-    test_list: [ "ScED_6h/056", "ScED_6h/057", "ScED_6h/058", "ScED_6h/059", "ScED_6h/062"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -2006:
-    test_list: [ "ScED_6h/064", "ScED_6h/065", "ScED_6h/069", "ScED_6h/070"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -1:
-    test_list: ["190301/004"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-  -2:
-    test_list: ["190301/007"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-  -3:
-    test_list: ["190301/014"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-  -4:
-    test_list: ["190301/017"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-  -5:
-    test_list: ["190301/018"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-  -6:
-    test_list: ["190301/019"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
-
-  -11:
-    test_list: ["190301/006"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_1"
-  -12:
-    test_list: ["190301/013"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_1"
-  -13:
-    test_list: ["190301/020"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_1"
-  -14:
-    test_list: ["190301/029"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_1"
-  -21:
-    test_list: ["190301/002"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_2"
-  -22:
-    test_list: ["190301/011"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_2"
-  -23:
-    test_list: ["190301/021"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_2"
-  -24:
-    test_list: ["190301/030"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_2"
-  -31:
-    test_list: ["190301/001"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_3"
-  -32:
-    test_list: ["190301/010"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_3"
-  -33:
-    test_list: ["190301/015"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_3"
-  -34:
-    test_list: ["190301/026"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_3"
 
   1:
     training_list: [ "190301/001", "190301/002", "190301/004", "190301/007",
@@ -120,7 +13,7 @@ tomos_sets:
                      "190301/026", "190301/030",
     ]
     test_list: ["190301/006","190301/013","190301/020","190301/029"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_1"
 
   2:
     training_list: [ "190301/001", "190301/004", "190301/006", "190301/007",
@@ -129,7 +22,7 @@ tomos_sets:
                      "190301/026", "190301/029",
     ]
     test_list: ["190301/002","190301/011","190301/021","190301/030"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_2"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_2"
 
   3:
     training_list: [ "190301/002", "190301/004", "190301/006", "190301/007",
@@ -138,7 +31,7 @@ tomos_sets:
                      "190301/029", "190301/030",
     ]
     test_list: ["190301/001","190301/010","190301/015","190301/026"]
-    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_3"
+    model_name: "64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_32_set_3"
 
 dataset_table: "/struct/mahamid/Irene/yeast/yeast_table.csv"
 overlap: 12
@@ -162,9 +55,9 @@ motl_parameters:
   min_cluster_size: 100
   max_cluster_size: 35000
   ignore_border_thickness: 10
-  filtering_mask: 'lamella_file'
+  filtering_mask: "cytosol_mask" #'lamella_file'
 
 performance_parameters:
   clean_motl: 'path_to_motl_clean_ribo'
   pr_tolerance_radius: 10
-  statistics_file: "/struct/mahamid/Irene/yeast/config_models/ribo/statistics.csv"
+  statistics_file: null #"/struct/mahamid/Irene/yeast/config_models/ribo/statistics.csv"

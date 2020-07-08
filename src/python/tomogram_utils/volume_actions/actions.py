@@ -454,7 +454,7 @@ def generate_strongly_labeled_partition(path_to_raw: str,
                                         overlap: int,
                                         min_label_fraction: float = 0,
                                         max_label_fraction: float = 1,
-                                        edge_tolerance: int = 0) -> list:
+                                        ) -> list:
     raw_dataset = load_tomogram(path_to_raw)
     min_shape = raw_dataset.shape
     print(path_to_raw, "shape", min_shape)
@@ -491,7 +491,6 @@ def generate_strongly_labeled_partition(path_to_raw: str,
         crop_shape=subtomo_shape,
         min_label_fraction=min_label_fraction,
         max_label_fraction=max_label_fraction,
-        edge_tolerance=edge_tolerance,
         unpadded_dataset_shape=min_shape)
     return label_fractions_list
 
@@ -504,7 +503,7 @@ def generate_random_labeled_partition(path_to_raw: str,
                                       n_total: int,
                                       min_label_fraction: float = 0,
                                       max_label_fraction: float = 1,
-                                      edge_tolerance: int = 0) -> list:
+                                      ) -> list:
     raw_dataset = load_tomogram(path_to_raw)
     min_shape = raw_dataset.shape
     print(path_to_raw, "shape", min_shape)
@@ -538,7 +537,6 @@ def generate_random_labeled_partition(path_to_raw: str,
         crop_shape=subtomo_shape,
         min_label_fraction=min_label_fraction,
         max_label_fraction=max_label_fraction,
-        edge_tolerance=edge_tolerance,
         unpadded_dataset_shape=min_shape)
     return label_fractions_list
 
@@ -552,7 +550,6 @@ def write_strongly_labeled_subtomograms(
         crop_shape: tuple,
         min_label_fraction: float = 0,
         max_label_fraction: float = 1,
-        edge_tolerance: int = 0,
         unpadded_dataset_shape: tuple = None) -> list:
     label_fractions_list = []
     with h5py.File(output_path, 'w') as f:
@@ -583,18 +580,6 @@ def write_strongly_labeled_subtomograms(
                     input_array=padded_label,
                     crop_shape=crop_shape,
                     window_center=window_center)
-                if edge_tolerance > 0:
-                    assert unpadded_dataset_shape is not None
-                    corner_distance = np.array(
-                        unpadded_dataset_shape) - np.array(window_center)
-                    distance_to_reflecting_area = [
-                        (0.5 * shape) - np.abs(elem) for elem, shape in
-                        zip(corner_distance, crop_shape)]
-                    if np.min(distance_to_reflecting_area) < edge_tolerance:
-                        dx, dy, dz = distance_to_reflecting_area
-                        subtomo_label_data[int(dx):, int(dy):, int(dz):] *= 0
-                    else:
-                        print("edge tolerance requirement met.")
 
                 subtomo_label_data_list += [subtomo_label_data]
                 subtomo_label_h5_internal_path = join(

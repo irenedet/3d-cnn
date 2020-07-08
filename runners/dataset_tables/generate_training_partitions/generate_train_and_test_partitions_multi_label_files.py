@@ -40,9 +40,6 @@ parser.add_argument("-max_label_fraction", "--max_label_fraction",
 parser.add_argument("-prefix", "--prefix",
                     help="additional name reference for the set to partition",
                     type=str or int, default="false")
-parser.add_argument("-edge_tolerance", "--edge_tolerance",
-                    help="edge_tolerance to not include particles half padded.",
-                    type=int, default=0)
 parser.add_argument("-processing_tomo", "--processing_tomo",
                     help="raw tomogram column name",
                     type=str, default='eman2_filetered_tomo')
@@ -60,11 +57,9 @@ split = args.split
 segmentation_names = args.segmentation_names
 write_on_table = strtobool(args.write_on_table)
 prefix = args.prefix
-edge_tolerance = args.edge_tolerance
 segmentation_names = list(map(str, segmentation_names.split(',')))
 print(segmentation_names)
 overlap = 12
-# edge_tolerance = 20
 print("output_dir", output_dir)
 
 df = pd.read_csv(dataset_table)
@@ -100,8 +95,7 @@ label_fractions_list = generate_strongly_labeled_partition(
     subtomo_shape=subtomogram_shape,
     overlap=overlap,
     min_label_fraction=min_label_fraction,
-    max_label_fraction=max_label_fraction,
-    edge_tolerance=edge_tolerance)
+    max_label_fraction=max_label_fraction)
 
 print("label_fractions_list =", label_fractions_list)
 print(np.where(np.array(label_fractions_list) > min_label_fraction)[0].shape,

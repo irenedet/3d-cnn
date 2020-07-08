@@ -51,7 +51,6 @@ def get_image_dict(data_path, labels: list = None, iterations=0,
                 label_volume = f[label_path][:]
 
                 indicator = np.where(label_volume > 0)
-                z_coords, y_coords, x_coords = indicator
                 unique_zindicator = np.unique(indicator[0])
                 for sl in unique_zindicator:
                     image = label_volume[sl, :, :]
@@ -72,7 +71,19 @@ def get_image_dict(data_path, labels: list = None, iterations=0,
 
 
 dataset_names = [
-    "180426/026",
+    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180426/004/train_part_alex_filter.h5",
+    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180426/005/train_part_alex_filter.h5",
+    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180426/021/train_part_alex_filter.h5",
+    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180426/024/train_part_alex_filter.h5",
+    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180426/026/train_part_alex_filter.h5",
+    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180426/027/train_part_alex_filter.h5",
+    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180713/027/train_part_alex_filter.h5",
+    "/struct/mahamid/Irene/test-3d-unet/out/training_data/181119/002/train_part_alex_filter.h5",
+    "/struct/mahamid/Irene/test-3d-unet/out/training_data/181119/030/train_part_alex_filter.h5",
+    "/struct/mahamid/Irene/test-3d-unet/out/training_data/181126/002/train_part_alex_filter.h5",
+    "/struct/mahamid/Irene/test-3d-unet/out/training_data/181126/012/train_part_alex_filter.h5",
+    "/struct/mahamid/Irene/test-3d-unet/out/training_data/181126/025/train_part_alex_filter.h5",
+    # "180426/026",
     # "180426/027",
     # "180426/028",
     # "180426/029",
@@ -110,25 +121,20 @@ dataset_names = [
 import random
 
 pdf = matplotlib.backends.backend_pdf.PdfPages(
-    "/home/papalotl/Desktop/DA_64pix_4bin_non_sph_fas_strongly_labeled_min0.01_max1.pdf")
-DA = "G5_E0_R180"
-for index, tomo_name in enumerate(dataset_names):
-    print("tomo_name", tomo_name)
-    tomo_path = join("/struct/mahamid/Irene/yeast/healthy", tomo_name)
-    data_path = join(tomo_path, "strongly_labeled_min0.01_max1")
-    data_path = join(data_path, "single_filter_64pix")
-    data_path = join(data_path, DA + "_DArounds4/full_partition.h5")
+    "training_data_test.pdf")
 
-    iterations = 0
-    labels = ['fas']
-    volumes = get_image_dict(data_path=data_path, labels=labels, iterations=4)
+for index, data_path in enumerate(dataset_names):
+    print("tomo_name", data_path)
+
+    labels = ['memb']
+    volumes = get_image_dict(data_path=data_path, labels=labels, iterations=0)
     names_list = list(volumes.keys())
-    names_list = random.choices(names_list, k=40)
+    names_list = random.choices(names_list, k=5)
     vol_numbers = range(len(names_list))
 
     matplotlib.use('Agg')
     plt.ioff()
-    print("starting fig for", tomo_name)
+    print("starting fig for", data_path)
     figsize = (10, 1.5 * len(names_list))
     nrows = len(vol_numbers)
     nlabels = len(labels)
@@ -148,7 +154,7 @@ for index, tomo_name in enumerate(dataset_names):
             axes[0].imshow(vol_dict['raw'])
             for ilabel, label in enumerate(labels):
                 axes[ilabel + 1].imshow(vol_dict[label])
-    plt.suptitle("tomo " + tomo_name)
+    plt.suptitle("tomo " + data_path[-30:-27])
     pdf.savefig(fig)
 pdf.close()
 

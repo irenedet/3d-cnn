@@ -624,6 +624,82 @@ def write_particle_mask_from_motl(path_to_motl: str,
     return
 
 
+def write_particle_mask_from_motl_in_score_range(path_to_motl: str,
+                                                 output_path: str,
+                                                 output_shape: tuple,
+                                                 score_range: tuple,
+                                                 sphere_radius=8,
+                                                 number_of_particles=None,
+                                                 z_shift=0,
+                                                 particles_in_tom_format=True) -> None:
+    _, motl_extension = os.path.splitext(path_to_motl)
+    assert motl_extension in [".csv", ".em"]
+
+    _, mask_extension = os.path.splitext(output_path)
+    assert mask_extension in [".hdf", ".mrc"]
+
+    if motl_extension == ".csv" or motl_extension == ".em":
+        if motl_extension == ".csv":
+            motive_list = read_motl_from_csv(path_to_motl)
+            if isinstance(number_of_particles, int):
+                motive_list = motive_list[:number_of_particles]
+                print("Only", str(number_of_particles),
+                      " particles in the motive list will be pasted.")
+            else:
+                print("All particles in the motive list will be pasted.")
+            if particles_in_tom_format:
+                coordinates = [
+                    np.array([int(row[9]) + z_shift, int(row[8]), int(row[7])])
+                    for
+                    row in motive_list]
+            else:
+                coordinates = [
+                    np.array([int(row[7]) + z_shift, int(row[8]), int(row[9])])
+                    for
+                    row in motive_list]
+            score_values = [row[0] for row in motive_list]
+        else:
+            _, motive_list = read_em(path_to_emfile=path_to_motl)
+            if isinstance(number_of_particles, int):
+                motive_list = motive_list[:number_of_particles]
+                print("Only", str(number_of_particles),
+                      " particles in the motive list will be pasted.")
+            else:
+                print("All particles in the motive list will be pasted.")
+            coordinates = extract_coordinates_from_em_motl(motive_list)
+
+            if particles_in_tom_format:
+                print("coordinates already in tom format")
+                coordinates = [[int(p[2]) + z_shift, int(p[1]), int(p[0])] for p
+                               in coordinates]
+            else:
+                print("transforming coordinates to tom format")
+                coordinates = [[int(p[2]) + z_shift, int(p[1]), int(p[0])] for p
+                               in coordinates]
+            score_values = motive_list[:, 0]
+
+        predicted_dataset = np.zeros(output_shape)
+        score_min, score_max = score_range
+        for center, value in zip(coordinates, score_values):
+            if score_min <= value <= score_max:
+                paste_sphere_in_dataset(dataset=predicted_dataset, center=center,
+                                        radius=sphere_radius, value=value)
+
+        if mask_extension == ".hdf":
+            write_dataset_hdf(output_path=output_path,
+                              tomo_data=predicted_dataset)
+        elif mask_extension == ".mrc":
+            if np.max(score_values) == np.min(score_values):
+                dtype = np.int8
+            else:
+                dtype = np.float16
+
+            write_mrc_dataset(mrc_path=output_path, array=predicted_dataset,
+                              dtype=dtype)
+
+    return
+
+
 def generate_particle_mask_from_motl(path_to_motl: str,
                                      output_shape: tuple,
                                      sphere_radius=8,

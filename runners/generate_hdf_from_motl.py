@@ -1,6 +1,9 @@
 from os.path import join
 from os import makedirs
 import argparse
+from file_actions.writers.h5 import write_particle_mask_from_motl_in_score_range
+
+# from file_actions.writers.h5 import write_particle_mask_from_motl
 
 #
 parser = argparse.ArgumentParser()
@@ -15,32 +18,22 @@ args = parser.parse_args()
 path_to_motl = args.path_to_motl
 output_dir = args.output_dir
 
-path_to_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_4_5_bis_/peaks_in_training_partition/undetected/chosen/motl_283.csv"
-output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_4_5_bis_/peaks_in_training_partition/undetected/chosen/"
+# path_to_motl = "/struct/mahamid/Irene/yeast/healthy/180426/004/fas/motl/corrected_motl_191108_shifted_by_16.csv"
+# output_dir = "/struct/mahamid/Irene/yeast/healthy/180426/004/fas/motl/"
 # path_to_motl = "/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/006/TM/motl_clean_4b.em"
-# path_to_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/from_004_training/confs_4_5_/motl_1315.csv"
-# path_to_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_4_5_bis_/detected/motl_1027.csv"
-# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_006/confs_4_5_bis_/detected/"
-# path_to_motl = "/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/004/train_and_test_partitions/shuffle/G1-5_confs_4_5_/motl_4777.csv"
-# output_dir = "/scratch/trueba/3d-cnn/training_data/TEST/mixed_training/004/train_and_test_partitions/shuffle/G1-5_confs_4_5_/"
-# path_to_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/confs_4_5_bis_/motl_4623.csv"
-# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_004/confs_4_5_bis_/"
 
-# path_to_motl = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_16_5_bis_/motl_4654.csv"
-# output_dir = "/scratch/trueba/3d-cnn/cnn_evaluation/180426_005/confs_16_5_bis_/"
-
+path_to_motl = "/struct/mahamid/Irene/yeast/quantifications/180426/021/ribo_motl_with_nn_dist_score.csv"
+output_dir = "/struct/mahamid/Irene/yeast/quantifications/180426/021"
 makedirs(name=output_dir, exist_ok=True)
-hdf_output_path = join(output_dir, "particles_mask.hdf")
-z_shift = -370  # shift between original tomogram and subtomogram of analysis
-output_shape = (251, 927, 927)
+hdf_output_path = join(output_dir, "only_in_polysome_peak.hdf")
+z_shift = 0  # shift between original tomogram and subtomogram of analysis
+output_shape = (1000, 928, 960)
 
-from file_actions.writers.h5 import write_particle_mask_from_motl
-
-write_particle_mask_from_motl(path_to_motl=path_to_motl,
-                              output_path=hdf_output_path,
-                              output_shape=output_shape,
-                              sphere_radius=8,
-                              values_in_motl=True,
-                              number_of_particles=None,
-                              z_shift=z_shift,
-                              particles_in_tom_format=True)
+write_particle_mask_from_motl_in_score_range(path_to_motl=path_to_motl,
+                                             output_path=hdf_output_path,
+                                             output_shape=output_shape,
+                                             sphere_radius=8,
+                                             score_range=(1, 14),
+                                             number_of_particles=None,
+                                             z_shift=z_shift,
+                                             particles_in_tom_format=True)

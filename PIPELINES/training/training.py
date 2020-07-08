@@ -30,7 +30,12 @@ parser.add_argument("-gpu", "--gpu", help="cuda visible devices", type=str)
 
 args = parser.parse_args()
 gpu = args.gpu
-os.environ["CUDA_VISIBLE_DEVICES"] = gpu
+if gpu is None:
+    print("No CUDA_VISIBLE_DEVICES passed...")
+    if torch.cuda.is_available():
+        CUDA_VISIBLE_DEVICES = "0"
+else:
+    os.environ["CUDA_VISIBLE_DEVICES"] = gpu
 
 yaml_file = args.yaml_file
 config = yaml.safe_load(open(yaml_file))

@@ -1,18 +1,23 @@
 name: 3d-cnn
 channels:
-  - pytorch
+  - bioconda
+  - anaconda
   - conda-forge
   - default
 dependencies:
-  - python=3.6
+  - python=3.7
   - jupyter
   - imageio
-  - h5py
-  - keras
-  - pytorch=0.4.1
+  - pytorch
   - torchvision
   - scikit-learn
   - scikit-image
+  - scipy
+  - numpy
   - tensorboardX
   - tqdm
   - pandas
+  - pyaml
+  - pip:
+      - h5py==2.10.0
+      - mrcfile==1.1.2

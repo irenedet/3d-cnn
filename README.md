@@ -189,10 +189,10 @@ Check the installation by importing tensorflow in a python console.
 The necessary virtual environment for the installation needs only snakemake 5.3 and pandas
 
 ```bash
-conda create -c conda-forge -c bioconda -n snakemake-pandas snakemake=5.3.0
+conda create -c conda-forge -c bioconda -n snakemake-pandas snakemake pandas
 conda activate snakemake-pandas
-conda install -c conda-forge pandas
 ```
+Check that the version of snakemake is 5.3.0
 
 Later, when running the pipeline, snakemake will generate the keras virtual environment with the rest of 
 the necessary packages.
