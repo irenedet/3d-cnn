@@ -70,93 +70,84 @@ def get_image_dict(data_path, labels: list = None, iterations=0,
     return volumes
 
 
-dataset_names = [
-    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180426/004/train_part_alex_filter.h5",
-    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180426/005/train_part_alex_filter.h5",
-    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180426/021/train_part_alex_filter.h5",
-    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180426/024/train_part_alex_filter.h5",
-    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180426/026/train_part_alex_filter.h5",
-    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180426/027/train_part_alex_filter.h5",
-    "/struct/mahamid/Irene/test-3d-unet/out/training_data/180713/027/train_part_alex_filter.h5",
-    "/struct/mahamid/Irene/test-3d-unet/out/training_data/181119/002/train_part_alex_filter.h5",
-    "/struct/mahamid/Irene/test-3d-unet/out/training_data/181119/030/train_part_alex_filter.h5",
-    "/struct/mahamid/Irene/test-3d-unet/out/training_data/181126/002/train_part_alex_filter.h5",
-    "/struct/mahamid/Irene/test-3d-unet/out/training_data/181126/012/train_part_alex_filter.h5",
-    "/struct/mahamid/Irene/test-3d-unet/out/training_data/181126/025/train_part_alex_filter.h5",
-    # "180426/026",
-    # "180426/027",
-    # "180426/028",
-    # "180426/029",
-    # "180426/030",
-    # "180426/034",
-    # "180426/037",
-    # "180426/041",
-    # "180426/043",
-    # "180426/045",
-]
+import os
+from file_actions.readers.tomograms import load_tomogram
 
-# pdf = matplotlib.backends.backend_pdf.PdfPages(
-#     "/g/scb2/zaugg/trueba/3d-cnn/NPC_SU_gauss_0.06_0.01_masks_test_datasets.pdf")
-# for index, tomo_name in enumerate(dataset_names):
-#     print("tomo_name", tomo_name)
-#     data_path = join("/struct/mahamid/Irene/NPC/SPombe", tomo_name)
-#     data_label = join(data_path, "NPC_SU_mask_gauss_0.06_0.01_bin.hdf")
-#     data_raw = join(data_path, "double_eman_filtered_raw_4b.hdf")
-#
-#     dataset_label = load_tomogram(data_label)
-#     dataset_raw = load_tomogram(data_raw)
-#     image_label = dataset_label[175, :, :]
-#     image_raw = dataset_raw[175, :, :]
-#     matplotlib.use('Agg')
-#     plt.ioff()
-#     figsize = (10, 10)
-#     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=figsize,
-#                              num=index, frameon=False)
-#     axes[0].imshow(image_raw)
-#     axes[1].imshow(image_label)
-#     plt.suptitle("tomo " + tomo_name)
-#     pdf.savefig(fig)
-# pdf.close()
-# /scratch/trueba/3d-cnn/cross-validation/fas_cross_validation/original-training-data//181126/002/strongly_labeled_min0.002_max0.1/no_eman_filter_256pix/full_partition.h5
-import random
+ribo_masks_dir = "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1"
+# tomo_name "/ribo/in_cytosol_mask/motl_*.csv"
+tomo_dir = "/struct/mahamid/Irene/yeast"
+tomo_names = [
+    "ScED_6h/001", "ScED_6h/002", "ScED_6h/003", "ScED_6h/006", "ScED_6h/011", "ScED_6h/015", "ScED_6h/019",
+    "ScED_6h/021", "ScED_6h/022", "ScED_6h/023", "ScED_6h/035", "ScED_6h/036", "ScED_6h/037", "ScED_6h/039",
+    "ScED_6h/041", "ScED_6h/044", "ScED_6h/047", "ScED_6h/049", "ScED_6h/054", "ScED_6h/055", "ScED_6h/056",
+    "ScED_6h/057", "ScED_6h/058", "ScED_6h/059", "ScED_6h/062", "ScED_6h/064", "ScED_6h/065", "ScED_6h/069",
+    "ScED_6h/070", ]
 
 pdf = matplotlib.backends.backend_pdf.PdfPages(
-    "training_data_test.pdf")
+        "/struct/mahamid/Irene/3d-cnn/ScED_6h_ribo_clusters_datasets1.pdf")
+for index, tomo_name in enumerate(tomo_names[:10]):
+    print("tomo_name", tomo_name)
+    data_path = join(tomo_dir, tomo_name)
+    data_raw = join(data_path, "1xf_tomo.mrc")
 
-for index, data_path in enumerate(dataset_names):
-    print("tomo_name", data_path)
-
-    labels = ['memb']
-    volumes = get_image_dict(data_path=data_path, labels=labels, iterations=0)
-    names_list = list(volumes.keys())
-    names_list = random.choices(names_list, k=5)
-    vol_numbers = range(len(names_list))
-
+    data_label = os.path.join(ribo_masks_dir, tomo_name)
+    data_label = join(data_label, "ribo/clusters.hdf")
+    dataset_label = load_tomogram(data_label)
+    dataset_raw = load_tomogram(data_raw)
+    image_label = dataset_label[250, :, :]
+    image_raw = dataset_raw[250, :, :]
     matplotlib.use('Agg')
     plt.ioff()
-    print("starting fig for", data_path)
-    figsize = (10, 1.5 * len(names_list))
-    nrows = len(vol_numbers)
-    nlabels = len(labels)
-    fig, axes = plt.subplots(nrows=nrows, ncols=nlabels + 1, figsize=figsize,
+    figsize = (10, 10)
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=figsize,
                              num=index, frameon=False)
-    if nrows > 1:
-        for i, vol_number in enumerate(vol_numbers):
-            vol_name = names_list[vol_number]
-            vol_dict = volumes[vol_name]
-            axes[i, 0].imshow(vol_dict['raw'])
-            for ilabel, label in enumerate(labels):
-                axes[i, ilabel + 1].imshow(vol_dict[label])
-    else:
-        for i, vol_number in enumerate(vol_numbers):
-            vol_name = names_list[vol_number]
-            vol_dict = volumes[vol_name]
-            axes[0].imshow(vol_dict['raw'])
-            for ilabel, label in enumerate(labels):
-                axes[ilabel + 1].imshow(vol_dict[label])
-    plt.suptitle("tomo " + data_path[-30:-27])
+    axes[0].imshow(image_raw)
+    axes[1].imshow(image_label)
+    plt.suptitle("tomo " + tomo_name)
     pdf.savefig(fig)
 pdf.close()
+# /scratch/trueba/3d-cnn/cross-validation/fas_cross_validation/original-training-data//181126/002/strongly_labeled_min0.002_max0.1/no_eman_filter_256pix/full_partition.h5
+# import random
+#
+# pdf = matplotlib.backends.backend_pdf.PdfPages(
+#     "training_data_test.pdf")
+
+# for index, tomo_name in enumerate(tomo_names):
+#     print("tomo_name", tomo_name)
+#
+#     data_path = os.path.join()
+#
+#     labels = ['memb']
+#     volumes = get_image_dict(data_path=data_path, labels=labels, iterations=0)
+#     names_list = list(volumes.keys())
+#     names_list = random.choices(names_list, k=5)
+#     vol_numbers = range(len(names_list))
+#
+#     matplotlib.use('Agg')
+#     plt.ioff()
+#     print("starting fig for", data_path)
+#     figsize = (10, 1.5 * len(names_list))
+#     nrows = len(vol_numbers)
+#     nlabels = len(labels)
+#     fig, axes = plt.subplots(nrows=nrows, ncols=nlabels + 1, figsize=figsize,
+#                              num=index, frameon=False)
+#     if nrows > 1:
+#         for i, vol_number in enumerate(vol_numbers):
+#             vol_name = names_list[vol_number]
+#             vol_dict = volumes[vol_name]
+#             axes[i, 0].imshow(vol_dict['raw'])
+#             for ilabel, label in enumerate(labels):
+#                 axes[i, ilabel + 1].imshow(vol_dict[label])
+#     else:
+#         for i, vol_number in enumerate(vol_numbers):
+#             vol_name = names_list[vol_number]
+#             vol_dict = volumes[vol_name]
+#             axes[0].imshow(vol_dict['raw'])
+#             for ilabel, label in enumerate(labels):
+#                 axes[ilabel + 1].imshow(vol_dict[label])
+#     plt.suptitle("tomo " + data_path[-30:-27])
+#     pdf.savefig(fig)
+# pdf.close()
 
 # for index, tomo_name in enumerate(dataset_names):
 #     data_path = join("/scratch/trueba/3d-cnn/SPombe_NPC_SU",

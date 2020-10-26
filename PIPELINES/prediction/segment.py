@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import yaml
 
+from collections import OrderedDict
 from constants.dataset_tables import ModelsTableHeader, DatasetTableHeader
 from file_actions.writers.h5 import segment_and_write
 from networks.io import get_device
@@ -76,12 +77,16 @@ model.to(device)
 
 if torch.cuda.device_count() > 1:
     print("Let's use", torch.cuda.device_count(), "GPUs!")
-    # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
     model = nn.DataParallel(model)
 
-
 checkpoint = torch.load(path_to_model, map_location=device)
-model.load_state_dict(checkpoint['model_state_dict'])
+
+substring = 'module.'
+checkpoint_tmp = OrderedDict()
+for k in checkpoint['model_state_dict']:
+    new_k = k[len(substring):] if k.startswith(substring) else k
+    checkpoint_tmp[new_k] = checkpoint['model_state_dict'][k]
+checkpoint['model_state_dict'] = checkpoint_tmp
 model = model.eval()
 
 DTHeader = DatasetTableHeader(partition_name=test_partition)

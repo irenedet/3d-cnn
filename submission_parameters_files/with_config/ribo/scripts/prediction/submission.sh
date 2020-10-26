@@ -3,8 +3,8 @@
 #SBATCH -A mahamid
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
-#SBATCH --mem 40G
-#SBATCH --time 0-6:00
+#SBATCH --mem 30G
+#SBATCH --time 0-1:00
 #SBATCH -o predict.slurm.%N.%j.out
 #SBAtCH -e predict.slurm.%N.%j.err
 #SBATCH --mail-type=END,FAIL
@@ -15,8 +15,11 @@
 echo "Activating virtual environment"
 #module load Anaconda3
 #export UPICKER_VENV_PATH="/struct/mahamid/Irene/envs/.conda/3d-cnn"
-source activate 3d-cnn
-export PYTHONPATH="/struct/mahamid/Irene/3d-cnn/src/python/"
+#source activate 3d-cnn
+source ~/.bashrc
+source activate /struct/mahamid/Irene/segmentation_ribo/.snakemake/conda/50db6a03
+export PYTHONPATH="/struct/mahamid/Irene/3d-cnn/src/python"
+export UPICKER_PATH="/struct/mahamid/Irene/3d-cnn"
 usage()
 
 {
@@ -29,6 +32,9 @@ while [ "$1" != "" ]; do
         -set | --set )   shift
                                 set=$1
                                 ;;
+        -config | --config )   shift
+                                config=$1
+                                ;;
         -h | --help )           usage
                                 exit
                                 ;;
@@ -38,24 +44,24 @@ while [ "$1" != "" ]; do
     shift
 done
 
-export yaml_file="/struct/mahamid/Irene/3d-cnn/submission_parameters_files/with_config/ribo/scripts/prediction/config_predict.yaml"
+export yaml_file=$config
 export set=$set
 echo "Analyzing set" $set
 
-#echo "Partitioning dataset"
-#python $UPICKER_PATH/PIPELINES/prediction/partition.py -yaml_file $yaml_file -tomos_set $set
-#
-#echo "Segmenting partition" $set
-#python $UPICKER_PATH/PIPELINES/prediction/segment.py -yaml_file $yaml_file -tomos_set $set --gpu $CUDA_VISIBLE_DEVICES
-#
-#echo "Reconstructing segmentation"
-#python $UPICKER_PATH/PIPELINES/prediction/assemble.py -yaml_file $yaml_file -tomos_set $set
-#
-#echo "Getting cluster centroids motl"
-#python $UPICKER_PATH/PIPELINES/prediction/cluster_motl.py -yaml_file $yaml_file -tomos_set $set
-#
-#echo "Selecting coordinates within mask"
-#python $UPICKER_PATH/PIPELINES/prediction/mask_motl.py -yaml_file $yaml_file -tomos_set $set
+echo "Partitioning dataset"
+python $UPICKER_PATH/PIPELINES/prediction/partition.py -yaml_file $yaml_file -tomos_set $set
+
+echo "Segmenting partition" $set
+python3 $UPICKER_PATH/PIPELINES/prediction/segment.py -yaml_file $yaml_file -tomos_set $set --gpu $CUDA_VISIBLE_DEVICES
+
+echo "Reconstructing segmentation"
+python3 $UPICKER_PATH/PIPELINES/prediction/assemble.py -yaml_file $yaml_file -tomos_set $set
+
+echo "Getting cluster centroids motl"
+python3 $UPICKER_PATH/PIPELINES/prediction/cluster_motl.py -yaml_file $yaml_file -tomos_set $set
+
+echo "Selecting coordinates within mask"
+python3 $UPICKER_PATH/PIPELINES/prediction/mask_motl.py -yaml_file $yaml_file -tomos_set $set
 
 echo "Performing precision-recall analysis"
-python $UPICKER_PATH/PIPELINES/pr_analysis/pr_analysis.py -yaml_file $yaml_file -tomos_set $set
+python3 $UPICKER_PATH/PIPELINES/pr_analysis/pr_analysis.py -yaml_file $yaml_file -tomos_set $set

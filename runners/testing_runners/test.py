@@ -329,34 +329,233 @@
 #         except EOFError:
 #             break
 
-# import matplotlib.pyplot as plt
-# import mrcfile
-# import numpy as np
-# from file_actions.readers.mrc import read_mrc
+import matplotlib.pyplot as plt
+import mrcfile
+import numpy as np
+from file_actions.readers.mrc import read_mrc
+from file_actions.readers.motl import read_motl_from_csv
+import pandas as pd
+import os
+
+global_motl_path = "/Users/trueba/mnt/struct/mahamid/Irene/yeast/healthy/fas_on_motl.csv"
+global_motl = pd.read_csv(filepath_or_buffer=global_motl_path)
+
+tomos_motl_df = [(x, pd.DataFrame(y)) for x, y in global_motl.groupby('tomo_name')]
+for tomo_name, tomo_data in tomos_motl_df:
+    print(tomo_name)
+    output_path = os.path.join("/Users/trueba/mnt/struct/mahamid/Irene/yeast/healthy/", tomo_name)
+    output_path = os.path.join(output_path, "fas/SpYES_motl_cnn_vs_TM.csv")
+    dirname = os.path.dirname(output_path)
+    # print(dirname)
+    os.makedirs(dirname, exist_ok=True)
+    subtomo_data = tomo_data.loc[:, tomo_data.columns != 'tomo_name']
+    # print(subtomo_data)
+    subtomo_data[['x', 'y', 'z']] = subtomo_data[['x', 'y', 'z']]*0.25
+    # print(subtomo_data)
+    subtomo_data.to_csv(output_path, header=False, index=False)
+
+# from file_actions.readers.tomograms import load_tomogram
+# from file_actions.writers.mrc import write_mrc_dataset
+# actine_mask = load_tomogram(path_to_dataset="/struct/mahamid/Irene/mauricio/actin_masks/induced_mask_nonbinary.mrc")
+#
+# actine_mask = 1 * (actine_mask > 0)
+# write_mrc_dataset(mrc_path="/struct/mahamid/Irene/mauricio/actin_masks/Induced_actin.mrc", array=actine_mask)
+
+
 # from file_actions.readers.motl import read_motl_from_csv
-# import pandas as pd
+# import numpy as np
 # import os
+# motls = [
 #
-# global_motl_path = "/Users/trueba/mnt/struct/mahamid/Irene/yeast/healthy/fas_on_motl.csv"
-# global_motl = pd.read_csv(filepath_or_buffer=global_motl_path)
+# "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/001/ribo/in_lamella_file/pr_radius_10/undetected/motl_1430.csv",
+# "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/004/ribo/in_lamella_file/pr_radius_10/undetected/motl_1446.csv",
+# "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/005/ribo/in_lamella_file/pr_radius_10/undetected/motl_1291.csv",
+# "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/007/ribo/in_lamella_file/pr_radius_10/undetected/motl_1108.csv",
+# "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/010/ribo/in_lamella_file/pr_radius_10/undetected/motl_771.csv",
+# "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/012/ribo/in_lamella_file/pr_radius_10/undetected/motl_1539.csv",
+# "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/022/ribo/in_lamella_file/pr_radius_10/undetected/motl_1086.csv",
+# "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/023/ribo/in_lamella_file/pr_radius_10/undetected/motl_1562.csv",
+# "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/025/ribo/in_lamella_file/pr_radius_10/undetected/motl_1107.csv",
+# "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/028/ribo/in_lamella_file/pr_radius_10/undetected/motl_2602.csv",
+# "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/032/ribo/in_lamella_file/pr_radius_10/undetected/motl_955.csv",
+# "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/036/ribo/in_lamella_file/pr_radius_10/undetected/motl_887.csv",
+# ]
 #
-# tomos_motl_df = [(x, pd.DataFrame(y)) for x, y in global_motl.groupby('tomo_name')]
-# for tomo_name, tomo_data in tomos_motl_df:
-#     print(tomo_name)
-#     output_path = os.path.join("/Users/trueba/mnt/struct/mahamid/Irene/yeast/healthy/", tomo_name)
-#     output_path = os.path.join(output_path, "fas/SpYES_motl_cnn_vs_TM.csv")
-#     dirname = os.path.dirname(output_path)
-#     # print(dirname)
-#     os.makedirs(dirname, exist_ok=True)
-#     subtomo_data = tomo_data.loc[:, tomo_data.columns != 'tomo_name']
-#     # print(subtomo_data)
-#     subtomo_data[['x', 'y', 'z']] = subtomo_data[['x', 'y', 'z']]*0.25
-#     # print(subtomo_data)
-#     subtomo_data.to_csv(output_path, header=False, index=False)
+# tomos = [
+#     "190329/001",
+#     "190329/004",
+#     "190329/005",
+#     "190329/007",
+#     "190329/010",
+#     "190329/012",
+#     "190329/022",
+#     "190329/023",
+#     "190329/025",
+#     "190329/028",
+#     "190329/032",
+#     "190329/036",
+# ]
+#
+# radius = 8
+# coords_in_tom_format = True
+# write_on_dataset_table = False
+# values_in_motl = True
+# output_shape = (500, 928, 928)
+# z_dim, y_dim, x_dim = output_shape
+# ignore_border_thickness = 0
+# from file_actions.writers.h5 import write_particle_mask_from_motl
+# import numpy as np
+# import pandas as pd
+# import yaml
+#
+# from constants.dataset_tables import ModelsTableHeader, DatasetTableHeader
+# from file_actions.readers.motl import read_motl_from_csv
+# from file_actions.readers.tomograms import load_tomogram
+# from file_actions.writers.csv import motl_writer
+# from networks.utils import build_prediction_output_dir
+#
+# for tomo_name in tomos[2:]:
+#     motl_dir = os.path.join("/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1", tomo_name)
+#     motl_dir = os.path.join(motl_dir, "ribo/in_lamella_file/pr_radius_10/undetected")
+#     filtering_mask_path = "/struct/mahamid/Irene/yeast/ED/"+tomo_name+"/clean_masks/cytosol_mask.mrc"
+#
+#     for file in os.listdir(motl_dir):
+#         if "motl" in file:
+#             print(file)
+#             motl = os.path.join(motl_dir, file)
+#             motl_predicted = read_motl_from_csv(path_to_csv_motl=motl)
+#             motl_values = [row[0] for row in motl_predicted]
+#             predicted_coordinates = [np.array([row[7], row[8], row[9]]) for row in
+#                                      motl_predicted]
+#
+#
+#             cytosol_dir = os.path.join(motl_dir, "in_cytosol_mask")
+#             out_cytosol_dir = os.path.join(motl_dir, "outside_cytosol_mask")
+#             os.makedirs(cytosol_dir, exist_ok=True)
+#             os.makedirs(out_cytosol_dir, exist_ok=True)
+#
+#             filtering_mask_indicator = load_tomogram(path_to_dataset=filtering_mask_path)
+#             mask_z, mask_y, mask_x = filtering_mask_indicator.shape
+#
+#             conserved_points = []
+#             conserved_values = []
+#             discarded_points = []
+#             discarded_values = []
+#             for value, point in zip(motl_values, predicted_coordinates):
+#                 point = [int(entry) for entry in point]
+#                 x, y, z = point
+#                 if np.min([mask_x - x, mask_y - y, mask_z - z]) > 0 and np.min(
+#                         [x, y, z]) >= 0:
+#                     if filtering_mask_indicator[z, y, x] == 1 and np.min(
+#                             [x, y, x_dim - x, y_dim - y]) > ignore_border_thickness:
+#                         conserved_values += [value]
+#                         conserved_points += [point]
+#                     else:
+#                         discarded_points += [point]
+#                         discarded_values += [value]
+#
+#             motl_writer(path_to_output_folder=cytosol_dir,
+#                         list_of_peak_scores=conserved_values,
+#                         list_of_peak_coords=conserved_points,
+#                         in_tom_format=True)
+#             motl_writer(path_to_output_folder=out_cytosol_dir,
+#                         list_of_peak_scores=discarded_values,
+#                         list_of_peak_coords=discarded_points,
+#                         in_tom_format=True)
+
+# motls = [
+#     "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/001/ribo/in_lamella_file/pr_radius_10/undetected/in_cytosol_mask/motl_1168.csv",
+#     "/struct/mahamid/Irene/scratch/trueba/3d-cnn/cnn_evaluation/ribo_sph_masks_TM_CNNs/64pix_encoder_dropout0_decoder_dropout0_DA_none_BN_False_ribo__D_2_IF_4_set_1/190329/001/ribo/in_lamella_file/pr_radius_10/undetected/outside_cytosol_mask/motl_262.csv",
+# ]
+# for motl in motls:
+#     output_path = os.path.join(os.path.dirname(motl), "map.mrc")
+#     write_particle_mask_from_motl(path_to_motl=motl,
+#                                   output_path=output_path,
+#                                   output_shape=output_shape,
+#                                   sphere_radius=radius,
+#                                   values_in_motl=values_in_motl,
+#                                   number_of_particles=None,
+#                                   z_shift=0,
+#                                   particles_in_tom_format=coords_in_tom_format)
+
+# motls = [
+# "/struct/mahamid/Irene/yeast/quantifications/180426/004/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/180426/005/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/180426/021/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/180426/024/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/180711/003/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/180711/004/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/180711/005/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/180711/018/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/001/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/004/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/005/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/007/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/010/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/012/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/013/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/015/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/017/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/021/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/022/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/023/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/025/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/028/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/032/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/190329/036/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/ScED_6h/001/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/ScED_6h/002/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/ScED_6h/003/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/ScED_6h/006/ribo_motl_with_nn_dist_score.csv",
+# "/struct/mahamid/Irene/yeast/quantifications/ScED_6h/011/ribo_motl_with_nn_dist_score.csv",
+# ]
+# import os
+# from file_actions.writers.csv import build_tom_motive_list
+#
+# for motl_path in motls:
+#     print(motl_path)
+#     motl = read_motl_from_csv(path_to_csv_motl=motl_path)
+#     print(motl.shape)
+#     dimers_motl = [row for row in list(motl) if row[0] < 18]
+#     if len(dimers_motl) > 0:
+#         coordinates = [row[7:10] for row in dimers_motl]
+#         scores = [row[0] for row in dimers_motl]
+#         print(len(dimers_motl), np.array(dimers_motl).shape)
+#
+#         output_dir = os.path.dirname(motl_path)
+#         motl_name = "motl_dimers.csv"
+#         motl_file_name = os.path.join(output_dir, motl_name)
+#         print(motl_file_name)
+#
+#         motive_list_df = build_tom_motive_list(
+#             list_of_peak_coordinates=coordinates,
+#             list_of_peak_scores=scores, in_tom_format=True)
+#         motive_list_df.to_csv(motl_file_name, index=False, header=False)
+#         print("Motive list saved in", motl_file_name)
+#
+import os
 
 from file_actions.readers.tomograms import load_tomogram
 from file_actions.writers.mrc import write_mrc_dataset
-actine_mask = load_tomogram(path_to_dataset="/struct/mahamid/Irene/mauricio/actin_masks/induced_mask_nonbinary.mrc")
 
-actine_mask = 1 * (actine_mask > 0)
-write_mrc_dataset(mrc_path="/struct/mahamid/Irene/mauricio/actin_masks/Induced_actin.mrc", array=actine_mask)
+
+# motl = "/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/026/TM/026_motl_ribo_clean_4b_checked_angles.em"
+# new_motl = "/struct/mahamid/Irene/yeast/healthy/180426/026/026_motl_ribo_clean_4b_checked_angles_value1.csv"
+
+# motl = "/struct/mahamid/Sara_Goetz/Data/Titan/Processing/180426/006/TM/motl_clean_nonova_4b.em"
+# new_motl = "/struct/mahamid/Irene/yeast/healthy/180426/006/motl_clean_nonova_4b_shifted.csv"
+#
+# from file_actions.readers.motl import read_em
+# from file_actions.writers.csv import build_tom_motive_list
+#
+# header, value = read_em(path_to_emfile=motl)
+#
+# print(value[:5, 7:10])
+# value[:, 7] += 16
+# print(value[:5, 7:10])
+# motive_list_df = build_tom_motive_list(
+#     list_of_peak_coordinates=list(value[:, 7:10]),
+#     list_of_peak_scores=list(np.ones(value[:, 19].shape)),
+#     in_tom_format=True)
+#
+# motive_list_df.to_csv(new_motl, index=False, header=False)
